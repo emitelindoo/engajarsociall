@@ -119,6 +119,8 @@ const Checkout = () => {
           platform: plan.platform,
           amount: total.toString(),
           username: username,
+          name: customerName,
+          email: customerEmail,
         });
         navigate(`/obrigado?${params.toString()}`);
       }
