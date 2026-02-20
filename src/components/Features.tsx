@@ -1,27 +1,24 @@
 import { Eye, Shield, Heart, TrendingUp } from "lucide-react";
 
 const items = [
-  { icon: Eye, title: "Visibilidade Instantânea", desc: "Aumente sua visibilidade na plataforma e alcance um público maior interessado no seu conteúdo ou negócio." },
-  { icon: Shield, title: "Mais Credibilidade", desc: "Perfis com mais seguidores transmitem mais confiança e profissionalismo, atraindo novas oportunidades." },
-  { icon: Heart, title: "Maior Engajamento", desc: "Com mais seguidores, suas publicações alcançam mais pessoas, gerando mais curtidas, comentários e compartilhamentos." },
-  { icon: TrendingUp, title: "Crescimento Orgânico", desc: "O aumento de seguidores atrai mais seguidores naturalmente, criando um ciclo positivo de crescimento." },
+  { icon: Eye, title: "Visibilidade Instantânea", desc: "Alcance um público maior interessado no seu conteúdo." },
+  { icon: Shield, title: "Mais Credibilidade", desc: "Perfis maiores transmitem confiança e profissionalismo." },
+  { icon: Heart, title: "Maior Engajamento", desc: "Mais curtidas, comentários e compartilhamentos." },
+  { icon: TrendingUp, title: "Crescimento Orgânico", desc: "Seguidores atraem mais seguidores naturalmente." },
 ];
 
 const Features = () => (
-  <section id="recursos" className="py-24 px-4">
-    <div className="container mx-auto max-w-5xl">
-      <p className="text-accent font-semibold text-sm text-center mb-3 uppercase tracking-widest">Vantagens</p>
-      <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-16">
-        Por que investir em seguidores?
-      </h2>
-      <div className="grid sm:grid-cols-2 gap-6">
+  <section id="recursos" className="py-16 px-4 bg-background">
+    <div className="container mx-auto max-w-4xl">
+      <h2 className="text-2xl font-bold text-center text-foreground mb-10">Por que investir em seguidores?</h2>
+      <div className="grid sm:grid-cols-2 gap-4">
         {items.map((item) => (
-          <div key={item.title} className="rounded-2xl p-8 border border-border/40 transition-all hover:border-border group" style={{ background: 'var(--card-gradient)' }}>
-            <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-5 group-hover:bg-accent/15 transition-colors">
-              <item.icon className="w-6 h-6 text-accent" />
+          <div key={item.title} className="bg-card rounded-2xl p-6 border border-border card-shadow hover:card-shadow-hover transition-all group">
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-4 group-hover:ig-gradient-bg transition-colors">
+              <item.icon className="w-5 h-5 text-primary" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>{item.title}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+            <h3 className="font-bold text-foreground mb-1">{item.title}</h3>
+            <p className="text-sm text-muted-foreground">{item.desc}</p>
           </div>
         ))}
       </div>
