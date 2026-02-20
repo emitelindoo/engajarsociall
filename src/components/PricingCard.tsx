@@ -1,5 +1,6 @@
 import { Check, Flame } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { fbEvent } from "@/lib/fbpixel";
 
 import { PlanData } from "@/data/plans";
 
@@ -39,7 +40,15 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
       </ul>
 
       <button
-        onClick={() => navigate(`/checkout/${plan.id}`)}
+        onClick={() => {
+          fbEvent("AddToCart", {
+            content_name: plan.name,
+            content_category: plan.platform,
+            value: plan.priceNum,
+            currency: "BRL",
+          });
+          navigate(`/checkout/${plan.id}`);
+        }}
         className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${
           plan.highlighted
             ? "ig-gradient-bg text-primary-foreground hover:opacity-90"
