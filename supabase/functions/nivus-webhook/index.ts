@@ -20,7 +20,8 @@ serve(async (req) => {
     console.log("Webhook received:", JSON.stringify(payload));
 
     // Nivus Pay sends transaction updates - extract the transaction ID and status
-    const nivusId = payload.id?.toString() || payload.transaction_id?.toString() || payload.data?.id?.toString();
+    // payload.id is the webhook event ID, payload.data.id is the actual transaction ID
+    const nivusId = payload.data?.id?.toString() || payload.objectId?.toString() || payload.transaction_id?.toString();
     const newStatus = payload.status || payload.current_status || payload.data?.status;
 
     if (!nivusId) {
