@@ -1,29 +1,25 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const faqs = [
-  { q: "Os seguidores são realmente brasileiros?", a: "Sim, garantimos que 100% dos seguidores são contas brasileiras reais e ativas. Não utilizamos bots ou contas falsas em nosso serviço." },
-  { q: "Quanto tempo leva para começar a receber os seguidores?", a: "Iniciamos a entrega em até 24 horas após a confirmação do pagamento. A velocidade de entrega varia de acordo com o pacote escolhido, mas sempre priorizamos um crescimento natural para não violar as políticas do Instagram." },
-  { q: "Preciso fornecer minha senha do Instagram?", a: "Não! Nunca pedimos sua senha. Nosso sistema funciona apenas com seu nome de usuário público, sem necessidade de acesso à sua conta." },
-  { q: "O que acontece se eu perder seguidores depois?", a: "Oferecemos garantia de reposição em todos os nossos pacotes. Se você perder seguidores dentro do período de garantia (que varia conforme o plano), repomos gratuitamente." },
-  { q: "Isso pode prejudicar minha conta no Instagram?", a: "Não. Nosso serviço segue todas as diretrizes do Instagram e prioriza o crescimento natural. Trabalhamos com seguidores reais e entrega gradual para garantir a segurança da sua conta." },
-  { q: "Quais formas de pagamento são aceitas?", a: "Aceitamos pagamento via PIX, que é a forma mais rápida e segura para concluir sua compra." },
+  { q: "Os seguidores são realmente brasileiros?", a: "Sim, 100% contas brasileiras reais e ativas. Não utilizamos bots." },
+  { q: "Quanto tempo leva para receber?", a: "Iniciamos em até 24h após pagamento. Entrega gradual e natural." },
+  { q: "Preciso informar minha senha?", a: "Nunca! Só precisamos do seu @ público." },
+  { q: "E se eu perder seguidores?", a: "Garantia de reposição em todos os pacotes." },
+  { q: "Pode prejudicar minha conta?", a: "Não. Crescimento natural com seguidores reais." },
+  { q: "Quais formas de pagamento?", a: "Pagamento via PIX — rápido e seguro." },
 ];
 
 const FAQ = () => (
-  <section id="faq" className="py-24 px-4">
-    <div className="container mx-auto max-w-3xl">
-      <p className="text-accent font-semibold text-sm text-center mb-3 uppercase tracking-widest">Dúvidas</p>
-      <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">Perguntas Frequentes</h2>
-      <p className="text-center text-muted-foreground mb-12">
-        Encontre respostas para as dúvidas mais comuns sobre nossos serviços.
-      </p>
-      <Accordion type="single" collapsible className="space-y-3">
+  <section id="faq" className="py-16 px-4 bg-background">
+    <div className="container mx-auto max-w-2xl">
+      <h2 className="text-2xl font-bold text-center text-foreground mb-10">Perguntas Frequentes</h2>
+      <Accordion type="single" collapsible className="space-y-2">
         {faqs.map((f, i) => (
-          <AccordionItem key={i} value={`item-${i}`} className="rounded-xl border border-border/40 px-5 data-[state=open]:border-accent/30 transition-colors" style={{ background: 'var(--card-gradient)' }}>
-            <AccordionTrigger className="text-foreground font-semibold text-left hover:no-underline py-5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+          <AccordionItem key={i} value={`item-${i}`} className="bg-card rounded-xl border border-border px-4 card-shadow">
+            <AccordionTrigger className="text-foreground font-semibold text-sm text-left hover:no-underline py-4">
               {f.q}
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-5">
+            <AccordionContent className="text-muted-foreground text-sm pb-4">
               {f.a}
             </AccordionContent>
           </AccordionItem>
