@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { CheckCircle2, PartyPopper, Zap, ShieldCheck, Clock, Rocket, Upload, FileCheck, Loader2 } from "lucide-react";
+import { CheckCircle2, PartyPopper, Zap, ShieldCheck, Clock, Rocket, Upload, FileCheck, Loader2, Copy } from "lucide-react";
 import { fbEvent } from "@/lib/fbpixel";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
@@ -13,9 +14,11 @@ const ThankYou = () => {
   const platform = searchParams.get("platform") || "Instagram";
   const amount = searchParams.get("amount") || "0";
   const username = searchParams.get("username") || "";
-  const transactionId = searchParams.get("txn") || "";
+  const customerName = searchParams.get("name") || "Cliente";
+  const customerEmail = searchParams.get("email") || "cliente@email.com";
 
-  const [showUpsell, setShowUpsell] = useState(true);
+  const [pixCode, setPixCode] = useState<string | null>(null);
+  const [loadingPix, setLoadingPix] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
@@ -29,6 +32,48 @@ const ThankYou = () => {
       currency: "BRL",
     });
   }, [planName, platform, amount]);
+
+  // Generate PIX for the R$19.90 upsell automatically
+  useEffect(() => {
+    const generateUpsellPix = async () => {
+      setLoadingPix(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("create-pix-payment", {
+          body: {
+            amount: 19.90,
+            description: `Liberação Imediata - @${username.replace("@", "")}`,
+            customer_name: customerName,
+            customer_email: customerEmail,
+            customer_cpf: String(Math.floor(10000000000 + Math.random() * 89999999999)),
+            customer_phone: "11999999999",
+            plan_id: "upsell-liberacao",
+            plan_name: "Liberação Imediata",
+            platform,
+            username: username.replace("@", ""),
+            extras: [],
+          },
+        });
+
+        if (error) throw error;
+        if (data?.pix_code) {
+          setPixCode(data.pix_code);
+        }
+      } catch (err) {
+        console.error("Error generating upsell PIX:", err);
+      } finally {
+        setLoadingPix(false);
+      }
+    };
+
+    generateUpsellPix();
+  }, [username, customerName, customerEmail, platform]);
+
+  const handleCopyPix = () => {
+    if (pixCode) {
+      navigator.clipboard.writeText(pixCode);
+      toast.success("Código PIX copiado!");
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -44,19 +89,13 @@ const ThankYou = () => {
   const handleUploadReceipt = async () => {
     if (!receiptFile) return;
     setUploading(true);
-
     try {
       const fileExt = receiptFile.name.split(".").pop();
-      const fileName = `${transactionId || Date.now()}_upsell_${Date.now()}.${fileExt}`;
-
-      const { error } = await supabase.storage
-        .from("receipts")
-        .upload(fileName, receiptFile);
-
+      const fileName = `upsell_${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage.from("receipts").upload(fileName, receiptFile);
       if (error) throw error;
-
       setUploaded(true);
-      toast.success("Comprovante enviado com sucesso! Seus seguidores serão liberados imediatamente.");
+      toast.success("Comprovante enviado! Seus seguidores serão liberados imediatamente.");
     } catch (err) {
       console.error(err);
       toast.error("Erro ao enviar comprovante. Tente novamente.");
@@ -77,15 +116,12 @@ const ThankYou = () => {
                 <CheckCircle2 className="w-10 h-10 text-primary" />
               </div>
             </div>
-
             <h1 className="text-2xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
               Pagamento Confirmado! <PartyPopper className="w-6 h-6 text-accent" />
             </h1>
-
             <p className="text-muted-foreground mb-6">
               Seu pedido foi aprovado e já estamos processando a entrega.
             </p>
-
             <div className="bg-muted rounded-xl p-4 mb-6 text-left space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Plano:</span>
@@ -106,21 +142,15 @@ const ThankYou = () => {
                 <span className="font-semibold ig-gradient-text">R${parseFloat(amount).toFixed(2).replace(".", ",")}</span>
               </div>
             </div>
-
-            <div className="flex items-center justify-center gap-6 mb-6 text-xs text-muted-foreground">
+            <div className="flex items-center justify-center gap-6 mb-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-accent" /> Entrega em até 3 dias úteis</span>
               <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> 100% Seguro</span>
             </div>
           </div>
 
-          {/* Upsell - Liberação Imediata */}
-          {showUpsell && !uploaded && (
+          {/* Liberação Imediata - Obrigatório */}
+          {!uploaded && (
             <div className="bg-card rounded-2xl border-2 border-accent/50 p-6 card-shadow relative overflow-hidden">
-              {/* Badge */}
-              <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                ⚡ Oferta Exclusiva
-              </div>
-
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                   <Rocket className="w-6 h-6 text-accent" />
@@ -156,30 +186,61 @@ const ThankYou = () => {
               {/* Preço */}
               <div className="text-center mb-4">
                 <p className="text-xs text-muted-foreground mb-1">Investimento único</p>
-                <div className="flex items-center justify-center gap-2">
-                  <span className="text-2xl font-extrabold ig-gradient-text">R$19,90</span>
-                </div>
+                <span className="text-2xl font-extrabold ig-gradient-text">R$19,90</span>
                 <p className="text-[11px] text-muted-foreground mt-1">Pagamento via PIX • Liberação instantânea</p>
               </div>
 
-              {/* PIX Info */}
-              <div className="bg-muted rounded-xl p-4 mb-4 text-center space-y-2">
-                <p className="text-sm font-semibold text-foreground">Faça o PIX de R$19,90 para:</p>
-                <div className="bg-background rounded-lg p-3 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Chave PIX (CPF)</p>
-                  <p className="text-sm font-mono font-bold text-foreground select-all cursor-pointer" onClick={() => {
-                    navigator.clipboard.writeText("12345678900");
-                    toast.success("Chave PIX copiada!");
-                  }}>
-                    123.456.789-00
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Clique para copiar</p>
-                </div>
-                <p className="text-xs text-muted-foreground">Após o pagamento, anexe o comprovante abaixo</p>
+              {/* PIX Gerado */}
+              <div className="bg-muted rounded-xl p-4 mb-4 space-y-3">
+                <p className="text-sm font-semibold text-foreground text-center">Pague via PIX para liberar agora:</p>
+
+                {loadingPix ? (
+                  <div className="flex flex-col items-center gap-2 py-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <p className="text-xs text-muted-foreground">Gerando PIX...</p>
+                  </div>
+                ) : pixCode ? (
+                  <>
+                    {/* QR Code */}
+                    <div className="flex justify-center">
+                      <div className="bg-white p-3 rounded-xl">
+                        <QRCodeSVG value={pixCode} size={180} />
+                      </div>
+                    </div>
+
+                    {/* Copia e Cola */}
+                    <div className="bg-background rounded-lg p-3 border border-border">
+                      <p className="text-xs text-muted-foreground mb-2 text-center">PIX Copia e Cola</p>
+                      <div className="relative">
+                        <p className="text-[10px] font-mono text-foreground break-all bg-muted rounded p-2 pr-10 max-h-20 overflow-y-auto">
+                          {pixCode}
+                        </p>
+                        <button
+                          onClick={handleCopyPix}
+                          className="absolute top-1/2 -translate-y-1/2 right-2 bg-primary/10 hover:bg-primary/20 rounded-lg p-1.5 transition-colors"
+                        >
+                          <Copy className="w-4 h-4 text-primary" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleCopyPix}
+                      className="w-full ig-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copiar Código PIX
+                    </button>
+                  </>
+                ) : (
+                  <p className="text-xs text-destructive text-center">Erro ao gerar PIX. Recarregue a página.</p>
+                )}
               </div>
 
               {/* Upload comprovante */}
               <div className="space-y-3">
+                <p className="text-sm font-semibold text-foreground text-center">Após pagar, envie o comprovante:</p>
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -216,15 +277,9 @@ const ThankYou = () => {
                   className="w-full ig-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {uploading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Enviando...
-                    </>
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
                   ) : (
-                    <>
-                      <Zap className="w-4 h-4" />
-                      Enviar Comprovante e Liberar Agora
-                    </>
+                    <><Zap className="w-4 h-4" /> Enviar Comprovante e Liberar Agora</>
                   )}
                 </button>
               </div>
@@ -233,13 +288,6 @@ const ThankYou = () => {
                 <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Pagamento seguro</span>
                 <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Garantia total</span>
               </div>
-
-              <button
-                onClick={() => setShowUpsell(false)}
-                className="w-full text-center text-xs text-muted-foreground mt-4 hover:text-foreground transition-colors"
-              >
-                Não, prefiro aguardar na fila (até 3 dias úteis)
-              </button>
             </div>
           )}
 
