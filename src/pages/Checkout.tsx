@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById, PlanData } from "@/data/plans";
-import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock, BadgeCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
 interface OrderBump {
@@ -37,6 +37,14 @@ const orderBumps: OrderBump[] = [
     price: 14.9,
     priceLabel: "R$14,90",
     icon: <MessageCircle className="w-5 h-5 text-primary" />,
+  },
+  {
+    id: "selo",
+    title: "Selo de Verificação ✓",
+    desc: "Selo azul de verificado no seu perfil — mais credibilidade e autoridade",
+    price: 29.9,
+    priceLabel: "R$29,90",
+    icon: <BadgeCheck className="w-5 h-5 text-[hsl(210,90%,55%)]" />,
   },
 ];
 
