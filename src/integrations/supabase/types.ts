@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_email: string
+          customer_name: string
+          extras: string[] | null
+          id: string
+          nivus_transaction_id: string | null
+          pix_code: string | null
+          plan_id: string
+          plan_name: string
+          platform: string
+          status: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          extras?: string[] | null
+          id?: string
+          nivus_transaction_id?: string | null
+          pix_code?: string | null
+          plan_id: string
+          plan_name: string
+          platform: string
+          status?: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          extras?: string[] | null
+          id?: string
+          nivus_transaction_id?: string | null
+          pix_code?: string | null
+          plan_id?: string
+          plan_name?: string
+          platform?: string
+          status?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

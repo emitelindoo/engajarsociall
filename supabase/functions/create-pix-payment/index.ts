@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,16 +15,16 @@ serve(async (req) => {
 
   try {
     const secretKey = Deno.env.get('NIVUS_PAY_API_KEY');
-    if (!secretKey) {
-      throw new Error('NIVUS_PAY_API_KEY is not configured');
-    }
+    if (!secretKey) throw new Error('NIVUS_PAY_API_KEY is not configured');
 
     const companyId = Deno.env.get('NIVUS_PAY_COMPANY_ID');
-    if (!companyId) {
-      throw new Error('NIVUS_PAY_COMPANY_ID is not configured');
-    }
+    if (!companyId) throw new Error('NIVUS_PAY_COMPANY_ID is not configured');
 
-    const { amount, description, customer_name, customer_email, customer_cpf, customer_phone } = await req.json();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { amount, description, customer_name, customer_email, customer_cpf, customer_phone, plan_id, plan_name, platform, username, extras } = await req.json();
 
     if (!amount || amount <= 0) {
       return new Response(JSON.stringify({ error: 'Valor inválido' }), {
@@ -71,7 +72,6 @@ serve(async (req) => {
     console.log("Nivus Pay response:", JSON.stringify(data));
 
     if (data.status === "refused" || (!response.ok && response.status !== 200)) {
-      console.error('Nivus Pay refused/error:', JSON.stringify(data));
       const reason = data.refusedReason?.description || data.error || "Pagamento recusado";
       return new Response(JSON.stringify({ success: false, error: reason }), {
         status: 400,
@@ -79,7 +79,6 @@ serve(async (req) => {
       });
     }
 
-    // Extract PIX code from response
     const pixCode = data.pix?.qrcode || data.pix?.qr_code_text || data.pix?.copy_paste ||
       data.pix?.emv || data.pix?.pixCopiaECola || data.pixCopiaECola ||
       data.qr_code_text || data.brcode || data.emv;
@@ -87,14 +86,33 @@ serve(async (req) => {
     const qrImage = data.pix?.qr_code_image || data.pix?.qrcode_image ||
       data.pix?.qr_code || data.qr_code_image || data.qr_code;
 
+    // Save transaction to DB
+    const { data: txRow, error: txError } = await supabase.from('transactions').insert({
+      nivus_transaction_id: data.id?.toString() || null,
+      plan_id: plan_id || 'unknown',
+      plan_name: plan_name || 'Plano',
+      platform: platform || 'Instagram',
+      username: username || '',
+      customer_name: customer_name || 'Cliente',
+      customer_email: customer_email || '',
+      amount: amount,
+      status: 'pending',
+      pix_code: pixCode || null,
+      extras: extras || [],
+    }).select('id').single();
+
+    if (txError) {
+      console.error("Error saving transaction:", txError);
+    }
+
     return new Response(JSON.stringify({
       success: true,
-      transaction_id: data.id,
+      transaction_id: txRow?.id || null,
+      nivus_transaction_id: data.id,
       pix_code: pixCode,
       qr_code_image: qrImage,
       amount: amount,
       status: data.status,
-      raw: data,
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

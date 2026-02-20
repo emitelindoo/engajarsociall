@@ -2,3 +2,6 @@ project_id = "gqwrfubnniqjwetrojxd"
 
 [functions.create-pix-payment]
 verify_jwt = false
+
+[functions.nivus-webhook]
+verify_jwt = false
