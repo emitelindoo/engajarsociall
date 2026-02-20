@@ -23,7 +23,7 @@ serve(async (req) => {
       throw new Error('NIVUS_PAY_COMPANY_ID is not configured');
     }
 
-    const { amount, description, customer_name, customer_email } = await req.json();
+    const { amount, description, customer_name, customer_email, customer_cpf } = await req.json();
 
     if (!amount || amount <= 0) {
       return new Response(JSON.stringify({ error: 'Valor inválido' }), {
@@ -32,8 +32,30 @@ serve(async (req) => {
       });
     }
 
-    // Base64 encode credentials for Basic Auth
     const credentials = btoa(`${secretKey}:${companyId}`);
+
+    const body = {
+      amount: Math.round(amount * 100),
+      paymentMethod: "pix",
+      customer: {
+        name: customer_name || "Cliente",
+        email: customer_email || "cliente@email.com",
+        document: {
+          number: (customer_cpf || "00000000000").replace(/\D/g, ""),
+          type: "CPF",
+        },
+      },
+      items: [
+        {
+          title: description || "Engajar Social",
+          unitPrice: Math.round(amount * 100),
+          quantity: 1,
+          tangible: false,
+        },
+      ],
+    };
+
+    console.log("Sending to Nivus Pay:", JSON.stringify(body));
 
     const response = await fetch(`${NIVUS_API_URL}/transactions`, {
       method: 'POST',
@@ -41,33 +63,37 @@ serve(async (req) => {
         'Authorization': `Basic ${credentials}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        amount: Math.round(amount * 100), // Convert to cents
-        payment_method: 'pix',
-        description: description || 'Engajar Social - Seguidores',
-        customer: {
-          name: customer_name || 'Cliente',
-          email: customer_email || '',
-        },
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await response.json();
+    console.log("Nivus Pay response:", JSON.stringify(data));
 
-    if (!response.ok) {
-      console.error('Nivus Pay API error:', JSON.stringify(data));
-      throw new Error(`Nivus Pay API error [${response.status}]: ${JSON.stringify(data)}`);
+    if (data.status === "refused" || (!response.ok && response.status !== 200)) {
+      console.error('Nivus Pay refused/error:', JSON.stringify(data));
+      const reason = data.refusedReason?.description || data.error || "Pagamento recusado";
+      return new Response(JSON.stringify({ success: false, error: reason }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Return the PIX data (qr_code, pix_copy_paste, etc.)
+    // Extract PIX code from response
+    const pixCode = data.pix?.qrcode || data.pix?.qr_code_text || data.pix?.copy_paste ||
+      data.pix?.emv || data.pix?.pixCopiaECola || data.pixCopiaECola ||
+      data.qr_code_text || data.brcode || data.emv;
+
+    const qrImage = data.pix?.qr_code_image || data.pix?.qrcode_image ||
+      data.pix?.qr_code || data.qr_code_image || data.qr_code;
+
     return new Response(JSON.stringify({
       success: true,
-      transaction_id: data.id || data.transaction_id,
-      pix_code: data.pix?.qr_code_text || data.pix?.copy_paste || data.pix_code || data.qr_code_text || data.copy_paste || data.pix_qrcode,
-      qr_code_image: data.pix?.qr_code_image || data.pix?.qr_code || data.qr_code_image || data.qr_code,
+      transaction_id: data.id,
+      pix_code: pixCode,
+      qr_code_image: qrImage,
       amount: amount,
       status: data.status,
-      raw: data, // Include raw response for debugging
+      raw: data,
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

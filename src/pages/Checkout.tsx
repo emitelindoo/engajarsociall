@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById } from "@/data/plans";
-import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock, BadgeCheck, Copy, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock, BadgeCheck, Copy, CheckCircle2, Loader2, User, Mail, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -50,12 +50,23 @@ const orderBumps: OrderBump[] = [
   },
 ];
 
+const formatCPF = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+};
+
 const Checkout = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
   const plan = getPlanById(planId || "");
 
   const [username, setUsername] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerCPF, setCustomerCPF] = useState("");
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [pixCode, setPixCode] = useState<string | null>(null);
@@ -76,8 +87,10 @@ const Checkout = () => {
     return plan.priceNum + bumpsTotal;
   }, [plan, selectedBumps]);
 
+  const isFormValid = username.trim() && customerName.trim() && customerEmail.trim() && customerCPF.replace(/\D/g, "").length === 11;
+
   const handlePayment = async () => {
-    if (!username.trim() || !plan) return;
+    if (!isFormValid || !plan) return;
     setLoading(true);
 
     try {
@@ -92,32 +105,36 @@ const Checkout = () => {
         body: {
           amount: total,
           description: `Engajar Social: ${items.join(", ")} | @${username.replace("@", "")}`,
-          customer_name: username,
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_cpf: customerCPF.replace(/\D/g, ""),
         },
       });
 
       if (error) throw error;
+
+      if (data?.success === false) {
+        throw new Error(data.error || "Erro ao gerar PIX");
+      }
 
       if (data?.pix_code) {
         setPixCode(data.pix_code);
         setQrCodeImage(data.qr_code_image || null);
         toast.success("PIX gerado com sucesso!");
       } else if (data?.raw) {
-        // Try to extract pix code from raw response
         const raw = data.raw;
-        const possibleCode = raw.pix_code || raw.qr_code_text || raw.copy_paste ||
-          raw.pix?.qr_code_text || raw.pix?.copy_paste || raw.pixCopiaECola ||
-          raw.brcode || raw.emv;
+        const possibleCode = raw.pix?.qrcode || raw.pix?.qr_code_text || raw.pix?.copy_paste ||
+          raw.pix?.emv || raw.pixCopiaECola || raw.brcode || raw.emv;
         if (possibleCode) {
           setPixCode(possibleCode);
-          setQrCodeImage(raw.qr_code_image || raw.pix?.qr_code_image || raw.qr_code || null);
+          setQrCodeImage(raw.pix?.qr_code_image || raw.pix?.qrcode_image || raw.qr_code || null);
           toast.success("PIX gerado com sucesso!");
         } else {
           console.error("Raw response:", JSON.stringify(raw));
-          toast.error("PIX gerado, mas não foi possível extrair o código. Verifique o console.");
+          toast.error("PIX gerado, mas não foi possível extrair o código.");
         }
       } else {
-        throw new Error(data?.error || "Erro ao gerar PIX");
+        throw new Error("Erro ao gerar PIX");
       }
     } catch (err: any) {
       console.error("Payment error:", err);
@@ -174,20 +191,64 @@ const Checkout = () => {
             </div>
           </div>
 
-          {/* Username input */}
+          {/* Customer info */}
           <div className="bg-card rounded-2xl border border-border p-5 card-shadow mb-4">
-            <label className="block text-sm font-semibold text-foreground mb-2">
-              Seu @ do {plan.platform}
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="@seuusuario"
-              className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-            />
-            <p className="text-[11px] text-muted-foreground mt-2 flex items-center gap-1">
-              <Lock className="w-3 h-3" /> Nunca pedimos sua senha. Apenas o @ público.
+            <h3 className="font-bold text-foreground text-sm mb-4 flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" /> Seus dados
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Seu @ do {plan.platform}
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="@seuusuario"
+                  className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Nome completo
+                </label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Seu nome completo"
+                  className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  E-mail
+                </label>
+                <input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  CPF
+                </label>
+                <input
+                  type="text"
+                  value={customerCPF}
+                  onChange={(e) => setCustomerCPF(formatCPF(e.target.value))}
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                  className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Nunca pedimos sua senha. Dados protegidos e criptografados.
             </p>
           </div>
 
@@ -287,7 +348,7 @@ const Checkout = () => {
 
               <button
                 onClick={handlePayment}
-                disabled={!username.trim() || loading}
+                disabled={!isFormValid || loading}
                 className="w-full ig-gradient-bg text-primary-foreground py-4 rounded-xl font-bold text-base transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
