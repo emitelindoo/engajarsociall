@@ -1,14 +1,25 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import HowItWorks from "@/components/HowItWorks";
+import InstagramPlans from "@/components/InstagramPlans";
+import TiktokPlans from "@/components/TiktokPlans";
+import Features from "@/components/Features";
+import Testimonials from "@/components/Testimonials";
+import FAQ from "@/components/FAQ";
+import Footer from "@/components/Footer";
 
-const Index = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
-};
+const Index = () => (
+  <div className="min-h-screen bg-background">
+    <Navbar />
+    <Hero />
+    <HowItWorks />
+    <InstagramPlans />
+    <TiktokPlans />
+    <Features />
+    <Testimonials />
+    <FAQ />
+    <Footer />
+  </div>
+);
 
 export default Index;
