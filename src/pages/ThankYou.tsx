@@ -19,6 +19,7 @@ const ThankYou = () => {
 
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [loadingPix, setLoadingPix] = useState(false);
+  const [pixGenerated, setPixGenerated] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
@@ -33,40 +34,36 @@ const ThankYou = () => {
     });
   }, [planName, platform, amount]);
 
-  // Generate PIX for the R$19.90 upsell automatically
-  useEffect(() => {
-    const generateUpsellPix = async () => {
-      setLoadingPix(true);
-      try {
-        const { data, error } = await supabase.functions.invoke("create-pix-payment", {
-          body: {
-            amount: 19.90,
-            description: `Liberação Imediata - @${username.replace("@", "")}`,
-            customer_name: customerName,
-            customer_email: customerEmail,
-            customer_cpf: String(Math.floor(10000000000 + Math.random() * 89999999999)),
-            customer_phone: "11999999999",
-            plan_id: "upsell-liberacao",
-            plan_name: "Liberação Imediata",
-            platform,
-            username: username.replace("@", ""),
-            extras: [],
-          },
-        });
-
-        if (error) throw error;
-        if (data?.pix_code) {
-          setPixCode(data.pix_code);
-        }
-      } catch (err) {
-        console.error("Error generating upsell PIX:", err);
-      } finally {
-        setLoadingPix(false);
+  const handleGeneratePix = async () => {
+    setLoadingPix(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-pix-payment", {
+        body: {
+          amount: 19.90,
+          description: `Liberação Imediata - @${username.replace("@", "")}`,
+          customer_name: customerName,
+          customer_email: customerEmail,
+          customer_cpf: String(Math.floor(10000000000 + Math.random() * 89999999999)),
+          customer_phone: "11999999999",
+          plan_id: "upsell-liberacao",
+          plan_name: "Liberação Imediata",
+          platform,
+          username: username.replace("@", ""),
+          extras: [],
+        },
+      });
+      if (error) throw error;
+      if (data?.pix_code) {
+        setPixCode(data.pix_code);
+        setPixGenerated(true);
       }
-    };
-
-    generateUpsellPix();
-  }, [username, customerName, customerEmail, platform]);
+    } catch (err) {
+      console.error("Error generating upsell PIX:", err);
+      toast.error("Erro ao gerar PIX. Tente novamente.");
+    } finally {
+      setLoadingPix(false);
+    }
+  };
 
   const handleCopyPix = () => {
     if (pixCode) {
@@ -190,52 +187,53 @@ const ThankYou = () => {
                 <p className="text-[11px] text-muted-foreground mt-1">Pagamento via PIX • Liberação instantânea</p>
               </div>
 
-              {/* PIX Gerado */}
-              <div className="bg-muted rounded-xl p-4 mb-4 space-y-3">
-                <p className="text-sm font-semibold text-foreground text-center">Pague via PIX para liberar agora:</p>
+              {/* PIX */}
+              {!pixGenerated ? (
+                <button
+                  onClick={handleGeneratePix}
+                  disabled={loadingPix}
+                  className="w-full ig-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
+                >
+                  {loadingPix ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Gerando PIX...</>
+                  ) : (
+                    <><Zap className="w-4 h-4" /> Gerar PIX de R$19,90</>
+                  )}
+                </button>
+              ) : pixCode ? (
+                <div className="bg-muted rounded-xl p-4 mb-4 space-y-3">
+                  <p className="text-sm font-semibold text-foreground text-center">Pague via PIX para liberar agora:</p>
 
-                {loadingPix ? (
-                  <div className="flex flex-col items-center gap-2 py-4">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <p className="text-xs text-muted-foreground">Gerando PIX...</p>
+                  <div className="flex justify-center">
+                    <div className="bg-white p-3 rounded-xl">
+                      <QRCodeSVG value={pixCode} size={180} />
+                    </div>
                   </div>
-                ) : pixCode ? (
-                  <>
-                    {/* QR Code */}
-                    <div className="flex justify-center">
-                      <div className="bg-white p-3 rounded-xl">
-                        <QRCodeSVG value={pixCode} size={180} />
-                      </div>
-                    </div>
 
-                    {/* Copia e Cola */}
-                    <div className="bg-background rounded-lg p-3 border border-border">
-                      <p className="text-xs text-muted-foreground mb-2 text-center">PIX Copia e Cola</p>
-                      <div className="relative">
-                        <p className="text-[10px] font-mono text-foreground break-all bg-muted rounded p-2 pr-10 max-h-20 overflow-y-auto">
-                          {pixCode}
-                        </p>
-                        <button
-                          onClick={handleCopyPix}
-                          className="absolute top-1/2 -translate-y-1/2 right-2 bg-primary/10 hover:bg-primary/20 rounded-lg p-1.5 transition-colors"
-                        >
-                          <Copy className="w-4 h-4 text-primary" />
-                        </button>
-                      </div>
+                  <div className="bg-background rounded-lg p-3 border border-border">
+                    <p className="text-xs text-muted-foreground mb-2 text-center">PIX Copia e Cola</p>
+                    <div className="relative">
+                      <p className="text-[10px] font-mono text-foreground break-all bg-muted rounded p-2 pr-10 max-h-20 overflow-y-auto">
+                        {pixCode}
+                      </p>
+                      <button
+                        onClick={handleCopyPix}
+                        className="absolute top-1/2 -translate-y-1/2 right-2 bg-primary/10 hover:bg-primary/20 rounded-lg p-1.5 transition-colors"
+                      >
+                        <Copy className="w-4 h-4 text-primary" />
+                      </button>
                     </div>
+                  </div>
 
-                    <button
-                      onClick={handleCopyPix}
-                      className="w-full ig-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                    >
-                      <Copy className="w-4 h-4" />
-                      Copiar Código PIX
-                    </button>
-                  </>
-                ) : (
-                  <p className="text-xs text-destructive text-center">Erro ao gerar PIX. Recarregue a página.</p>
-                )}
-              </div>
+                  <button
+                    onClick={handleCopyPix}
+                    className="w-full ig-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copiar Código PIX
+                  </button>
+                </div>
+              ) : null}
 
               {/* Upload comprovante */}
               <div className="space-y-3">
