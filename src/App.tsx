@@ -7,6 +7,9 @@ import Index from "./pages/Index";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTopButton from "./components/ScrollToTopButton";
+import PurchaseNotifications from "./components/PurchaseNotifications";
+import SupportChat from "./components/SupportChat";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +20,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <PurchaseNotifications />
+        <ScrollToTopButton />
+        <SupportChat />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/checkout/:planId" element={<Checkout />} />

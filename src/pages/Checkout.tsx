@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById } from "@/data/plans";
-import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock, BadgeCheck, Copy, CheckCircle2, Loader2, User, Mail, CreditCard } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock, BadgeCheck, Copy, CheckCircle2, Loader2, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
+import { QRCodeSVG } from "qrcode.react";
 
 interface OrderBump {
   id: string;
@@ -319,11 +320,11 @@ const Checkout = () => {
                 <h3 className="font-bold text-foreground">PIX Gerado!</h3>
               </div>
 
-              {qrCodeImage && (
-                <div className="flex justify-center mb-4">
-                  <img src={qrCodeImage} alt="QR Code PIX" className="w-48 h-48 rounded-lg" />
+              <div className="flex justify-center mb-4">
+                <div className="bg-white p-3 rounded-xl">
+                  <QRCodeSVG value={pixCode} size={200} level="M" />
                 </div>
-              )}
+              </div>
 
               <p className="text-xs text-muted-foreground mb-2 font-medium">Código PIX Copia e Cola:</p>
               <div className="bg-muted rounded-xl p-3 mb-3 break-all">
