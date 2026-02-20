@@ -75,6 +75,7 @@ const Checkout = () => {
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
 
   const toggleBump = (id: string) => {
     setSelectedBumps((prev) =>
@@ -102,6 +103,33 @@ const Checkout = () => {
     return plan.priceNum + bumpsTotal;
   }, [plan, selectedBumps]);
 
+  // Poll for payment confirmation
+  useEffect(() => {
+    if (!transactionId || !plan) return;
+
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from('transactions')
+        .select('status')
+        .eq('id', transactionId)
+        .single();
+
+      if (data?.status === 'paid') {
+        clearInterval(interval);
+        const params = new URLSearchParams({
+          plan: plan.name,
+          platform: plan.platform,
+          amount: total.toString(),
+          username: username,
+        });
+        navigate(`/obrigado?${params.toString()}`);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [transactionId, plan, total, username, navigate]);
+
+
   const isFormValid = username.trim() && customerName.trim() && customerEmail.trim() && customerCPF.replace(/\D/g, "").length === 11 && customerPhone.replace(/\D/g, "").length >= 10;
 
   const handlePayment = async () => {
@@ -109,11 +137,13 @@ const Checkout = () => {
     setLoading(true);
 
     try {
+      const selectedExtras = orderBumps
+        .filter((b) => selectedBumps.includes(b.id))
+        .map((b) => b.title);
+
       const items = [
         `${plan.name} - ${plan.followers} (${plan.platform})`,
-        ...orderBumps
-          .filter((b) => selectedBumps.includes(b.id))
-          .map((b) => b.title),
+        ...selectedExtras,
       ];
 
       const { data, error } = await supabase.functions.invoke("create-pix-payment", {
@@ -124,6 +154,11 @@ const Checkout = () => {
           customer_email: customerEmail,
           customer_cpf: customerCPF.replace(/\D/g, ""),
           customer_phone: customerPhone.replace(/\D/g, ""),
+          plan_id: plan.id,
+          plan_name: plan.name,
+          platform: plan.platform,
+          username: username,
+          extras: selectedExtras,
         },
       });
 
@@ -136,31 +171,8 @@ const Checkout = () => {
       if (data?.pix_code) {
         setPixCode(data.pix_code);
         setQrCodeImage(data.qr_code_image || null);
+        setTransactionId(data.transaction_id || null);
         toast.success("PIX gerado com sucesso!");
-        fbEvent("Purchase", {
-          content_name: plan.name,
-          content_category: plan.platform,
-          value: total,
-          currency: "BRL",
-        });
-      } else if (data?.raw) {
-        const raw = data.raw;
-        const possibleCode = raw.pix?.qrcode || raw.pix?.qr_code_text || raw.pix?.copy_paste ||
-          raw.pix?.emv || raw.pixCopiaECola || raw.brcode || raw.emv;
-        if (possibleCode) {
-          setPixCode(possibleCode);
-          setQrCodeImage(raw.pix?.qr_code_image || raw.pix?.qrcode_image || raw.qr_code || null);
-          toast.success("PIX gerado com sucesso!");
-          fbEvent("Purchase", {
-            content_name: plan.name,
-            content_category: plan.platform,
-            value: total,
-            currency: "BRL",
-          });
-        } else {
-          console.error("Raw response:", JSON.stringify(raw));
-          toast.error("PIX gerado, mas não foi possível extrair o código.");
-        }
       } else {
         throw new Error("Erro ao gerar PIX");
       }
