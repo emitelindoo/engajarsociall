@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById } from "@/data/plans";
 import { ArrowLeft, ShieldCheck, Check, Heart, Eye, MessageCircle, Zap, Lock, BadgeCheck, Copy, CheckCircle2, Loader2, User } from "lucide-react";
@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { QRCodeSVG } from "qrcode.react";
+import { fbEvent } from "@/lib/fbpixel";
 
 interface OrderBump {
   id: string;
@@ -81,6 +82,18 @@ const Checkout = () => {
     );
   };
 
+  // Track InitiateCheckout when page loads
+  useEffect(() => {
+    if (plan) {
+      fbEvent("InitiateCheckout", {
+        content_name: plan.name,
+        content_category: plan.platform,
+        value: plan.priceNum,
+        currency: "BRL",
+      });
+    }
+  }, [plan]);
+
   const total = useMemo(() => {
     if (!plan) return 0;
     const bumpsTotal = orderBumps
@@ -124,6 +137,12 @@ const Checkout = () => {
         setPixCode(data.pix_code);
         setQrCodeImage(data.qr_code_image || null);
         toast.success("PIX gerado com sucesso!");
+        fbEvent("Purchase", {
+          content_name: plan.name,
+          content_category: plan.platform,
+          value: total,
+          currency: "BRL",
+        });
       } else if (data?.raw) {
         const raw = data.raw;
         const possibleCode = raw.pix?.qrcode || raw.pix?.qr_code_text || raw.pix?.copy_paste ||
@@ -132,6 +151,12 @@ const Checkout = () => {
           setPixCode(possibleCode);
           setQrCodeImage(raw.pix?.qr_code_image || raw.pix?.qrcode_image || raw.qr_code || null);
           toast.success("PIX gerado com sucesso!");
+          fbEvent("Purchase", {
+            content_name: plan.name,
+            content_category: plan.platform,
+            value: total,
+            currency: "BRL",
+          });
         } else {
           console.error("Raw response:", JSON.stringify(raw));
           toast.error("PIX gerado, mas não foi possível extrair o código.");

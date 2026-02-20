@@ -1,6 +1,12 @@
 import { Instagram, Star, Users, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { useEffect } from "react";
+import { fbEvent } from "@/lib/fbpixel";
 
 const Hero = () => {
+  useEffect(() => {
+    fbEvent("ViewContent", { content_name: "Landing Page", content_category: "Home" });
+  }, []);
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
