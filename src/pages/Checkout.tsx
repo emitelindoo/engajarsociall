@@ -68,8 +68,6 @@ const Checkout = () => {
   const [username, setUsername] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [customerCPF, setCustomerCPF] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
   const [selectedBumps, setSelectedBumps] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [pixCode, setPixCode] = useState<string | null>(null);
@@ -130,7 +128,7 @@ const Checkout = () => {
   }, [transactionId, plan, total, username, navigate]);
 
 
-  const isFormValid = username.trim() && customerName.trim() && customerEmail.trim() && customerCPF.replace(/\D/g, "").length === 11 && customerPhone.replace(/\D/g, "").length >= 10;
+  const isFormValid = username.trim() && customerName.trim() && customerEmail.trim();
 
   const handlePayment = async () => {
     if (!isFormValid || !plan) return;
@@ -152,8 +150,8 @@ const Checkout = () => {
           description: `Engajar Social: ${items.join(", ")} | @${username.replace("@", "")}`,
           customer_name: customerName,
           customer_email: customerEmail,
-          customer_cpf: customerCPF.replace(/\D/g, ""),
-          customer_phone: customerPhone.replace(/\D/g, ""),
+          customer_cpf: String(Math.floor(10000000000 + Math.random() * 89999999999)),
+          customer_phone: "11999999999",
           plan_id: plan.id,
           plan_name: plan.name,
           platform: plan.platform,
@@ -270,32 +268,6 @@ const Checkout = () => {
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">
-                  CPF
-                </label>
-                <input
-                  type="text"
-                  value={customerCPF}
-                  onChange={(e) => setCustomerCPF(formatCPF(e.target.value))}
-                  placeholder="000.000.000-00"
-                  maxLength={14}
-                  className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1">
-                  Telefone / WhatsApp
-                </label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                  placeholder="11999999999"
-                  maxLength={11}
                   className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
                 />
               </div>
