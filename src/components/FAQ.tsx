@@ -10,19 +10,20 @@ const faqs = [
 ];
 
 const FAQ = () => (
-  <section id="faq" className="py-20 px-4">
+  <section id="faq" className="py-24 px-4">
     <div className="container mx-auto max-w-3xl">
+      <p className="text-accent font-semibold text-sm text-center mb-3 uppercase tracking-widest">Dúvidas</p>
       <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">Perguntas Frequentes</h2>
       <p className="text-center text-muted-foreground mb-12">
         Encontre respostas para as dúvidas mais comuns sobre nossos serviços.
       </p>
       <Accordion type="single" collapsible className="space-y-3">
         {faqs.map((f, i) => (
-          <AccordionItem key={i} value={`item-${i}`} className="rounded-xl border border-border/30 px-4" style={{ background: 'var(--card-gradient)' }}>
-            <AccordionTrigger className="text-foreground font-semibold text-left hover:no-underline">
+          <AccordionItem key={i} value={`item-${i}`} className="rounded-xl border border-border/40 px-5 data-[state=open]:border-accent/30 transition-colors" style={{ background: 'var(--card-gradient)' }}>
+            <AccordionTrigger className="text-foreground font-semibold text-left hover:no-underline py-5" style={{ fontFamily: 'DM Sans, sans-serif' }}>
               {f.q}
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground text-sm">
+            <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-5">
               {f.a}
             </AccordionContent>
           </AccordionItem>
