@@ -23,7 +23,7 @@ serve(async (req) => {
       throw new Error('NIVUS_PAY_COMPANY_ID is not configured');
     }
 
-    const { amount, description, customer_name, customer_email, customer_cpf } = await req.json();
+    const { amount, description, customer_name, customer_email, customer_cpf, customer_phone } = await req.json();
 
     if (!amount || amount <= 0) {
       return new Response(JSON.stringify({ error: 'Valor inválido' }), {
@@ -36,10 +36,11 @@ serve(async (req) => {
 
     const body = {
       amount: Math.round(amount * 100),
-      paymentMethod: "pix",
+      paymentMethod: "PIX",
       customer: {
         name: customer_name || "Cliente",
         email: customer_email || "cliente@email.com",
+        phone: (customer_phone || "11999999999").replace(/\D/g, ""),
         document: {
           number: (customer_cpf || "00000000000").replace(/\D/g, ""),
           type: "CPF",
