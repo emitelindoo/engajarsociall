@@ -1,7 +1,9 @@
+import { Package, UserCheck, Rocket } from "lucide-react";
+
 const steps = [
-  { num: 1, title: "Escolha o seu pacote de seguidores", desc: "Escolha o pacote de seguidores no Instagram que mais se adequa a você." },
-  { num: 2, title: "Insira seu @usuário do Instagram e conclua o pedido", desc: "Digite seu nome de usuário (nunca solicitaremos sua senha) e faça o pagamento via PIX." },
-  { num: 3, title: "Veja o seu Instagram decolar!", desc: "Relaxe na poltrona e observe seus novos seguidores chegando automaticamente ao seu perfil. É fácil assim 🚀" },
+  { icon: Package, num: "01", title: "Escolha o seu pacote", desc: "Escolha o pacote de seguidores que mais se adequa ao seu perfil e objetivos." },
+  { icon: UserCheck, num: "02", title: "Insira seu @usuário", desc: "Digite seu nome de usuário (nunca solicitaremos sua senha) e faça o pagamento via PIX." },
+  { icon: Rocket, num: "03", title: "Veja os resultados!", desc: "Relaxe e observe seus novos seguidores chegando automaticamente ao seu perfil. É fácil assim 🚀" },
 ];
 
 const HowItWorks = () => {
@@ -10,25 +12,27 @@ const HowItWorks = () => {
   };
 
   return (
-    <section className="py-20 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-12">
-          Como comprar seguidores no Instagram passo a passo
+    <section className="py-24 px-4">
+      <div className="container mx-auto max-w-5xl">
+        <p className="text-accent font-semibold text-sm text-center mb-3 uppercase tracking-widest">Como funciona</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-4">
+          Simples, rápido e seguro
         </h2>
-        <p className="text-center text-muted-foreground mb-12">Veja abaixo como é simples, rápido e prático.</p>
+        <p className="text-center text-muted-foreground mb-16 max-w-lg mx-auto">Veja abaixo como é prático comprar seguidores reais.</p>
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {steps.map((s) => (
-            <div key={s.num} className="text-center">
-              <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                {s.num}
+            <div key={s.num} className="relative rounded-2xl p-8 border border-border/40 text-center transition-all hover:border-border" style={{ background: 'var(--card-gradient)' }}>
+              <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
+                <s.icon className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">{s.title}</h3>
-              <p className="text-muted-foreground text-sm">{s.desc}</p>
+              <span className="text-xs text-accent font-bold tracking-widest">{s.num}</span>
+              <h3 className="text-lg font-bold text-foreground mt-2 mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>{s.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
             </div>
           ))}
         </div>
         <div className="text-center">
-          <button onClick={() => scrollTo('precos')} className="bg-accent text-accent-foreground px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+          <button onClick={() => scrollTo('precos')} className="bg-accent text-accent-foreground px-8 py-3.5 rounded-xl font-bold hover:brightness-110 transition-all">
             Escolher pacotes
           </button>
         </div>
