@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, Send, Instagram, Music2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { fbEvent } from "@/lib/fbpixel";
+import { instagramPlans, tiktokPlans, PlanData } from "@/data/plans";
 
 interface Message {
   role: "bot" | "user";
   text: string;
+  buttons?: { label: string; planId: string; platform: string }[];
 }
 
 const quickReplies = [
@@ -15,49 +19,60 @@ const quickReplies = [
   "Tem garantia?",
 ];
 
-const getAutoReply = (input: string): string => {
+const getAutoReply = (input: string): { text: string; buttons?: Message["buttons"] } => {
   const lower = input.toLowerCase();
 
+  const igButtons = instagramPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "Instagram" }));
+  const ttButtons = tiktokPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "TikTok" }));
+  const allButtons = [...igButtons.slice(0, 2), ...ttButtons.slice(0, 1)];
+
   if (lower.includes("seguro") || lower.includes("confiável") || lower.includes("confiavel") || lower.includes("golpe") || lower.includes("fraude")) {
-    return "Sim, somos 100% seguros! 🔒 Trabalhamos com criptografia de ponta a ponta e já atendemos mais de 50.000 clientes satisfeitos. Seus dados estão totalmente protegidos. Quer aproveitar e garantir seu plano agora?";
+    return { text: "Sim, somos 100% seguros! 🔒 Já atendemos mais de 50.000 clientes satisfeitos. Seus dados estão totalmente protegidos. Aproveite e garanta seu plano agora! 👇", buttons: allButtons };
   }
   if (lower.includes("entrega") || lower.includes("demora") || lower.includes("tempo") || lower.includes("prazo") || lower.includes("quando")) {
-    return "A entrega começa em até 5 minutos após a confirmação do pagamento! ⚡ Geralmente em menos de 1 hora você já percebe os resultados. É instantâneo! Quer garantir o seu agora?";
+    return { text: "A entrega começa em até 5 minutos após a confirmação! ⚡ Geralmente em menos de 1 hora você já percebe os resultados. Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("senha") || lower.includes("login") || lower.includes("acesso")) {
-    return "Nunca pedimos sua senha! 🔐 Precisamos apenas do seu @ público. Sua conta fica 100% segura o tempo todo. Pode comprar tranquilamente!";
+    return { text: "Nunca pedimos sua senha! 🔐 Precisamos apenas do seu @ público. Pode comprar tranquilamente! Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("real") || lower.includes("reais") || lower.includes("fake") || lower.includes("bot") || lower.includes("robô")) {
-    return "Nossos seguidores são perfis brasileiros de alta qualidade! 🇧🇷 Eles interagem naturalmente com seu conteúdo, aumentando seu engajamento real. Mais de 50.000 clientes podem confirmar!";
+    return { text: "Nossos seguidores são perfis brasileiros de alta qualidade! 🇧🇷 Eles interagem naturalmente com seu conteúdo. Garanta já o seu: 👇", buttons: allButtons };
   }
   if (lower.includes("garantia") || lower.includes("reembolso") || lower.includes("devol")) {
-    return "Oferecemos garantia de reposição! Se houver qualquer queda, repomos gratuitamente em até 30 dias. 💎 Você não tem nada a perder! Aproveite agora!";
+    return { text: "Oferecemos garantia de reposição de 30 dias! 💎 Você não tem nada a perder! Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("preço") || lower.includes("preco") || lower.includes("valor") || lower.includes("desconto") || lower.includes("promoção") || lower.includes("promocao")) {
-    return "Nossos preços são os mais competitivos do mercado! 🔥 E hoje temos uma promoção especial com até 60% de desconto. Essa oferta é por tempo limitado — aproveite agora antes que acabe!";
+    return { text: "Nossos preços são os mais competitivos! 🔥 Até 60% de desconto por tempo limitado. Confira: 👇", buttons: allButtons };
   }
   if (lower.includes("pix") || lower.includes("pagamento") || lower.includes("pagar")) {
-    return "Aceitamos PIX para pagamento instantâneo! ✅ É rápido, seguro e sem burocracia. Após a confirmação, a entrega começa imediatamente. Vamos lá?";
+    return { text: "Aceitamos PIX para pagamento instantâneo! ✅ Rápido e seguro. Escolha seu plano e pague agora: 👇", buttons: allButtons };
+  }
+  if (lower.includes("instagram") || lower.includes("insta")) {
+    return { text: "Temos planos incríveis para Instagram! 📸 Escolha o ideal pra você: 👇", buttons: igButtons };
+  }
+  if (lower.includes("tiktok") || lower.includes("tik tok") || lower.includes("tt")) {
+    return { text: "Temos planos incríveis para TikTok! 🎵 Escolha o ideal pra você: 👇", buttons: ttButtons };
   }
   if (lower.includes("funciona") || lower.includes("como")) {
-    return "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! Os seguidores começam a chegar em minutos. Quer começar agora?";
+    return { text: "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! Comece agora: 👇", buttons: allButtons };
   }
   if (lower.includes("oi") || lower.includes("olá") || lower.includes("ola") || lower.includes("bom dia") || lower.includes("boa tarde") || lower.includes("boa noite") || lower.includes("eae") || lower.includes("hey") || lower.includes("hello")) {
-    return "Olá! 👋 Seja bem-vindo(a) à Engajar Social! Como posso te ajudar? Estamos aqui para tirar todas as suas dúvidas e te ajudar a crescer nas redes sociais!";
+    return { text: "Olá! 👋 Seja bem-vindo(a) à Engajar Social! Quer crescer nas redes sociais? Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("obrigad") || lower.includes("valeu") || lower.includes("thanks")) {
-    return "Por nada! 😊 Estamos sempre aqui para ajudar. Se precisar de qualquer coisa, é só chamar. Aproveite nossa promoção e garanta seu crescimento agora!";
+    return { text: "Por nada! 😊 Aproveite nossa promoção e garanta seu crescimento agora! 👇", buttons: allButtons };
   }
 
-  return "Ótima pergunta! 😊 Somos a plataforma #1 em crescimento de redes sociais no Brasil, com mais de 50.000 clientes satisfeitos. Oferecemos entrega rápida, garantia de reposição e total segurança. Quer aproveitar nossos planos com desconto exclusivo?";
+  return { text: "Somos a plataforma #1 em crescimento de redes sociais no Brasil! 🚀 Mais de 50.000 clientes satisfeitos. Confira nossos planos: 👇", buttons: allButtons };
 };
 
 const SupportChat = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
-      text: "Olá! 👋 Sou a assistente da Engajar Social. Como posso te ajudar? Escolha uma opção abaixo ou digite sua dúvida!",
+      text: "Olá! 👋 Sou a assistente da Engajar Social. Quer crescer nas redes sociais? Escolha uma opção ou digite sua dúvida!",
     },
   ]);
   const [input, setInput] = useState("");
@@ -73,6 +88,11 @@ const SupportChat = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handlePlanClick = (planId: string, platform: string) => {
+    fbEvent("AddToCart", { content_name: planId, content_category: platform, currency: "BRL" });
+    navigate(`/checkout/${planId}`);
+  };
+
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
     const userMsg: Message = { role: "user", text };
@@ -80,7 +100,8 @@ const SupportChat = () => {
     setInput("");
 
     setTimeout(() => {
-      const reply: Message = { role: "bot", text: getAutoReply(text) };
+      const { text: replyText, buttons } = getAutoReply(text);
+      const reply: Message = { role: "bot", text: replyText, buttons };
       setMessages((prev) => [...prev, reply]);
     }, 800 + Math.random() * 700);
   };
@@ -121,14 +142,30 @@ const SupportChat = () => {
                 key={i}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "ig-gradient-bg text-primary-foreground rounded-br-md"
-                      : "bg-muted text-foreground rounded-bl-md"
-                  }`}
-                >
-                  {msg.text}
+                <div className={`max-w-[85%] ${msg.role === "user" ? "" : ""}`}>
+                  <div
+                    className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                      msg.role === "user"
+                        ? "ig-gradient-bg text-primary-foreground rounded-br-md"
+                        : "bg-muted text-foreground rounded-bl-md"
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                  {msg.buttons && msg.buttons.length > 0 && (
+                    <div className="mt-2 flex flex-col gap-1.5">
+                      {msg.buttons.map((btn) => (
+                        <button
+                          key={btn.planId}
+                          onClick={() => handlePlanClick(btn.planId, btn.platform)}
+                          className="w-full text-left px-3 py-2 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/15 transition-colors text-xs font-medium text-primary flex items-center gap-2"
+                        >
+                          {btn.platform === "Instagram" ? <Instagram className="w-3.5 h-3.5 flex-shrink-0" /> : <Music2 className="w-3.5 h-3.5 flex-shrink-0" />}
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
