@@ -25,7 +25,11 @@ const ThankYou = () => {
   const [uploaded, setUploaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const purchaseFired = useRef(false);
+
   useEffect(() => {
+    if (purchaseFired.current) return;
+    purchaseFired.current = true;
     fbEvent("Purchase", {
       content_name: planName,
       content_category: platform,
