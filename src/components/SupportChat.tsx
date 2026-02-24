@@ -2,68 +2,79 @@ import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Instagram, Music2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { fbEvent } from "@/lib/fbpixel";
-import { instagramPlans, tiktokPlans, PlanData } from "@/data/plans";
+import { instagramPlans, tiktokPlans } from "@/data/plans";
+
+interface ChatButton {
+  label: string;
+  planId?: string;
+  platform: string;
+  action?: "scroll";
+}
 
 interface Message {
   role: "bot" | "user";
   text: string;
-  buttons?: { label: string; planId: string; platform: string }[];
+  buttons?: ChatButton[];
 }
 
+const platformButtons: ChatButton[] = [
+  { label: "📸 Planos Instagram", platform: "Instagram", action: "scroll" },
+  { label: "🎵 Planos TikTok", platform: "TikTok", action: "scroll" },
+];
+
 const quickReplies = [
-  "É seguro comprar aqui?",
-  "Como funciona a entrega?",
-  "Preciso informar minha senha?",
+  "É seguro comprar?",
+  "Como funciona?",
+  "Preciso da senha?",
   "Os seguidores são reais?",
-  "Quanto tempo demora?",
   "Tem garantia?",
 ];
 
-const getAutoReply = (input: string): { text: string; buttons?: Message["buttons"] } => {
+const getAutoReply = (input: string): { text: string; buttons?: ChatButton[] } => {
   const lower = input.toLowerCase();
 
-  const igButtons = instagramPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "Instagram" }));
-  const ttButtons = tiktokPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "TikTok" }));
-  const allButtons = [...igButtons.slice(0, 2), ...ttButtons.slice(0, 1)];
+  const igButtons: ChatButton[] = instagramPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "Instagram" }));
+  const ttButtons: ChatButton[] = tiktokPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "TikTok" }));
+  const allButtons: ChatButton[] = [...igButtons.slice(0, 2), ...ttButtons.slice(0, 1)];
 
   if (lower.includes("seguro") || lower.includes("confiável") || lower.includes("confiavel") || lower.includes("golpe") || lower.includes("fraude")) {
-    return { text: "Sim, somos 100% seguros! 🔒 Já atendemos mais de 50.000 clientes satisfeitos. Seus dados estão totalmente protegidos. Aproveite e garanta seu plano agora! 👇", buttons: allButtons };
+    return { text: "Sim, somos 100% seguros! 🔒 Já atendemos mais de 50.000 clientes satisfeitos. Aproveite e garanta seu plano agora! 👇", buttons: allButtons };
   }
   if (lower.includes("entrega") || lower.includes("demora") || lower.includes("tempo") || lower.includes("prazo") || lower.includes("quando")) {
-    return { text: "A entrega começa em até 5 minutos após a confirmação! ⚡ Geralmente em menos de 1 hora você já percebe os resultados. Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "A entrega começa em até 5 minutos após a confirmação! ⚡ Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("senha") || lower.includes("login") || lower.includes("acesso")) {
-    return { text: "Nunca pedimos sua senha! 🔐 Precisamos apenas do seu @ público. Pode comprar tranquilamente! Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "Nunca pedimos sua senha! 🔐 Precisamos apenas do seu @ público. Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("real") || lower.includes("reais") || lower.includes("fake") || lower.includes("bot") || lower.includes("robô")) {
-    return { text: "Nossos seguidores são perfis brasileiros de alta qualidade! 🇧🇷 Eles interagem naturalmente com seu conteúdo. Garanta já o seu: 👇", buttons: allButtons };
+    return { text: "Nossos seguidores são perfis brasileiros de alta qualidade! 🇧🇷 Garanta já o seu: 👇", buttons: allButtons };
   }
   if (lower.includes("garantia") || lower.includes("reembolso") || lower.includes("devol")) {
-    return { text: "Oferecemos garantia de reposição de 30 dias! 💎 Você não tem nada a perder! Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "Oferecemos garantia de reposição de 30 dias! 💎 Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("preço") || lower.includes("preco") || lower.includes("valor") || lower.includes("desconto") || lower.includes("promoção") || lower.includes("promocao")) {
-    return { text: "Nossos preços são os mais competitivos! 🔥 Até 60% de desconto por tempo limitado. Confira: 👇", buttons: allButtons };
+    return { text: "Nossos preços são os mais competitivos! 🔥 Até 60% de desconto. Confira: 👇", buttons: allButtons };
   }
   if (lower.includes("pix") || lower.includes("pagamento") || lower.includes("pagar")) {
-    return { text: "Aceitamos PIX para pagamento instantâneo! ✅ Rápido e seguro. Escolha seu plano e pague agora: 👇", buttons: allButtons };
+    return { text: "Aceitamos PIX para pagamento instantâneo! ✅ Escolha seu plano: 👇", buttons: allButtons };
   }
   if (lower.includes("instagram") || lower.includes("insta")) {
-    return { text: "Temos planos incríveis para Instagram! 📸 Escolha o ideal pra você: 👇", buttons: igButtons };
+    return { text: "Temos planos incríveis para Instagram! 📸 Escolha o ideal: 👇", buttons: igButtons };
   }
   if (lower.includes("tiktok") || lower.includes("tik tok") || lower.includes("tt")) {
-    return { text: "Temos planos incríveis para TikTok! 🎵 Escolha o ideal pra você: 👇", buttons: ttButtons };
+    return { text: "Temos planos incríveis para TikTok! 🎵 Escolha o ideal: 👇", buttons: ttButtons };
   }
   if (lower.includes("funciona") || lower.includes("como")) {
-    return { text: "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! Comece agora: 👇", buttons: allButtons };
+    return { text: "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! 👇", buttons: allButtons };
   }
   if (lower.includes("oi") || lower.includes("olá") || lower.includes("ola") || lower.includes("bom dia") || lower.includes("boa tarde") || lower.includes("boa noite") || lower.includes("eae") || lower.includes("hey") || lower.includes("hello")) {
-    return { text: "Olá! 👋 Seja bem-vindo(a) à Engajar Social! Quer crescer nas redes sociais? Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "Olá! 👋 Quer crescer nas redes sociais? Escolha a plataforma: 👇", buttons: platformButtons };
   }
   if (lower.includes("obrigad") || lower.includes("valeu") || lower.includes("thanks")) {
-    return { text: "Por nada! 😊 Aproveite nossa promoção e garanta seu crescimento agora! 👇", buttons: allButtons };
+    return { text: "Por nada! 😊 Aproveite nossa promoção! 👇", buttons: platformButtons };
   }
 
-  return { text: "Somos a plataforma #1 em crescimento de redes sociais no Brasil! 🚀 Mais de 50.000 clientes satisfeitos. Confira nossos planos: 👇", buttons: allButtons };
+  return { text: "Somos a plataforma #1 em crescimento de redes sociais! 🚀 Escolha a plataforma: 👇", buttons: platformButtons };
 };
 
 const SupportChat = () => {
@@ -72,7 +83,8 @@ const SupportChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
-      text: "Olá! 👋 Sou a assistente da Engajar Social. Quer crescer nas redes sociais? Escolha uma opção ou digite sua dúvida!",
+      text: "Olá! 👋 Sou a assistente da Engajar Social. Escolha a plataforma para ver nossos planos ou digite sua dúvida!",
+      buttons: platformButtons,
     },
   ]);
   const [input, setInput] = useState("");
@@ -88,9 +100,23 @@ const SupportChat = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handlePlanClick = (planId: string, platform: string) => {
-    fbEvent("AddToCart", { content_name: planId, content_category: platform, currency: "BRL" });
-    navigate(`/checkout/${planId}`);
+  const handleButtonClick = (btn: ChatButton) => {
+    if (btn.action === "scroll") {
+      // Navigate to home and scroll to plans
+      const sectionId = btn.platform === "Instagram" ? "instagram-plans" : "tiktok-plans";
+      if (window.location.pathname !== "/") {
+        navigate("/");
+        setTimeout(() => {
+          document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+        }, 500);
+      } else {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+      }
+      setOpen(false);
+    } else if (btn.planId) {
+      fbEvent("AddToCart", { content_name: btn.planId, content_category: btn.platform, currency: "BRL" });
+      navigate(`/checkout/${btn.planId}`);
+    }
   };
 
   const sendMessage = (text: string) => {
@@ -142,7 +168,7 @@ const SupportChat = () => {
                 key={i}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <div className={`max-w-[85%] ${msg.role === "user" ? "" : ""}`}>
+                <div className="max-w-[85%]">
                   <div
                     className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
                       msg.role === "user"
@@ -154,13 +180,17 @@ const SupportChat = () => {
                   </div>
                   {msg.buttons && msg.buttons.length > 0 && (
                     <div className="mt-2 flex flex-col gap-1.5">
-                      {msg.buttons.map((btn) => (
+                      {msg.buttons.map((btn, idx) => (
                         <button
-                          key={btn.planId}
-                          onClick={() => handlePlanClick(btn.planId, btn.platform)}
-                          className="w-full text-left px-3 py-2 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/15 transition-colors text-xs font-medium text-primary flex items-center gap-2"
+                          key={btn.planId || `${btn.platform}-${idx}`}
+                          onClick={() => handleButtonClick(btn)}
+                          className={`w-full text-left px-3 py-2.5 rounded-xl border transition-colors text-xs font-semibold flex items-center gap-2 ${
+                            btn.action === "scroll"
+                              ? "border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary"
+                              : "border-primary/30 bg-primary/5 hover:bg-primary/15 text-primary"
+                          }`}
                         >
-                          {btn.platform === "Instagram" ? <Instagram className="w-3.5 h-3.5 flex-shrink-0" /> : <Music2 className="w-3.5 h-3.5 flex-shrink-0" />}
+                          {btn.platform === "Instagram" ? <Instagram className="w-4 h-4 flex-shrink-0" /> : <Music2 className="w-4 h-4 flex-shrink-0" />}
                           {btn.label}
                         </button>
                       ))}
