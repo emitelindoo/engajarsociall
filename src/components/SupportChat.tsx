@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Instagram, Music2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { fbEvent } from "@/lib/fbpixel";
-import { instagramPlans, tiktokPlans } from "@/data/plans";
+
 
 interface ChatButton {
   label: string;
@@ -33,48 +33,47 @@ const quickReplies = [
 const getAutoReply = (input: string): { text: string; buttons?: ChatButton[] } => {
   const lower = input.toLowerCase();
 
-  const igButtons: ChatButton[] = instagramPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "Instagram" }));
-  const ttButtons: ChatButton[] = tiktokPlans.slice(0, 3).map((p) => ({ label: `${p.followers} - ${p.price}`, planId: p.id, platform: "TikTok" }));
-  const allButtons: ChatButton[] = [...igButtons.slice(0, 2), ...ttButtons.slice(0, 1)];
+  // Always show platform buttons at the end for navigation
+  const nav = platformButtons;
 
   if (lower.includes("seguro") || lower.includes("confiável") || lower.includes("confiavel") || lower.includes("golpe") || lower.includes("fraude")) {
-    return { text: "Sim, somos 100% seguros! 🔒 Já atendemos mais de 50.000 clientes satisfeitos. Aproveite e garanta seu plano agora! 👇", buttons: allButtons };
+    return { text: "Sim, somos 100% seguros! 🔒 Já atendemos mais de 50.000 clientes satisfeitos. Seus dados estão totalmente protegidos e nunca pedimos sua senha. Pode comprar tranquilamente!", buttons: nav };
   }
   if (lower.includes("entrega") || lower.includes("demora") || lower.includes("tempo") || lower.includes("prazo") || lower.includes("quando")) {
-    return { text: "A entrega começa em até 5 minutos após a confirmação! ⚡ Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "A entrega começa em até 5 minutos após a confirmação do pagamento! ⚡ Geralmente em menos de 1 hora você já percebe os resultados.", buttons: nav };
   }
   if (lower.includes("senha") || lower.includes("login") || lower.includes("acesso")) {
-    return { text: "Nunca pedimos sua senha! 🔐 Precisamos apenas do seu @ público. Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "Nunca pedimos sua senha! 🔐 Precisamos apenas do seu @ público. Seu perfil fica totalmente seguro.", buttons: nav };
   }
   if (lower.includes("real") || lower.includes("reais") || lower.includes("fake") || lower.includes("bot") || lower.includes("robô")) {
-    return { text: "Nossos seguidores são perfis brasileiros de alta qualidade! 🇧🇷 Garanta já o seu: 👇", buttons: allButtons };
+    return { text: "Nossos seguidores são perfis brasileiros de alta qualidade! 🇧🇷 Eles interagem naturalmente com seu conteúdo, trazendo mais credibilidade ao seu perfil.", buttons: nav };
   }
   if (lower.includes("garantia") || lower.includes("reembolso") || lower.includes("devol")) {
-    return { text: "Oferecemos garantia de reposição de 30 dias! 💎 Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "Oferecemos garantia de reposição de 30 dias! 💎 Se houver qualquer queda, repomos automaticamente. Você não tem nada a perder!", buttons: nav };
   }
   if (lower.includes("preço") || lower.includes("preco") || lower.includes("valor") || lower.includes("desconto") || lower.includes("promoção") || lower.includes("promocao")) {
-    return { text: "Nossos preços são os mais competitivos! 🔥 Até 60% de desconto. Confira: 👇", buttons: allButtons };
+    return { text: "Nossos preços são os mais competitivos do mercado! 🔥 Estamos com até 60% de desconto por tempo limitado. Confira os planos abaixo! 👇", buttons: nav };
   }
   if (lower.includes("pix") || lower.includes("pagamento") || lower.includes("pagar")) {
-    return { text: "Aceitamos PIX para pagamento instantâneo! ✅ Escolha seu plano: 👇", buttons: allButtons };
+    return { text: "Aceitamos PIX para pagamento instantâneo! ✅ Rápido, seguro e sem complicação.", buttons: nav };
   }
   if (lower.includes("instagram") || lower.includes("insta")) {
-    return { text: "Temos planos incríveis para Instagram! 📸 Escolha o ideal: 👇", buttons: igButtons };
+    return { text: "Temos planos incríveis para Instagram! 📸 Clique abaixo para conferir: 👇", buttons: [platformButtons[0]] };
   }
   if (lower.includes("tiktok") || lower.includes("tik tok") || lower.includes("tt")) {
-    return { text: "Temos planos incríveis para TikTok! 🎵 Escolha o ideal: 👇", buttons: ttButtons };
+    return { text: "Temos planos incríveis para TikTok! 🎵 Clique abaixo para conferir: 👇", buttons: [platformButtons[1]] };
   }
   if (lower.includes("funciona") || lower.includes("como")) {
-    return { text: "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! 👇", buttons: allButtons };
+    return { text: "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! Os seguidores começam a chegar rapidinho.", buttons: nav };
   }
   if (lower.includes("oi") || lower.includes("olá") || lower.includes("ola") || lower.includes("bom dia") || lower.includes("boa tarde") || lower.includes("boa noite") || lower.includes("eae") || lower.includes("hey") || lower.includes("hello")) {
-    return { text: "Olá! 👋 Quer crescer nas redes sociais? Escolha a plataforma: 👇", buttons: platformButtons };
+    return { text: "Olá! 👋 Seja bem-vindo(a) à Engajar Social! Quer crescer nas redes sociais? Escolha a plataforma abaixo! 👇", buttons: nav };
   }
   if (lower.includes("obrigad") || lower.includes("valeu") || lower.includes("thanks")) {
-    return { text: "Por nada! 😊 Aproveite nossa promoção! 👇", buttons: platformButtons };
+    return { text: "Por nada! 😊 Estamos aqui pra te ajudar. Se precisar de algo mais, é só perguntar!", buttons: nav };
   }
 
-  return { text: "Somos a plataforma #1 em crescimento de redes sociais! 🚀 Escolha a plataforma: 👇", buttons: platformButtons };
+  return { text: "Somos a plataforma #1 em crescimento de redes sociais no Brasil! 🚀 Mais de 50.000 clientes satisfeitos. Escolha a plataforma: 👇", buttons: nav };
 };
 
 const SupportChat = () => {
