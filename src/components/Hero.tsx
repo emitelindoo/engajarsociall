@@ -69,7 +69,7 @@ const Hero = () => {
           </div>
           <div className="text-center">
             <p className="text-xl font-bold text-foreground">
-              <Zap className="w-4 h-4 inline text-accent" /> 24h
+              <Zap className="w-4 h-4 inline text-accent" /> Imediata
             </p>
             <p className="text-xs text-muted-foreground">Entrega</p>
           </div>
