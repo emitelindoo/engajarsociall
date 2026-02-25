@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { CheckCircle2, PartyPopper, Zap, ShieldCheck, Clock, Rocket, Upload, FileCheck, Loader2, Copy } from "lucide-react";
-import { fbEvent } from "@/lib/fbpixel";
+import { fbEvent, fbSetUserData } from "@/lib/fbpixel";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -30,13 +30,23 @@ const ThankYou = () => {
   useEffect(() => {
     if (purchaseFired.current) return;
     purchaseFired.current = true;
+
+    // Advanced Matching for better event quality
+    const nameParts = customerName.trim().split(/\s+/);
+    fbSetUserData({
+      em: customerEmail.trim().toLowerCase(),
+      fn: nameParts[0]?.toLowerCase(),
+      ln: nameParts.length > 1 ? nameParts[nameParts.length - 1].toLowerCase() : undefined,
+      external_id: username.replace("@", "").toLowerCase(),
+    });
+
     fbEvent("Purchase", {
       content_name: planName,
       content_category: platform,
       value: parseFloat(amount),
       currency: "BRL",
     });
-  }, [planName, platform, amount]);
+  }, [planName, platform, amount, customerName, customerEmail, username]);
 
   const handleGeneratePix = async () => {
     setLoadingPix(true);

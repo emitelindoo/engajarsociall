@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import { QRCodeSVG } from "qrcode.react";
-import { fbEvent } from "@/lib/fbpixel";
+import { fbEvent, fbSetUserData } from "@/lib/fbpixel";
 
 interface OrderBump {
   id: string;
@@ -135,6 +135,15 @@ const Checkout = () => {
   const handlePayment = async () => {
     if (!isFormValid || !plan) return;
     setLoading(true);
+
+    // Advanced Matching: send user data to Meta Pixel
+    const nameParts = customerName.trim().split(/\s+/);
+    fbSetUserData({
+      em: customerEmail.trim().toLowerCase(),
+      fn: nameParts[0]?.toLowerCase(),
+      ln: nameParts.length > 1 ? nameParts[nameParts.length - 1].toLowerCase() : undefined,
+      external_id: username.replace("@", "").toLowerCase(),
+    });
 
     try {
       const selectedExtras = orderBumps
