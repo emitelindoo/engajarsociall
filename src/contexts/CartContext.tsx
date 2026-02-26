@@ -27,8 +27,8 @@ export const useCart = () => {
 
 /** Returns the input label/placeholder based on service type */
 export const getTargetLabel = (serviceType: string) => {
-  if (serviceType === "Seguidores") return { label: "@ do perfil", placeholder: "@seuusuario" };
-  return { label: "Link da publicação", placeholder: "https://instagram.com/p/..." };
+  if (serviceType === "Seguidores" || serviceType === "Inscritos") return { label: "@ do perfil ou link do canal", placeholder: "@seuusuario" };
+  return { label: "Link da publicação", placeholder: "https://..." };
 };
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
