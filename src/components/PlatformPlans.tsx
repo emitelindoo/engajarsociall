@@ -56,6 +56,9 @@ const PlatformPlans = () => {
   const handleServiceChange = (id: string) => {
     setActiveService(id);
     setSelectedPlanIndex(0);
+    setTimeout(() => {
+      document.getElementById("seletor-plano")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
   };
 
   const decrease = () => {
@@ -134,7 +137,7 @@ const PlatformPlans = () => {
         </div>
 
         {/* Interactive Selector Card */}
-        <div className="bg-card rounded-3xl border border-border p-8 card-shadow max-w-md mx-auto">
+        <div id="seletor-plano" className="bg-card rounded-3xl border border-border p-8 card-shadow max-w-md mx-auto">
           {/* Quantity display */}
           <div className="text-center mb-6">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">
