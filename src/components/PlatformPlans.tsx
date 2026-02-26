@@ -3,6 +3,9 @@ import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, Shi
 import {
   igSeguidores, igCurtidas, igComentarios, igVisualizacoes,
   ttSeguidores, ttCurtidas, ttComentarios, ttVisualizacoes,
+  ytInscritos, ytCurtidas, ytVisualizacoes, ytComentarios,
+  kwSeguidores, kwCurtidas, kwVisualizacoes,
+  fbSeguidores, fbCurtidas, fbVisualizacoes, fbComentarios,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
@@ -30,9 +33,32 @@ const ttServices: ServiceConfig[] = [
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ttComentarios },
 ];
 
+const ytServices: ServiceConfig[] = [
+  { id: "seg", label: "Inscritos", icon: <Users className="w-5 h-5" />, plans: ytInscritos },
+  { id: "curt", label: "Likes", icon: <Heart className="w-5 h-5" />, plans: ytCurtidas },
+  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ytVisualizacoes },
+  { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ytComentarios },
+];
+
+const kwServices: ServiceConfig[] = [
+  { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: kwSeguidores },
+  { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: kwCurtidas },
+  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: kwVisualizacoes },
+];
+
+const fbServices: ServiceConfig[] = [
+  { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: fbSeguidores },
+  { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: fbCurtidas },
+  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: fbVisualizacoes },
+  { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: fbComentarios },
+];
+
 const platforms = [
   { id: "instagram", label: "Instagram", services: igServices, gradient: "from-[hsl(43,96%,56%)] via-[hsl(350,96%,55%)] to-[hsl(316,73%,52%)]" },
   { id: "tiktok", label: "TikTok", services: ttServices, gradient: "from-[hsl(180,80%,50%)] via-[hsl(340,80%,55%)] to-[hsl(0,0%,15%)]" },
+  { id: "youtube", label: "YouTube", services: ytServices, gradient: "from-[hsl(0,100%,50%)] to-[hsl(0,80%,40%)]" },
+  { id: "kwai", label: "Kwai", services: kwServices, gradient: "from-[hsl(30,100%,50%)] to-[hsl(15,100%,45%)]" },
+  { id: "facebook", label: "Facebook", services: fbServices, gradient: "from-[hsl(220,80%,50%)] to-[hsl(220,70%,40%)]" },
 ];
 
 const PlatformPlans = () => {
