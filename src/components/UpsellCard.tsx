@@ -113,7 +113,7 @@ const UpsellCard = ({ username, customerName, customerEmail, platform, onComplet
       {/* Urgency banner */}
       <div className="bg-destructive text-destructive-foreground px-4 py-2.5 flex items-center justify-center gap-2 text-sm font-bold">
         <AlertTriangle className="w-4 h-4 animate-pulse" />
-        <span>⚠️ ATENÇÃO: Seu pedido está na fila de espera</span>
+        <span>⚠️ ATENÇÃO: Seus seguidores chegarão em até 3 dias úteis</span>
       </div>
 
       <div className="p-6 space-y-5">
@@ -122,9 +122,9 @@ const UpsellCard = ({ username, customerName, customerEmail, platform, onComplet
           <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3 animate-bounce">
             <Rocket className="w-8 h-8 text-accent" />
           </div>
-          <h2 className="text-xl font-extrabold text-foreground">Fure a Fila e Receba AGORA!</h2>
+          <h2 className="text-xl font-extrabold text-foreground">Receba seus Seguidores AGORA!</h2>
           <p className="text-sm text-muted-foreground">
-            Sem a liberação imediata, seu pedido será processado em até <strong className="text-destructive">3 dias úteis</strong>
+            Sem a liberação imediata, seus seguidores só começam a chegar em <strong className="text-destructive">3 dias úteis</strong>
           </p>
         </div>
 
@@ -150,7 +150,7 @@ const UpsellCard = ({ username, customerName, customerEmail, platform, onComplet
           <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-3 text-center space-y-2">
             <Clock className="w-5 h-5 text-destructive mx-auto" />
             <p className="text-xs font-bold text-destructive">SEM liberação</p>
-            <p className="text-[11px] text-muted-foreground">Até 3 dias úteis na fila de espera</p>
+            <p className="text-[11px] text-muted-foreground">Seguidores chegam em até 3 dias úteis</p>
           </div>
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-center space-y-2 relative">
             <div className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-[9px] font-bold px-2 py-0.5 rounded-full">
@@ -285,7 +285,7 @@ const UpsellCard = ({ username, customerName, customerEmail, platform, onComplet
           onClick={onSkip}
           className="w-full text-center text-xs text-muted-foreground/60 hover:text-muted-foreground underline underline-offset-2 transition-colors pt-1"
         >
-          Não, prefiro esperar até 3 dias úteis →
+          Não, quero esperar 3 dias úteis →
         </button>
       </div>
     </div>
