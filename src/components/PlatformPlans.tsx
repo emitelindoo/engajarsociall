@@ -139,7 +139,7 @@ const PlatformPlans = () => {
         </p>
 
         {/* Platform Tabs */}
-        <div className="flex justify-start md:justify-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+        <div className="flex justify-center gap-2 flex-wrap mb-6">
           {platforms.map((platform) => (
             <button
               key={platform.id}
