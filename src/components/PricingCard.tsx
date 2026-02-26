@@ -28,18 +28,18 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
 
   return (
     <div
-      className={`relative bg-card rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-1 hover:card-shadow-hover card-shadow ${
-        plan.highlighted ? "border-primary ring-2 ring-primary/30 scale-[1.02]" : "border-border"
+      className={`relative bg-card rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-1 hover:card-shadow-hover card-shadow group ${
+        plan.highlighted ? "border-primary/50 ring-1 ring-primary/20" : "border-border"
       }`}
     >
       {plan.highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 ig-gradient-bg text-primary-foreground px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 brand-gradient-bg text-primary-foreground px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 whitespace-nowrap">
           <Flame className="w-3 h-3" /> Mais Vendido
         </div>
       )}
 
       <div className="absolute top-3 right-3">
-        <span className="bg-destructive/10 text-destructive text-[10px] font-bold px-2 py-1 rounded-lg">
+        <span className="bg-accent/15 text-accent text-[10px] font-bold px-2 py-1 rounded-lg">
           -{discount}% OFF
         </span>
       </div>
@@ -56,7 +56,7 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
         <span className="text-base font-bold text-foreground">{plan.quantity}</span>
       </div>
 
-      <div className="mb-5 p-3 rounded-xl bg-muted/50">
+      <div className="mb-5 p-3 rounded-xl bg-secondary">
         <span className="text-sm line-through mr-2" style={{ color: "hsl(var(--price-old))" }}>
           {plan.originalPrice}
         </span>
@@ -68,7 +68,7 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
       <ul className="space-y-2 mb-6">
         {plan.features.map((f, i) => (
           <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" /> {f}
+            <Check className="w-3.5 h-3.5 text-accent flex-shrink-0" /> {f}
           </li>
         ))}
       </ul>
@@ -78,10 +78,10 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
         disabled={inCart}
         className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
           inCart
-            ? "bg-primary/10 text-primary cursor-default"
+            ? "bg-accent/15 text-accent cursor-default"
             : plan.highlighted
-              ? "ig-gradient-bg text-primary-foreground hover:opacity-90 shadow-lg"
-              : "bg-foreground text-background hover:opacity-90"
+              ? "brand-gradient-bg text-primary-foreground hover:opacity-90 glow"
+              : "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
         }`}
       >
         {inCart ? (
