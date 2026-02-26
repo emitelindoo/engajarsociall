@@ -15,17 +15,28 @@ const Hero = () => {
     <section className="pt-20 pb-16 px-4" style={{ background: "var(--ig-gradient-soft)" }}>
       <div className="container mx-auto max-w-2xl text-center">
         <div className="flex justify-center gap-4 mb-8">
-          {["Seguidores", "Curtidas", "Views"].map((label) => (
-            <div key={label} className="flex flex-col items-center gap-1">
-              <div className="ig-gradient-border">
+          {[
+            { label: "Seguidores", serviceId: "seg", icon: <Users className="w-6 h-6 text-foreground" /> },
+            { label: "Curtidas", serviceId: "curt", icon: <span className="text-xl">❤️</span> },
+            { label: "Views", serviceId: "views", icon: <span className="text-xl">👁️</span> },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("select-service", { detail: item.serviceId }));
+                setTimeout(() => {
+                  document.getElementById("seletor-plano")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 100);
+              }}
+              className="flex flex-col items-center gap-1 group cursor-pointer"
+            >
+              <div className="ig-gradient-border group-hover:scale-110 transition-transform">
                 <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center">
-                  {label === "Seguidores" && <Users className="w-6 h-6 text-foreground" />}
-                  {label === "Curtidas" && <span className="text-xl">❤️</span>}
-                  {label === "Views" && <span className="text-xl">👁️</span>}
+                  {item.icon}
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground font-medium">{label}</span>
-            </div>
+              <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">{item.label}</span>
+            </button>
           ))}
         </div>
 
