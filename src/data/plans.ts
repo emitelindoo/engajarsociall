@@ -32,7 +32,6 @@ export const igSeguidores: PlanData[] = [
 ];
 
 export const igCurtidas: PlanData[] = [
-  { id: "ig-curt-100", name: "Mini", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$7,90", priceNum: 7.9, quantity: "100 Curtidas", features: curtidaFeatures },
   { id: "ig-curt-500", name: "Starter", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Curtidas", features: curtidaFeatures },
   { id: "ig-curt-1k", name: "Básico", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Curtidas", features: curtidaFeatures },
   { id: "ig-curt-2500", name: "Profissional", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Curtidas", features: curtidaFeatures, highlighted: true },
@@ -41,7 +40,6 @@ export const igCurtidas: PlanData[] = [
 ];
 
 export const igComentarios: PlanData[] = [
-  { id: "ig-com-5", name: "Mini", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$14,90", price: "R$7,90", priceNum: 7.9, quantity: "5 Comentários", features: commentFeatures },
   { id: "ig-com-10", name: "Starter", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "10 Comentários", features: commentFeatures },
   { id: "ig-com-25", name: "Básico", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "25 Comentários", features: commentFeatures },
   { id: "ig-com-50", name: "Profissional", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$89,90", price: "R$49,90", priceNum: 49.9, quantity: "50 Comentários", features: commentFeatures, highlighted: true },
@@ -49,7 +47,6 @@ export const igComentarios: PlanData[] = [
 ];
 
 export const igVisualizacoes: PlanData[] = [
-  { id: "ig-views-500", name: "Mini", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "500 Visualizações", features: viewFeatures },
   { id: "ig-views-1k", name: "Starter", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
   { id: "ig-views-5k", name: "Básico", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: viewFeatures },
   { id: "ig-views-10k", name: "Profissional", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "10.000 Visualizações", features: viewFeatures, highlighted: true },
@@ -59,7 +56,6 @@ export const igVisualizacoes: PlanData[] = [
 
 // ─── TIKTOK ───────────────────────────────────────────────
 export const ttSeguidores: PlanData[] = [
-  { id: "tt-seg-500", name: "Mini", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "500 Seguidores", features: segFeatures },
   { id: "tt-seg-1k", name: "Starter", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "1.000 Seguidores", features: segFeatures },
   { id: "tt-seg-5k", name: "Básico", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$119,90", price: "R$59,90", priceNum: 59.9, quantity: "5.000 Seguidores", features: segFeatures },
   { id: "tt-seg-10k", name: "Profissional", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$199,90", price: "R$89,90", priceNum: 89.9, quantity: "10.000 Seguidores", features: segFeatures, highlighted: true },
@@ -69,7 +65,6 @@ export const ttSeguidores: PlanData[] = [
 ];
 
 export const ttCurtidas: PlanData[] = [
-  { id: "tt-curt-100", name: "Mini", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$7,90", priceNum: 7.9, quantity: "100 Curtidas", features: curtidaFeatures },
   { id: "tt-curt-500", name: "Starter", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Curtidas", features: curtidaFeatures },
   { id: "tt-curt-1k", name: "Básico", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Curtidas", features: curtidaFeatures },
   { id: "tt-curt-5k", name: "Profissional", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$99,90", price: "R$49,90", priceNum: 49.9, quantity: "5.000 Curtidas", features: curtidaFeatures, highlighted: true },
@@ -77,7 +72,6 @@ export const ttCurtidas: PlanData[] = [
 ];
 
 export const ttComentarios: PlanData[] = [
-  { id: "tt-com-5", name: "Mini", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "5 Comentários", features: commentFeatures },
   { id: "tt-com-10", name: "Starter", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$34,90", price: "R$19,90", priceNum: 19.9, quantity: "10 Comentários", features: commentFeatures },
   { id: "tt-com-25", name: "Básico", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$59,90", price: "R$34,90", priceNum: 34.9, quantity: "25 Comentários", features: commentFeatures },
   { id: "tt-com-50", name: "Profissional", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$99,90", price: "R$54,90", priceNum: 54.9, quantity: "50 Comentários", features: commentFeatures, highlighted: true },
@@ -85,7 +79,6 @@ export const ttComentarios: PlanData[] = [
 ];
 
 export const ttVisualizacoes: PlanData[] = [
-  { id: "tt-views-500", name: "Mini", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "500 Visualizações", features: viewFeatures },
   { id: "tt-views-1k", name: "Starter", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
   { id: "tt-views-5k", name: "Básico", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: viewFeatures },
   { id: "tt-views-10k", name: "Profissional", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "10.000 Visualizações", features: viewFeatures, highlighted: true },
@@ -99,7 +92,6 @@ const ytViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem
 const ytCommentFeatures = ["Comentários positivos", "Perfis reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 
 export const ytInscritos: PlanData[] = [
-  { id: "yt-ins-100", name: "Mini", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "100 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-500", name: "Starter", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "500 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-1k", name: "Básico", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$89,90", price: "R$49,90", priceNum: 49.9, quantity: "1.000 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-2500", name: "Profissional", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$149,90", price: "R$79,90", priceNum: 79.9, quantity: "2.500 Inscritos", features: ytSegFeatures, highlighted: true },
@@ -109,7 +101,6 @@ export const ytInscritos: PlanData[] = [
 ];
 
 export const ytCurtidas: PlanData[] = [
-  { id: "yt-curt-100", name: "Mini", platform: "YouTube", serviceType: "Likes", originalPrice: "R$14,90", price: "R$7,90", priceNum: 7.9, quantity: "100 Likes", features: ytCurtFeatures },
   { id: "yt-curt-500", name: "Starter", platform: "YouTube", serviceType: "Likes", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Likes", features: ytCurtFeatures },
   { id: "yt-curt-1k", name: "Básico", platform: "YouTube", serviceType: "Likes", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Likes", features: ytCurtFeatures },
   { id: "yt-curt-2500", name: "Profissional", platform: "YouTube", serviceType: "Likes", originalPrice: "R$89,90", price: "R$44,90", priceNum: 44.9, quantity: "2.500 Likes", features: ytCurtFeatures, highlighted: true },
@@ -118,7 +109,6 @@ export const ytCurtidas: PlanData[] = [
 ];
 
 export const ytVisualizacoes: PlanData[] = [
-  { id: "yt-views-500", name: "Mini", platform: "YouTube", serviceType: "Visualizações", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "500 Visualizações", features: ytViewFeatures },
   { id: "yt-views-1k", name: "Starter", platform: "YouTube", serviceType: "Visualizações", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "1.000 Visualizações", features: ytViewFeatures },
   { id: "yt-views-5k", name: "Básico", platform: "YouTube", serviceType: "Visualizações", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "5.000 Visualizações", features: ytViewFeatures },
   { id: "yt-views-10k", name: "Profissional", platform: "YouTube", serviceType: "Visualizações", originalPrice: "R$89,90", price: "R$44,90", priceNum: 44.9, quantity: "10.000 Visualizações", features: ytViewFeatures, highlighted: true },
@@ -127,7 +117,6 @@ export const ytVisualizacoes: PlanData[] = [
 ];
 
 export const ytComentarios: PlanData[] = [
-  { id: "yt-com-5", name: "Mini", platform: "YouTube", serviceType: "Comentários", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "5 Comentários", features: ytCommentFeatures },
   { id: "yt-com-10", name: "Starter", platform: "YouTube", serviceType: "Comentários", originalPrice: "R$34,90", price: "R$19,90", priceNum: 19.9, quantity: "10 Comentários", features: ytCommentFeatures },
   { id: "yt-com-25", name: "Básico", platform: "YouTube", serviceType: "Comentários", originalPrice: "R$59,90", price: "R$34,90", priceNum: 34.9, quantity: "25 Comentários", features: ytCommentFeatures },
   { id: "yt-com-50", name: "Profissional", platform: "YouTube", serviceType: "Comentários", originalPrice: "R$99,90", price: "R$54,90", priceNum: 54.9, quantity: "50 Comentários", features: ytCommentFeatures, highlighted: true },
@@ -140,7 +129,6 @@ const kwCurtFeatures = ["Curtidas reais", "Distribuídas nos vídeos", "Entrega 
 const kwViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 export const kwSeguidores: PlanData[] = [
-  { id: "kw-seg-500", name: "Mini", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "500 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-1k", name: "Starter", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "1.000 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-2500", name: "Básico", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "2.500 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-5k", name: "Profissional", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$99,90", price: "R$49,90", priceNum: 49.9, quantity: "5.000 Seguidores", features: kwSegFeatures, highlighted: true },
@@ -149,7 +137,6 @@ export const kwSeguidores: PlanData[] = [
 ];
 
 export const kwCurtidas: PlanData[] = [
-  { id: "kw-curt-100", name: "Mini", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "100 Curtidas", features: kwCurtFeatures },
   { id: "kw-curt-500", name: "Starter", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "500 Curtidas", features: kwCurtFeatures },
   { id: "kw-curt-1k", name: "Básico", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "1.000 Curtidas", features: kwCurtFeatures },
   { id: "kw-curt-5k", name: "Profissional", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "5.000 Curtidas", features: kwCurtFeatures, highlighted: true },
@@ -157,7 +144,6 @@ export const kwCurtidas: PlanData[] = [
 ];
 
 export const kwVisualizacoes: PlanData[] = [
-  { id: "kw-views-500", name: "Mini", platform: "Kwai", serviceType: "Visualizações", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "500 Visualizações", features: kwViewFeatures },
   { id: "kw-views-1k", name: "Starter", platform: "Kwai", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: kwViewFeatures },
   { id: "kw-views-5k", name: "Básico", platform: "Kwai", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: kwViewFeatures },
   { id: "kw-views-10k", name: "Profissional", platform: "Kwai", serviceType: "Visualizações", originalPrice: "R$59,90", price: "R$29,90", priceNum: 29.9, quantity: "10.000 Visualizações", features: kwViewFeatures, highlighted: true },
@@ -171,7 +157,6 @@ const fbViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem
 const fbCommentFeatures = ["Comentários positivos", "Perfis reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 
 export const fbSeguidores: PlanData[] = [
-  { id: "fb-seg-500", name: "Mini", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-1k", name: "Starter", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-2500", name: "Básico", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-5k", name: "Profissional", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$129,90", price: "R$59,90", priceNum: 59.9, quantity: "5.000 Seguidores", features: fbSegFeatures, highlighted: true },
@@ -180,7 +165,6 @@ export const fbSeguidores: PlanData[] = [
 ];
 
 export const fbCurtidas: PlanData[] = [
-  { id: "fb-curt-100", name: "Mini", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "100 Curtidas", features: fbCurtFeatures },
   { id: "fb-curt-500", name: "Starter", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "500 Curtidas", features: fbCurtFeatures },
   { id: "fb-curt-1k", name: "Básico", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$44,90", price: "R$22,90", priceNum: 22.9, quantity: "1.000 Curtidas", features: fbCurtFeatures },
   { id: "fb-curt-2500", name: "Profissional", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Curtidas", features: fbCurtFeatures, highlighted: true },
@@ -188,7 +172,6 @@ export const fbCurtidas: PlanData[] = [
 ];
 
 export const fbVisualizacoes: PlanData[] = [
-  { id: "fb-views-500", name: "Mini", platform: "Facebook", serviceType: "Visualizações", originalPrice: "R$12,90", price: "R$5,90", priceNum: 5.9, quantity: "500 Visualizações", features: fbViewFeatures },
   { id: "fb-views-1k", name: "Starter", platform: "Facebook", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: fbViewFeatures },
   { id: "fb-views-5k", name: "Básico", platform: "Facebook", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: fbViewFeatures },
   { id: "fb-views-10k", name: "Profissional", platform: "Facebook", serviceType: "Visualizações", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "10.000 Visualizações", features: fbViewFeatures, highlighted: true },
@@ -196,7 +179,6 @@ export const fbVisualizacoes: PlanData[] = [
 ];
 
 export const fbComentarios: PlanData[] = [
-  { id: "fb-com-5", name: "Mini", platform: "Facebook", serviceType: "Comentários", originalPrice: "R$14,90", price: "R$7,90", priceNum: 7.9, quantity: "5 Comentários", features: fbCommentFeatures },
   { id: "fb-com-10", name: "Starter", platform: "Facebook", serviceType: "Comentários", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "10 Comentários", features: fbCommentFeatures },
   { id: "fb-com-25", name: "Básico", platform: "Facebook", serviceType: "Comentários", originalPrice: "R$54,90", price: "R$29,90", priceNum: 29.9, quantity: "25 Comentários", features: fbCommentFeatures },
   { id: "fb-com-50", name: "Profissional", platform: "Facebook", serviceType: "Comentários", originalPrice: "R$94,90", price: "R$49,90", priceNum: 49.9, quantity: "50 Comentários", features: fbCommentFeatures, highlighted: true },
