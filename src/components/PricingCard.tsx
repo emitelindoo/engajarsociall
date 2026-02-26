@@ -1,16 +1,30 @@
-import { Check, Flame, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Check, Flame, Sparkles, ShoppingCart, CheckCircle2 } from "lucide-react";
 import { fbEvent } from "@/lib/fbpixel";
 import { PlanData } from "@/data/plans";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 const PricingCard = ({ plan }: { plan: PlanData }) => {
-  const navigate = useNavigate();
+  const { items, addItem } = useCart();
+  const inCart = items.some((i) => i.plan.id === plan.id);
 
   const discount = Math.round(
     ((parseFloat(plan.originalPrice.replace(/[R$.\s]/g, "").replace(",", ".")) - plan.priceNum) /
       parseFloat(plan.originalPrice.replace(/[R$.\s]/g, "").replace(",", "."))) *
       100
   );
+
+  const handleAdd = () => {
+    if (inCart) return;
+    fbEvent("AddToCart", {
+      content_name: `${plan.serviceType} - ${plan.name}`,
+      content_category: plan.platform,
+      value: plan.priceNum,
+      currency: "BRL",
+    });
+    addItem(plan);
+    toast.success(`${plan.quantity} adicionado ao carrinho!`);
+  };
 
   return (
     <div
@@ -60,22 +74,21 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
       </ul>
 
       <button
-        onClick={() => {
-          fbEvent("AddToCart", {
-            content_name: `${plan.serviceType} - ${plan.name}`,
-            content_category: plan.platform,
-            value: plan.priceNum,
-            currency: "BRL",
-          });
-          navigate(`/checkout/${plan.id}`);
-        }}
-        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all ${
-          plan.highlighted
-            ? "ig-gradient-bg text-primary-foreground hover:opacity-90 shadow-lg"
-            : "bg-foreground text-background hover:opacity-90"
+        onClick={handleAdd}
+        disabled={inCart}
+        className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+          inCart
+            ? "bg-primary/10 text-primary cursor-default"
+            : plan.highlighted
+              ? "ig-gradient-bg text-primary-foreground hover:opacity-90 shadow-lg"
+              : "bg-foreground text-background hover:opacity-90"
         }`}
       >
-        Comprar Agora
+        {inCart ? (
+          <><CheckCircle2 className="w-4 h-4" /> No Carrinho</>
+        ) : (
+          <><ShoppingCart className="w-4 h-4" /> Adicionar ao Carrinho</>
+        )}
       </button>
     </div>
   );

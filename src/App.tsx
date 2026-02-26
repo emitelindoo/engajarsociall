@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import Checkout from "./pages/Checkout";
 import ThankYou from "./pages/ThankYou";
@@ -20,16 +21,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ScrollToTop />
-        <PurchaseNotifications />
-        <ScrollToTopButton />
-        <SupportChat />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/checkout/:planId" element={<Checkout />} />
-          <Route path="/obrigado" element={<ThankYou />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <CartProvider>
+          <ScrollToTop />
+          <PurchaseNotifications />
+          <ScrollToTopButton />
+          <SupportChat />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/:planId" element={<Checkout />} />
+            <Route path="/obrigado" element={<ThankYou />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </CartProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
