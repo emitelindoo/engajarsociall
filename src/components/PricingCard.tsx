@@ -24,7 +24,6 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
         </div>
       )}
 
-      {/* Discount badge */}
       <div className="absolute top-3 right-3">
         <span className="bg-destructive/10 text-destructive text-[10px] font-bold px-2 py-1 rounded-lg">
           -{discount}% OFF
@@ -34,17 +33,15 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
       <div className="mb-4">
         <h3 className="font-bold text-foreground text-lg">{plan.name}</h3>
         <span className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">
-          {plan.platform}
+          {plan.serviceType} • {plan.platform}
         </span>
       </div>
 
-      {/* Followers count - prominent */}
       <div className="mb-4 flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-primary" />
-        <span className="text-base font-bold text-foreground">{plan.followers}</span>
+        <span className="text-base font-bold text-foreground">{plan.quantity}</span>
       </div>
 
-      {/* Price */}
       <div className="mb-5 p-3 rounded-xl bg-muted/50">
         <span className="text-sm line-through mr-2" style={{ color: "hsl(var(--price-old))" }}>
           {plan.originalPrice}
@@ -65,7 +62,7 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
       <button
         onClick={() => {
           fbEvent("AddToCart", {
-            content_name: plan.name,
+            content_name: `${plan.serviceType} - ${plan.name}`,
             content_category: plan.platform,
             value: plan.priceNum,
             currency: "BRL",

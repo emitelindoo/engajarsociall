@@ -163,7 +163,7 @@ const Checkout = () => {
         .map((b) => b.title);
 
       const items = [
-        `${plan.name} - ${plan.followers} (${plan.platform})`,
+        `${plan.name} - ${plan.quantity} (${plan.platform})`,
         ...selectedExtras,
       ];
 
@@ -248,7 +248,7 @@ const Checkout = () => {
             </div>
             <div className="flex items-center gap-2 text-sm text-foreground">
               <ShieldCheck className="w-4 h-4 text-primary" />
-              <span className="font-semibold">{plan.followers}</span>
+              <span className="font-semibold">{plan.quantity}</span>
             </div>
           </div>
 
