@@ -93,6 +93,18 @@ const Checkout = () => {
     }
   }, [plan]);
 
+  // Send Advanced Matching data as soon as user fills form fields
+  useEffect(() => {
+    if (!customerName.trim() && !customerEmail.trim() && !username.trim()) return;
+    const nameParts = customerName.trim().split(/\s+/);
+    fbSetUserData({
+      em: customerEmail.trim().toLowerCase() || undefined,
+      fn: nameParts[0]?.toLowerCase() || undefined,
+      ln: nameParts.length > 1 ? nameParts[nameParts.length - 1].toLowerCase() : undefined,
+      external_id: username.replace("@", "").toLowerCase() || undefined,
+    });
+  }, [customerName, customerEmail, username]);
+
   const total = useMemo(() => {
     if (!plan) return 0;
     const bumpsTotal = orderBumps
