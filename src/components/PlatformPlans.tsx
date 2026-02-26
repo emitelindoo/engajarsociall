@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
 import {
   igSeguidores, igCurtidas, igComentarios, igVisualizacoes,
@@ -46,6 +46,17 @@ const PlatformPlans = () => {
   const plans = currentService.plans;
   const currentPlan = plans[selectedPlanIndex] || plans[0];
   const inCart = items.some((i) => i.plan.id === currentPlan.id);
+
+  // Listen for hero circle clicks
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const serviceId = (e as CustomEvent).detail;
+      setActiveService(serviceId);
+      setSelectedPlanIndex(0);
+    };
+    window.addEventListener("select-service", handler);
+    return () => window.removeEventListener("select-service", handler);
+  }, []);
 
   const handlePlatformChange = (id: string) => {
     setActivePlatform(id);
