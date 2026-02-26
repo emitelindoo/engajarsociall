@@ -1,8 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
-import InstagramPlans from "@/components/InstagramPlans";
-import TiktokPlans from "@/components/TiktokPlans";
+import PlatformPlans from "@/components/PlatformPlans";
 import Features from "@/components/Features";
 import Testimonials from "@/components/Testimonials";
 import FAQ from "@/components/FAQ";
@@ -14,8 +13,7 @@ const Index = () => (
     <Navbar />
     <Hero />
     <HowItWorks />
-    <InstagramPlans />
-    <TiktokPlans />
+    <PlatformPlans />
     <Features />
     <Testimonials />
     <FAQ />
