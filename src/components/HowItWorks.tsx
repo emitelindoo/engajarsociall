@@ -1,19 +1,19 @@
 import { Package, UserCheck, Rocket } from "lucide-react";
 
 const steps = [
-  { icon: Package, num: "1", title: "Escolha seu pacote", desc: "Selecione o pacote ideal para o seu perfil e objetivos." },
-  { icon: UserCheck, num: "2", title: "Informe seu @", desc: "Digite seu usuário. Nunca pedimos sua senha!" },
-  { icon: Rocket, num: "3", title: "Receba e decole!", desc: "Seus seguidores começam a chegar em minutos. 🚀" },
+  { icon: Package, num: "1", title: "Escolha seu pacote", desc: "Seguidores, curtidas, views ou comentários. Adicione ao carrinho." },
+  { icon: UserCheck, num: "2", title: "Informe o perfil ou link", desc: "@ do perfil para seguidores, link da publicação para curtidas e views." },
+  { icon: Rocket, num: "3", title: "Receba e decole!", desc: "Pague via PIX e receba tudo em minutos. 🚀" },
 ];
 
 const HowItWorks = () => (
-  <section className="py-16 px-4 bg-background">
+  <section className="py-20 px-4 bg-background">
     <div className="container mx-auto max-w-3xl">
-      <h2 className="text-2xl font-bold text-center text-foreground mb-10">Como funciona</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-12 tracking-tight">Como funciona</h2>
       <div className="grid md:grid-cols-3 gap-6">
         {steps.map((s) => (
-          <div key={s.num} className="bg-card rounded-2xl p-6 border border-border card-shadow text-center">
-            <div className="w-10 h-10 rounded-full ig-gradient-bg text-primary-foreground flex items-center justify-center mx-auto mb-4 text-sm font-bold">
+          <div key={s.num} className="bg-card rounded-2xl p-6 border border-border card-shadow text-center group hover:border-primary/30 transition-colors">
+            <div className="w-12 h-12 rounded-xl brand-gradient-bg text-primary-foreground flex items-center justify-center mx-auto mb-4 text-sm font-bold">
               {s.num}
             </div>
             <h3 className="font-bold text-foreground mb-2">{s.title}</h3>

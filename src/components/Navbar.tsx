@@ -1,4 +1,4 @@
-import { Instagram, Menu, X } from "lucide-react";
+import { Menu, X, Rocket } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CartDrawer from "./CartDrawer";
@@ -16,15 +16,13 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
       <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-        <button onClick={() => navigate("/")} className="flex items-center gap-2">
-          <div className="ig-gradient-border">
-            <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center">
-              <Instagram className="w-4 h-4 text-foreground" />
-            </div>
+        <button onClick={() => navigate("/")} className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg brand-gradient-bg flex items-center justify-center">
+            <Rocket className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-foreground text-base">Engajar Social</span>
+          <span className="font-bold text-foreground text-base tracking-tight">Engajar Social</span>
         </button>
 
         <div className="hidden md:flex items-center gap-6 text-sm">
@@ -33,7 +31,7 @@ const Navbar = () => {
           <button onClick={() => scrollTo("depoimentos")} className="text-muted-foreground hover:text-foreground transition-colors font-medium">Depoimentos</button>
           <button onClick={() => scrollTo("faq")} className="text-muted-foreground hover:text-foreground transition-colors font-medium">FAQ</button>
           <CartDrawer />
-          <button onClick={() => scrollTo("precos")} className="ig-gradient-bg text-primary-foreground px-5 py-2 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity">
+          <button onClick={() => scrollTo("precos")} className="brand-gradient-bg text-primary-foreground px-5 py-2 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity">
             Começar Agora
           </button>
         </div>
