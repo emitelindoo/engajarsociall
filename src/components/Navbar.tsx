@@ -1,6 +1,7 @@
 import { Instagram, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CartDrawer from "./CartDrawer";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -31,14 +32,18 @@ const Navbar = () => {
           <button onClick={() => scrollTo("recursos")} className="text-muted-foreground hover:text-foreground transition-colors font-medium">Recursos</button>
           <button onClick={() => scrollTo("depoimentos")} className="text-muted-foreground hover:text-foreground transition-colors font-medium">Depoimentos</button>
           <button onClick={() => scrollTo("faq")} className="text-muted-foreground hover:text-foreground transition-colors font-medium">FAQ</button>
+          <CartDrawer />
           <button onClick={() => scrollTo("precos")} className="ig-gradient-bg text-primary-foreground px-5 py-2 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity">
             Começar Agora
           </button>
         </div>
 
-        <button className="md:hidden" onClick={() => setOpen(!open)}>
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <CartDrawer />
+          <button onClick={() => setOpen(!open)}>
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (
