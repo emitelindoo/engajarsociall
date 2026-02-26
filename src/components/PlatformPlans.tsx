@@ -139,12 +139,12 @@ const PlatformPlans = () => {
         </p>
 
         {/* Platform Tabs */}
-        <div className="flex justify-center gap-3 mb-6">
+        <div className="flex justify-start md:justify-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
           {platforms.map((platform) => (
             <button
               key={platform.id}
               onClick={() => handlePlatformChange(platform.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap flex-shrink-0 ${
                 activePlatform === platform.id
                   ? `bg-gradient-to-r ${platform.gradient} text-white shadow-lg`
                   : "bg-card border border-border text-foreground hover:border-primary/30"
