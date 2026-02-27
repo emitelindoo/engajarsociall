@@ -146,7 +146,10 @@ const SupportChat = () => {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-20 right-4 z-50 w-[340px] max-h-[480px] bg-card border border-border rounded-2xl card-shadow flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300">
+        <>
+        {/* Mobile backdrop */}
+        <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden" onClick={() => setOpen(false)} />
+        <div className="fixed bottom-20 right-4 left-4 md:left-auto z-50 md:w-[340px] max-h-[60vh] md:max-h-[480px] bg-card border border-border rounded-2xl card-shadow flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300">
           {/* Header */}
           <div className="ig-gradient-bg px-4 py-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
@@ -235,6 +238,7 @@ const SupportChat = () => {
             </button>
           </div>
         </div>
+        </>
       )}
     </>
   );
