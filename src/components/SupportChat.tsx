@@ -20,6 +20,9 @@ interface Message {
 const platformButtons: ChatButton[] = [
   { label: "📸 Planos Instagram", platform: "Instagram", action: "scroll" },
   { label: "🎵 Planos TikTok", platform: "TikTok", action: "scroll" },
+  { label: "▶️ Planos YouTube", platform: "YouTube", action: "scroll" },
+  { label: "🟠 Planos Kwai", platform: "Kwai", action: "scroll" },
+  { label: "📘 Planos Facebook", platform: "Facebook", action: "scroll" },
 ];
 
 const quickReplies = [
@@ -63,6 +66,15 @@ const getAutoReply = (input: string): { text: string; buttons?: ChatButton[] } =
   if (lower.includes("tiktok") || lower.includes("tik tok") || lower.includes("tt")) {
     return { text: "Temos planos incríveis para TikTok! 🎵 Clique abaixo para conferir: 👇", buttons: [platformButtons[1]] };
   }
+  if (lower.includes("youtube") || lower.includes("yt") || lower.includes("inscrit")) {
+    return { text: "Temos planos incríveis para YouTube! ▶️ Clique abaixo para conferir: 👇", buttons: [platformButtons[2]] };
+  }
+  if (lower.includes("kwai")) {
+    return { text: "Temos planos incríveis para Kwai! 🟠 Clique abaixo para conferir: 👇", buttons: [platformButtons[3]] };
+  }
+  if (lower.includes("facebook") || lower.includes("face") || lower.includes("fb")) {
+    return { text: "Temos planos incríveis para Facebook! 📘 Clique abaixo para conferir: 👇", buttons: [platformButtons[4]] };
+  }
   if (lower.includes("funciona") || lower.includes("como")) {
     return { text: "É super simples! 📱 1) Escolha seu plano, 2) Informe seu @, 3) Pague via PIX, 4) Pronto! Os seguidores começam a chegar rapidinho.", buttons: nav };
   }
@@ -101,15 +113,28 @@ const SupportChat = () => {
 
   const handleButtonClick = (btn: ChatButton) => {
     if (btn.action === "scroll") {
-      // Navigate to home and scroll to plans
-      const sectionId = btn.platform === "Instagram" ? "instagram-plans" : "tiktok-plans";
+      const scrollToPlans = () => {
+        document.getElementById("precos")?.scrollIntoView({ behavior: "smooth" });
+        // Dispatch platform selection event
+        const platformMap: Record<string, string> = {
+          Instagram: "instagram",
+          TikTok: "tiktok",
+          YouTube: "youtube",
+          Kwai: "kwai",
+          Facebook: "facebook",
+        };
+        const platformId = platformMap[btn.platform];
+        if (platformId) {
+          // Click the platform tab programmatically
+          const event = new CustomEvent("select-platform", { detail: platformId });
+          window.dispatchEvent(event);
+        }
+      };
       if (window.location.pathname !== "/") {
         navigate("/");
-        setTimeout(() => {
-          document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
-        }, 500);
+        setTimeout(scrollToPlans, 500);
       } else {
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+        scrollToPlans();
       }
       setOpen(false);
     } else if (btn.planId) {

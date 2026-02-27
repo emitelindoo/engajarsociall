@@ -80,8 +80,16 @@ const PlatformPlans = () => {
       setActiveService(serviceId);
       setSelectedPlanIndex(0);
     };
+    const platformHandler = (e: Event) => {
+      const platformId = (e as CustomEvent).detail;
+      handlePlatformChange(platformId);
+    };
     window.addEventListener("select-service", handler);
-    return () => window.removeEventListener("select-service", handler);
+    window.addEventListener("select-platform", platformHandler);
+    return () => {
+      window.removeEventListener("select-service", handler);
+      window.removeEventListener("select-platform", platformHandler);
+    };
   }, []);
 
   const handlePlatformChange = (id: string) => {
