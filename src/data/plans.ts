@@ -56,6 +56,7 @@ export const igVisualizacoes: PlanData[] = [
 
 // ─── TIKTOK ───────────────────────────────────────────────
 export const ttSeguidores: PlanData[] = [
+  { id: "tt-seg-500", name: "Iniciante", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "500 Seguidores", features: segFeatures },
   { id: "tt-seg-1k", name: "Starter", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "1.000 Seguidores", features: segFeatures },
   { id: "tt-seg-5k", name: "Básico", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$119,90", price: "R$59,90", priceNum: 59.9, quantity: "5.000 Seguidores", features: segFeatures },
   { id: "tt-seg-10k", name: "Profissional", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$199,90", price: "R$89,90", priceNum: 89.9, quantity: "10.000 Seguidores", features: segFeatures, highlighted: true },
