@@ -32,6 +32,7 @@ export const igSeguidores: PlanData[] = [
 ];
 
 export const igCurtidas: PlanData[] = [
+  { id: "ig-curt-100", name: "Iniciante", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$6,90", priceNum: 6.9, quantity: "100 Curtidas", features: curtidaFeatures },
   { id: "ig-curt-500", name: "Starter", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Curtidas", features: curtidaFeatures },
   { id: "ig-curt-1k", name: "Básico", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Curtidas", features: curtidaFeatures },
   { id: "ig-curt-2500", name: "Profissional", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Curtidas", features: curtidaFeatures, highlighted: true },
@@ -66,6 +67,7 @@ export const ttSeguidores: PlanData[] = [
 ];
 
 export const ttCurtidas: PlanData[] = [
+  { id: "tt-curt-100", name: "Iniciante", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$6,90", priceNum: 6.9, quantity: "100 Curtidas", features: curtidaFeatures },
   { id: "tt-curt-500", name: "Starter", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Curtidas", features: curtidaFeatures },
   { id: "tt-curt-1k", name: "Básico", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Curtidas", features: curtidaFeatures },
   { id: "tt-curt-5k", name: "Profissional", platform: "TikTok", serviceType: "Curtidas", originalPrice: "R$99,90", price: "R$49,90", priceNum: 49.9, quantity: "5.000 Curtidas", features: curtidaFeatures, highlighted: true },
@@ -102,6 +104,7 @@ export const ytInscritos: PlanData[] = [
 ];
 
 export const ytCurtidas: PlanData[] = [
+  { id: "yt-curt-100", name: "Iniciante", platform: "YouTube", serviceType: "Likes", originalPrice: "R$14,90", price: "R$6,90", priceNum: 6.9, quantity: "100 Likes", features: ytCurtFeatures },
   { id: "yt-curt-500", name: "Starter", platform: "YouTube", serviceType: "Likes", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "500 Likes", features: ytCurtFeatures },
   { id: "yt-curt-1k", name: "Básico", platform: "YouTube", serviceType: "Likes", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Likes", features: ytCurtFeatures },
   { id: "yt-curt-2500", name: "Profissional", platform: "YouTube", serviceType: "Likes", originalPrice: "R$89,90", price: "R$44,90", priceNum: 44.9, quantity: "2.500 Likes", features: ytCurtFeatures, highlighted: true },
@@ -138,6 +141,7 @@ export const kwSeguidores: PlanData[] = [
 ];
 
 export const kwCurtidas: PlanData[] = [
+  { id: "kw-curt-100", name: "Iniciante", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$5,90", priceNum: 5.9, quantity: "100 Curtidas", features: kwCurtFeatures },
   { id: "kw-curt-500", name: "Starter", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "500 Curtidas", features: kwCurtFeatures },
   { id: "kw-curt-1k", name: "Básico", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "1.000 Curtidas", features: kwCurtFeatures },
   { id: "kw-curt-5k", name: "Profissional", platform: "Kwai", serviceType: "Curtidas", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "5.000 Curtidas", features: kwCurtFeatures, highlighted: true },
@@ -166,6 +170,7 @@ export const fbSeguidores: PlanData[] = [
 ];
 
 export const fbCurtidas: PlanData[] = [
+  { id: "fb-curt-100", name: "Iniciante", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$5,90", priceNum: 5.9, quantity: "100 Curtidas", features: fbCurtFeatures },
   { id: "fb-curt-500", name: "Starter", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "500 Curtidas", features: fbCurtFeatures },
   { id: "fb-curt-1k", name: "Básico", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$44,90", price: "R$22,90", priceNum: 22.9, quantity: "1.000 Curtidas", features: fbCurtFeatures },
   { id: "fb-curt-2500", name: "Profissional", platform: "Facebook", serviceType: "Curtidas", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Curtidas", features: fbCurtFeatures, highlighted: true },
