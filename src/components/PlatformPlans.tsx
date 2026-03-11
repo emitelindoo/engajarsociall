@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
-import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
+import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck, BadgeCheck } from "lucide-react";
 import {
   igSeguidores, igCurtidas, igComentarios, igVisualizacoes,
   ttSeguidores, ttCurtidas, ttComentarios, ttVisualizacoes,
   ytInscritos, ytCurtidas, ytVisualizacoes, ytComentarios,
   kwSeguidores, kwCurtidas, kwVisualizacoes,
   fbSeguidores, fbCurtidas, fbVisualizacoes, fbComentarios,
+  seloVerificacao,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
