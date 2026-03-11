@@ -166,6 +166,7 @@ const fbViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem
 const fbCommentFeatures = ["Comentários positivos", "Perfis reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 
 export const fbSeguidores: PlanData[] = [
+  { id: "fb-seg-100", name: "Teste", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "100 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-1k", name: "Starter", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-2500", name: "Básico", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-5k", name: "Profissional", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$129,90", price: "R$59,90", priceNum: 59.9, quantity: "5.000 Seguidores", features: fbSegFeatures, highlighted: true },
