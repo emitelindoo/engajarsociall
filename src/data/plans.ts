@@ -136,6 +136,7 @@ const kwCurtFeatures = ["Curtidas reais", "Distribuídas nos vídeos", "Entrega 
 const kwViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 export const kwSeguidores: PlanData[] = [
+  { id: "kw-seg-100", name: "Teste", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "100 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-1k", name: "Starter", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "1.000 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-2500", name: "Básico", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "2.500 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-5k", name: "Profissional", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$99,90", price: "R$49,90", priceNum: 49.9, quantity: "5.000 Seguidores", features: kwSegFeatures, highlighted: true },
