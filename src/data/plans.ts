@@ -191,6 +191,15 @@ export const fbComentarios: PlanData[] = [
   { id: "fb-com-100", name: "Elite", platform: "Facebook", serviceType: "Comentários", originalPrice: "R$159,90", price: "R$84,90", priceNum: 84.9, quantity: "100 Comentários", features: fbCommentFeatures },
 ];
 
+// ─── SELO DE VERIFICAÇÃO ──────────────────────────────────
+const seloFeatures = ["Selo azul verificado", "Ativação em até 24h", "Suporte prioritário", "Sem senha necessária", "Garantia de permanência"];
+
+export const seloVerificacao: PlanData[] = [
+  { id: "selo-mensal", name: "Mensal", platform: "Verificação", serviceType: "Selo Verificado", originalPrice: "R$59,90", price: "R$29,90", priceNum: 29.9, quantity: "Selo Mensal", features: seloFeatures },
+  { id: "selo-trimestral", name: "Trimestral", platform: "Verificação", serviceType: "Selo Verificado", originalPrice: "R$99,90", price: "R$49,90", priceNum: 49.9, quantity: "Selo Trimestral", features: [...seloFeatures, "Economia de 44%"], highlighted: true },
+  { id: "selo-anual", name: "Anual", platform: "Verificação", serviceType: "Selo Verificado", originalPrice: "R$179,90", price: "R$84,90", priceNum: 84.9, quantity: "Selo Anual", features: [...seloFeatures, "Economia de 52%", "Melhor custo-benefício"] },
+];
+
 // ─── HELPERS ──────────────────────────────────────────────
 const allPlans: PlanData[] = [
   ...igSeguidores, ...igCurtidas, ...igComentarios, ...igVisualizacoes,
@@ -198,6 +207,7 @@ const allPlans: PlanData[] = [
   ...ytInscritos, ...ytCurtidas, ...ytVisualizacoes, ...ytComentarios,
   ...kwSeguidores, ...kwCurtidas, ...kwVisualizacoes,
   ...fbSeguidores, ...fbCurtidas, ...fbVisualizacoes, ...fbComentarios,
+  ...seloVerificacao,
 ];
 
 // backward compat exports
