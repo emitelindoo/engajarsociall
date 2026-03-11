@@ -54,12 +54,17 @@ const fbServices: ServiceConfig[] = [
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: fbComentarios },
 ];
 
+const seloServices: ServiceConfig[] = [
+  { id: "selo", label: "Selo Verificado", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
+];
+
 const platforms = [
   { id: "instagram", label: "Instagram", services: igServices, gradient: "from-[hsl(43,96%,56%)] via-[hsl(350,96%,55%)] to-[hsl(316,73%,52%)]" },
   { id: "tiktok", label: "TikTok", services: ttServices, gradient: "from-[hsl(180,80%,50%)] via-[hsl(340,80%,55%)] to-[hsl(0,0%,15%)]" },
   { id: "youtube", label: "YouTube", services: ytServices, gradient: "from-[hsl(0,100%,50%)] to-[hsl(0,80%,40%)]" },
   { id: "kwai", label: "Kwai", services: kwServices, gradient: "from-[hsl(30,100%,50%)] to-[hsl(15,100%,45%)]" },
   { id: "facebook", label: "Facebook", services: fbServices, gradient: "from-[hsl(220,80%,50%)] to-[hsl(220,70%,40%)]" },
+  { id: "selo", label: "Selo ✓", services: seloServices, gradient: "from-[hsl(210,90%,50%)] to-[hsl(260,80%,55%)]" },
 ];
 
 const PlatformPlans = () => {
