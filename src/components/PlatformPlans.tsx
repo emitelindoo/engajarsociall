@@ -100,7 +100,8 @@ const PlatformPlans = () => {
 
   const handlePlatformChange = (id: string) => {
     setActivePlatform(id);
-    setActiveService("seg");
+    const platform = platforms.find((p) => p.id === id)!;
+    setActiveService(platform.services[0].id);
     setSelectedPlanIndex(0);
   };
 
