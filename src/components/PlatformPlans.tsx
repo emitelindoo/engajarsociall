@@ -25,6 +25,7 @@ const igServices: ServiceConfig[] = [
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: igCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: igVisualizacoes },
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: igComentarios },
+  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const ttServices: ServiceConfig[] = [
@@ -32,6 +33,7 @@ const ttServices: ServiceConfig[] = [
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: ttCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ttVisualizacoes },
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ttComentarios },
+  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const ytServices: ServiceConfig[] = [
@@ -39,12 +41,14 @@ const ytServices: ServiceConfig[] = [
   { id: "curt", label: "Likes", icon: <Heart className="w-5 h-5" />, plans: ytCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ytVisualizacoes },
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ytComentarios },
+  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const kwServices: ServiceConfig[] = [
   { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: kwSeguidores },
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: kwCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: kwVisualizacoes },
+  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const fbServices: ServiceConfig[] = [
@@ -52,10 +56,7 @@ const fbServices: ServiceConfig[] = [
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: fbCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: fbVisualizacoes },
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: fbComentarios },
-];
-
-const seloServices: ServiceConfig[] = [
-  { id: "selo", label: "Selo Verificado", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
+  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const platforms = [
@@ -64,7 +65,6 @@ const platforms = [
   { id: "youtube", label: "YouTube", services: ytServices, gradient: "from-[hsl(0,100%,50%)] to-[hsl(0,80%,40%)]" },
   { id: "kwai", label: "Kwai", services: kwServices, gradient: "from-[hsl(30,100%,50%)] to-[hsl(15,100%,45%)]" },
   { id: "facebook", label: "Facebook", services: fbServices, gradient: "from-[hsl(220,80%,50%)] to-[hsl(220,70%,40%)]" },
-  { id: "selo", label: "Selo ✓", services: seloServices, gradient: "from-[hsl(210,90%,50%)] to-[hsl(260,80%,55%)]" },
 ];
 
 const PlatformPlans = () => {
