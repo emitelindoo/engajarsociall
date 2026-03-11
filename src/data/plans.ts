@@ -21,6 +21,7 @@ const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", 
 
 // ─── INSTAGRAM ────────────────────────────────────────────
 export const igSeguidores: PlanData[] = [
+  { id: "ig-seg-100", name: "Teste", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "100 Seguidores", features: segFeatures },
   { id: "ig-seg-500", name: "Starter", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "500 Seguidores", features: segFeatures },
   { id: "ig-seg-1k", name: "Básico", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "1.000 Seguidores", features: segFeatures },
   { id: "ig-seg-2500", name: "Intermediário", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Seguidores", features: segFeatures },
@@ -57,6 +58,7 @@ export const igVisualizacoes: PlanData[] = [
 
 // ─── TIKTOK ───────────────────────────────────────────────
 export const ttSeguidores: PlanData[] = [
+  { id: "tt-seg-100", name: "Teste", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "100 Seguidores", features: segFeatures },
   { id: "tt-seg-500", name: "Iniciante", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "500 Seguidores", features: segFeatures },
   { id: "tt-seg-1k", name: "Starter", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "1.000 Seguidores", features: segFeatures },
   { id: "tt-seg-5k", name: "Básico", platform: "TikTok", serviceType: "Seguidores", originalPrice: "R$119,90", price: "R$59,90", priceNum: 59.9, quantity: "5.000 Seguidores", features: segFeatures },
@@ -95,6 +97,7 @@ const ytViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem
 const ytCommentFeatures = ["Comentários positivos", "Perfis reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 
 export const ytInscritos: PlanData[] = [
+  { id: "yt-ins-100", name: "Teste", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "100 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-500", name: "Starter", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "500 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-1k", name: "Básico", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$89,90", price: "R$49,90", priceNum: 49.9, quantity: "1.000 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-2500", name: "Profissional", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$149,90", price: "R$79,90", priceNum: 79.9, quantity: "2.500 Inscritos", features: ytSegFeatures, highlighted: true },
@@ -133,6 +136,7 @@ const kwCurtFeatures = ["Curtidas reais", "Distribuídas nos vídeos", "Entrega 
 const kwViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 export const kwSeguidores: PlanData[] = [
+  { id: "kw-seg-100", name: "Teste", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "100 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-1k", name: "Starter", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "1.000 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-2500", name: "Básico", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "2.500 Seguidores", features: kwSegFeatures },
   { id: "kw-seg-5k", name: "Profissional", platform: "Kwai", serviceType: "Seguidores", originalPrice: "R$99,90", price: "R$49,90", priceNum: 49.9, quantity: "5.000 Seguidores", features: kwSegFeatures, highlighted: true },
@@ -162,6 +166,7 @@ const fbViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem
 const fbCommentFeatures = ["Comentários positivos", "Perfis reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 
 export const fbSeguidores: PlanData[] = [
+  { id: "fb-seg-100", name: "Teste", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "100 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-1k", name: "Starter", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$24,90", priceNum: 24.9, quantity: "1.000 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-2500", name: "Básico", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Seguidores", features: fbSegFeatures },
   { id: "fb-seg-5k", name: "Profissional", platform: "Facebook", serviceType: "Seguidores", originalPrice: "R$129,90", price: "R$59,90", priceNum: 59.9, quantity: "5.000 Seguidores", features: fbSegFeatures, highlighted: true },
