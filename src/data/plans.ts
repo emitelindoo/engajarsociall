@@ -97,6 +97,7 @@ const ytViewFeatures = ["Views reais", "Entrega instantânea", "Sem queda", "Sem
 const ytCommentFeatures = ["Comentários positivos", "Perfis reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 
 export const ytInscritos: PlanData[] = [
+  { id: "yt-ins-100", name: "Teste", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$24,90", price: "R$12,90", priceNum: 12.9, quantity: "100 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-500", name: "Starter", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "500 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-1k", name: "Básico", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$89,90", price: "R$49,90", priceNum: 49.9, quantity: "1.000 Inscritos", features: ytSegFeatures },
   { id: "yt-ins-2500", name: "Profissional", platform: "YouTube", serviceType: "Inscritos", originalPrice: "R$149,90", price: "R$79,90", priceNum: 79.9, quantity: "2.500 Inscritos", features: ytSegFeatures, highlighted: true },
