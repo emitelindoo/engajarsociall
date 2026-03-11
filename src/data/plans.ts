@@ -21,6 +21,7 @@ const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", 
 
 // ─── INSTAGRAM ────────────────────────────────────────────
 export const igSeguidores: PlanData[] = [
+  { id: "ig-seg-100", name: "Teste", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "100 Seguidores", features: segFeatures },
   { id: "ig-seg-500", name: "Starter", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "500 Seguidores", features: segFeatures },
   { id: "ig-seg-1k", name: "Básico", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "1.000 Seguidores", features: segFeatures },
   { id: "ig-seg-2500", name: "Intermediário", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$79,90", price: "R$39,90", priceNum: 39.9, quantity: "2.500 Seguidores", features: segFeatures },
