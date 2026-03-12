@@ -112,7 +112,21 @@ const Checkout = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        let backendMessage: string | null = null;
+
+        const errorWithContext = error as { context?: Response; message?: string };
+        if (errorWithContext.context) {
+          try {
+            const errorBody = await errorWithContext.context.json();
+            backendMessage = errorBody?.error || null;
+          } catch {
+            backendMessage = null;
+          }
+        }
+
+        throw new Error(backendMessage || errorWithContext.message || "Erro ao gerar PIX");
+      }
       if (data?.success === false) throw new Error(data.error || "Erro ao gerar PIX");
 
       if (data?.pix_code) {
@@ -121,7 +135,7 @@ const Checkout = () => {
         setTransactionId(data.transaction_id || null);
         toast.success("PIX gerado com sucesso!");
       } else {
-        throw new Error("Erro ao gerar PIX");
+        throw new Error(data?.error || "Erro ao gerar PIX");
       }
     } catch (err: any) {
       console.error("Payment error:", err);
