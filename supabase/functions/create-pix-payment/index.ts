@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const NIVUS_API_URL = "https://api.nivuspay.com.br/functions/v1";
+const INVICTUS_API_URL = "https://api.invictuspay.app.br/api/public/v1";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -14,11 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    const secretKey = Deno.env.get('NIVUS_PAY_API_KEY');
-    if (!secretKey) throw new Error('NIVUS_PAY_API_KEY is not configured');
-
-    const companyId = Deno.env.get('NIVUS_PAY_COMPANY_ID');
-    if (!companyId) throw new Error('NIVUS_PAY_COMPANY_ID is not configured');
+    const apiToken = Deno.env.get('INVICTUS_PAY_API_TOKEN');
+    if (!apiToken) throw new Error('INVICTUS_PAY_API_TOKEN is not configured');
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -33,62 +30,59 @@ serve(async (req) => {
       });
     }
 
-    const credentials = btoa(`${secretKey}:${companyId}`);
-
     const body = {
-      amount: Math.round(amount * 100),
-      paymentMethod: "PIX",
+      api_token: apiToken,
+      amount: Math.round(amount * 100), // valores em centavos
+      payment_method: "pix",
       customer: {
         name: customer_name || "Cliente",
         email: customer_email || "cliente@email.com",
         phone: (customer_phone || "11999999999").replace(/\D/g, ""),
-        document: {
-          number: (customer_cpf || "00000000000").replace(/\D/g, ""),
-          type: "CPF",
-        },
+        document: (customer_cpf || "00000000000").replace(/\D/g, ""),
       },
       items: [
         {
           title: description || "Engajar Social",
-          unitPrice: Math.round(amount * 100),
+          unit_price: Math.round(amount * 100),
           quantity: 1,
-          tangible: false,
         },
       ],
     };
 
-    console.log("Sending to Nivus Pay:", JSON.stringify(body));
+    console.log("Sending to InvictusPay:", JSON.stringify(body));
 
-    const response = await fetch(`${NIVUS_API_URL}/transactions`, {
+    const response = await fetch(`${INVICTUS_API_URL}/transactions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${credentials}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
     });
 
     const data = await response.json();
-    console.log("Nivus Pay response:", JSON.stringify(data));
+    console.log("InvictusPay response:", JSON.stringify(data));
 
-    if (data.status === "refused" || (!response.ok && response.status !== 200)) {
-      const reason = data.refusedReason?.description || data.error || "Pagamento recusado";
+    if (!response.ok) {
+      const reason = data.message || data.error || "Pagamento recusado";
       return new Response(JSON.stringify({ success: false, error: reason }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    // Extract PIX code and QR image from response
     const pixCode = data.pix?.qrcode || data.pix?.qr_code_text || data.pix?.copy_paste ||
       data.pix?.emv || data.pix?.pixCopiaECola || data.pixCopiaECola ||
-      data.qr_code_text || data.brcode || data.emv;
+      data.qr_code_text || data.brcode || data.emv || data.pix_code;
 
     const qrImage = data.pix?.qr_code_image || data.pix?.qrcode_image ||
-      data.pix?.qr_code || data.qr_code_image || data.qr_code;
+      data.qr_code_image || data.qr_code;
+
+    const transactionHash = data.hash || data.transaction_hash || data.id?.toString();
 
     // Save transaction to DB
     const { data: txRow, error: txError } = await supabase.from('transactions').insert({
-      nivus_transaction_id: data.id?.toString() || null,
+      nivus_transaction_id: transactionHash || null,
       plan_id: plan_id || 'unknown',
       plan_name: plan_name || 'Plano',
       platform: platform || 'Instagram',
@@ -108,7 +102,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       transaction_id: txRow?.id || null,
-      nivus_transaction_id: data.id,
+      invictus_transaction_hash: transactionHash,
       pix_code: pixCode,
       qr_code_image: qrImage,
       amount: amount,
