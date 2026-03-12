@@ -30,9 +30,12 @@ serve(async (req) => {
       });
     }
 
+    const amountInCents = Math.round(amount * 100);
+
     const body = {
       api_token: apiToken,
       offer_hash: "i9mh7xwr5z",
+      amount: amountInCents,
       payment_method: "pix",
       customer: {
         name: customer_name || "Cliente",
@@ -43,7 +46,7 @@ serve(async (req) => {
       cart: [
         {
           title: description || "Engajar Social",
-          amount: Math.round(amount * 100),
+          price: amountInCents,
           quantity: 1,
         },
       ],
