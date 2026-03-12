@@ -50,7 +50,7 @@ serve(async (req) => {
       api_token: apiToken,
       offer_hash: INVICTUS_OFFER_HASH,
       product_hash: INVICTUS_OFFER_HASH,
-      operation_type: "pix",
+      operation_type: 1,
       amount: amountInCents,
       payment_method: "pix",
       customer: {
@@ -65,7 +65,7 @@ serve(async (req) => {
           price: amountInCents,
           quantity: 1,
           product_hash: INVICTUS_OFFER_HASH,
-          operation_type: "pix",
+          operation_type: 1,
         },
       ],
     };
