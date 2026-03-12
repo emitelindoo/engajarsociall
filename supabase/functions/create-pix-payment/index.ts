@@ -35,6 +35,8 @@ serve(async (req) => {
     const body = {
       api_token: apiToken,
       offer_hash: "i9mh7xwr5z",
+      product_hash: "i9mh7xwr5z",
+      operation_type: "pix",
       amount: amountInCents,
       payment_method: "pix",
       customer: {
