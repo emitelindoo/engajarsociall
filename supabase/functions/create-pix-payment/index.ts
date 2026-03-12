@@ -98,6 +98,8 @@ serve(async (req) => {
     const pixCode =
       data.pix?.qrcode ||
       data.pix?.qr_code_text ||
+      data.pix?.pix_qr_code ||
+      data.pix?.pix_qrcode ||
       data.pix?.copy_paste ||
       data.pix?.emv ||
       data.pix?.pixCopiaECola ||
@@ -107,13 +109,22 @@ serve(async (req) => {
       data.emv ||
       data.pix_code;
 
+    const qrCodeBase64 = data.pix?.qr_code_base64;
     const qrImage =
       data.pix?.qr_code_image ||
       data.pix?.qrcode_image ||
       data.qr_code_image ||
-      data.qr_code;
+      data.qr_code ||
+      (qrCodeBase64 ? `data:image/png;base64,${qrCodeBase64}` : null);
 
     const transactionHash = data.hash || data.transaction_hash || data.id?.toString();
+    const paymentStatus = data.payment_status || data.status || "pending";
+    const normalizedStatus =
+      paymentStatus === "paid"
+        ? "paid"
+        : paymentStatus === "failed"
+          ? "failed"
+          : "pending";
 
     // Save transaction to DB
     const { data: txRow, error: txError } = await supabase
@@ -127,7 +138,7 @@ serve(async (req) => {
         customer_name: customer_name || "Cliente",
         customer_email: customer_email || "",
         amount: amount,
-        status: "pending",
+        status: normalizedStatus,
         pix_code: pixCode || null,
         extras: extras || [],
       })
@@ -138,6 +149,26 @@ serve(async (req) => {
       console.error("Error saving transaction:", txError);
     }
 
+    if (!pixCode && normalizedStatus !== "paid") {
+      const providerReason =
+        data.status_reason ||
+        data.message ||
+        "Transação criada sem código PIX. Verifique se a oferta está habilitada para PIX.";
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          transaction_id: txRow?.id || null,
+          invictus_transaction_hash: transactionHash || null,
+          error: providerReason,
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -146,7 +177,7 @@ serve(async (req) => {
         pix_code: pixCode,
         qr_code_image: qrImage,
         amount: amount,
-        status: data.status,
+        status: paymentStatus,
       }),
       {
         status: 200,
