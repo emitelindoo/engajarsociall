@@ -19,36 +19,35 @@ serve(async (req) => {
     const payload = await req.json();
     console.log("Webhook received:", JSON.stringify(payload));
 
-    // Nivus Pay sends transaction updates - extract the transaction ID and status
-    // payload.id is the webhook event ID, payload.data.id is the actual transaction ID
-    const nivusId = payload.data?.id?.toString() || payload.objectId?.toString() || payload.transaction_id?.toString();
-    const newStatus = payload.status || payload.current_status || payload.data?.status;
+    // InvictusPay webhook payload: { transaction_hash, status, amount, payment_method, paid_at }
+    const transactionHash = payload.transaction_hash || payload.hash || payload.id?.toString();
+    const newStatus = payload.status;
 
-    if (!nivusId) {
-      console.error("No transaction ID in webhook payload");
+    if (!transactionHash) {
+      console.error("No transaction hash in webhook payload");
       return new Response(JSON.stringify({ received: true }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Map Nivus Pay statuses to our statuses
+    // Map InvictusPay statuses
     let mappedStatus = 'pending';
     const statusLower = (newStatus || '').toLowerCase();
     if (statusLower === 'paid' || statusLower === 'approved' || statusLower === 'captured') {
       mappedStatus = 'paid';
-    } else if (statusLower === 'refused' || statusLower === 'refunded' || statusLower === 'cancelled' || statusLower === 'canceled') {
+    } else if (statusLower === 'refused' || statusLower === 'refunded' || statusLower === 'cancelled' || statusLower === 'canceled' || statusLower === 'chargeback') {
       mappedStatus = 'failed';
     } else if (statusLower === 'waiting_payment' || statusLower === 'pending') {
       mappedStatus = 'pending';
     }
 
-    console.log(`Updating transaction ${nivusId} to status: ${mappedStatus}`);
+    console.log(`Updating transaction ${transactionHash} to status: ${mappedStatus}`);
 
     const { error } = await supabase
       .from('transactions')
       .update({ status: mappedStatus })
-      .eq('nivus_transaction_id', nivusId);
+      .eq('nivus_transaction_id', transactionHash);
 
     if (error) {
       console.error("Error updating transaction:", error);
