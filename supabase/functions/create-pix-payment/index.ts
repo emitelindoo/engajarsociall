@@ -32,7 +32,7 @@ serve(async (req) => {
 
     const body = {
       api_token: apiToken,
-      amount: Math.round(amount * 100), // valores em centavos
+      offer_hash: "i9mh7xwr5z",
       payment_method: "pix",
       customer: {
         name: customer_name || "Cliente",
@@ -40,10 +40,10 @@ serve(async (req) => {
         phone: (customer_phone || "11999999999").replace(/\D/g, ""),
         document: (customer_cpf || "00000000000").replace(/\D/g, ""),
       },
-      items: [
+      cart: [
         {
           title: description || "Engajar Social",
-          unit_price: Math.round(amount * 100),
+          amount: Math.round(amount * 100),
           quantity: 1,
         },
       ],
