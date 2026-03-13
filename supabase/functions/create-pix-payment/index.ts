@@ -7,8 +7,28 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const INVICTUS_API_URL = "https://api.invictuspay.app.br/api/public/v1";
-const INVICTUS_OFFER_HASH = "i9mh7xwr5z";
+const HORSEPAY_API = "https://api.horsepay.io";
+
+async function getAccessToken(): Promise<string> {
+  const clientKey = Deno.env.get("HORSEPAY_CLIENT_KEY");
+  const clientSecret = Deno.env.get("HORSEPAY_CLIENT_SECRET");
+  if (!clientKey || !clientSecret) throw new Error("HorsePay credentials not configured");
+
+  const res = await fetch(`${HORSEPAY_API}/auth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ client_key: clientKey, client_secret: clientSecret }),
+  });
+
+  const data = await res.json();
+  console.log("HorsePay auth response status:", res.status);
+
+  if (!res.ok || !data.access_token) {
+    throw new Error(data.message || data.error || "Falha na autenticação HorsePay");
+  }
+
+  return data.access_token;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -16,9 +36,6 @@ serve(async (req) => {
   }
 
   try {
-    const apiToken = Deno.env.get("INVICTUS_PAY_API_TOKEN");
-    if (!apiToken) throw new Error("INVICTUS_PAY_API_TOKEN is not configured");
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -28,7 +45,6 @@ serve(async (req) => {
       description,
       customer_name,
       customer_email,
-      customer_cpf,
       customer_phone,
       plan_id,
       plan_name,
@@ -44,93 +60,56 @@ serve(async (req) => {
       });
     }
 
-    const amountInCents = Math.round(amount * 100);
+    // 1. Authenticate with HorsePay
+    const accessToken = await getAccessToken();
 
-    const body = {
-      api_token: apiToken,
-      offer_hash: INVICTUS_OFFER_HASH,
-      product_hash: INVICTUS_OFFER_HASH,
-      operation_type: 1,
-      amount: amountInCents,
-      payment_method: "pix",
-      customer: {
-        name: customer_name || "Cliente",
-        email: customer_email || "cliente@email.com",
-        phone: (customer_phone || "11999999999").replace(/\D/g, ""),
-        document: (customer_cpf || "00000000000").replace(/\D/g, ""),
-      },
-      cart: [
-        {
-          title: description || "Engajar Social",
-          price: amountInCents,
-          quantity: 1,
-          product_hash: INVICTUS_OFFER_HASH,
-          operation_type: 1,
-        },
-      ],
+    // 2. Build the webhook callback URL
+    const callbackUrl = `${supabaseUrl}/functions/v1/nivus-webhook`;
+
+    // 3. Create a unique reference to link callback to our DB
+    const clientReferenceId = crypto.randomUUID();
+
+    // 4. Create order on HorsePay
+    const orderBody = {
+      payer_name: customer_name || "Cliente",
+      amount: amount, // HorsePay expects value in reais (not cents)
+      callback_url: callbackUrl,
+      client_reference_id: clientReferenceId,
+      phone: (customer_phone || "11999999999").replace(/\D/g, ""),
     };
 
-    console.log("Sending to InvictusPay:", JSON.stringify(body));
+    console.log("Sending to HorsePay:", JSON.stringify(orderBody));
 
-    const response = await fetch(`${INVICTUS_API_URL}/transactions`, {
+    const orderRes = await fetch(`${HORSEPAY_API}/transaction/neworder`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(orderBody),
     });
 
-    const data = await response.json();
-    console.log("InvictusPay response:", JSON.stringify(data));
+    const orderData = await orderRes.json();
+    console.log("HorsePay response:", JSON.stringify(orderData));
 
-    if (!response.ok) {
-      const flatErrors = data?.errors
-        ? Object.values(data.errors).flat().join(" | ")
-        : null;
-      const reason = flatErrors || data.message || data.error || "Pagamento recusado";
+    if (!orderRes.ok) {
+      const reason = orderData.message || orderData.error || "Erro ao criar pedido no gateway";
       return new Response(JSON.stringify({ success: false, error: reason }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Extract PIX code and QR image from response
-    const pixCode =
-      data.pix?.qrcode ||
-      data.pix?.qr_code_text ||
-      data.pix?.pix_qr_code ||
-      data.pix?.pix_qrcode ||
-      data.pix?.copy_paste ||
-      data.pix?.emv ||
-      data.pix?.pixCopiaECola ||
-      data.pixCopiaECola ||
-      data.qr_code_text ||
-      data.brcode ||
-      data.emv ||
-      data.pix_code;
+    // HorsePay response: { copy_past, external_id, payer_name, payment (base64 QR), status }
+    const pixCode = orderData.copy_past || orderData.copy_paste || null;
+    const qrImage = orderData.payment || null; // base64 data URI
+    const externalId = orderData.external_id?.toString() || null;
 
-    const qrCodeBase64 = data.pix?.qr_code_base64;
-    const qrImage =
-      data.pix?.qr_code_image ||
-      data.pix?.qrcode_image ||
-      data.qr_code_image ||
-      data.qr_code ||
-      (qrCodeBase64 ? `data:image/png;base64,${qrCodeBase64}` : null);
-
-    const transactionHash = data.hash || data.transaction_hash || data.id?.toString();
-    const paymentStatus = data.payment_status || data.status || "pending";
-    const normalizedStatus =
-      paymentStatus === "paid"
-        ? "paid"
-        : paymentStatus === "failed"
-          ? "failed"
-          : "pending";
-
-    // Save transaction to DB
+    // 5. Save transaction to DB
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        nivus_transaction_id: transactionHash || null,
+        nivus_transaction_id: externalId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
@@ -138,7 +117,7 @@ serve(async (req) => {
         customer_name: customer_name || "Cliente",
         customer_email: customer_email || "",
         amount: amount,
-        status: normalizedStatus,
+        status: "pending",
         pix_code: pixCode || null,
         extras: extras || [],
       })
@@ -149,18 +128,15 @@ serve(async (req) => {
       console.error("Error saving transaction:", txError);
     }
 
-    if (!pixCode && normalizedStatus !== "paid") {
-      const providerReason =
-        data.status_reason ||
-        data.message ||
-        "Transação criada sem código PIX. Verifique se a oferta está habilitada para PIX.";
+    // Also store client_reference_id mapping so the webhook can find this tx
+    // We'll use the nivus_transaction_id field to store external_id for lookup
 
+    if (!pixCode) {
       return new Response(
         JSON.stringify({
           success: false,
           transaction_id: txRow?.id || null,
-          invictus_transaction_hash: transactionHash || null,
-          error: providerReason,
+          error: "PIX não gerado pelo gateway. Tente novamente.",
         }),
         {
           status: 400,
@@ -173,11 +149,10 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         transaction_id: txRow?.id || null,
-        invictus_transaction_hash: transactionHash,
         pix_code: pixCode,
         qr_code_image: qrImage,
         amount: amount,
-        status: paymentStatus,
+        status: "pending",
       }),
       {
         status: 200,
