@@ -20,10 +20,8 @@ serve(async (req) => {
     const payload = await req.json();
     console.log("HorsePay webhook received:", JSON.stringify(payload));
 
-    // HorsePay deposit callback:
-    // { amount, document, end_to_end, external_id, name, status (boolean), client_reference_id }
     const externalId = payload.external_id?.toString();
-    const statusBool = payload.status; // true = paid, false = failed
+    const statusBool = payload.status;
 
     if (!externalId) {
       console.error("No external_id in webhook payload");
@@ -33,7 +31,6 @@ serve(async (req) => {
       });
     }
 
-    // HorsePay uses boolean status: true = paid, false = failed
     const mappedStatus = statusBool === true ? "paid" : "failed";
 
     console.log(`Updating transaction external_id=${externalId} to status: ${mappedStatus}`);

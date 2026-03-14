@@ -64,7 +64,7 @@ serve(async (req) => {
     const accessToken = await getAccessToken();
 
     // 2. Build the webhook callback URL
-    const callbackUrl = `${supabaseUrl}/functions/v1/nivus-webhook`;
+    const callbackUrl = `${supabaseUrl}/functions/v1/horsepay-webhook`;
 
     // 3. Create a unique reference to link callback to our DB
     const clientReferenceId = crypto.randomUUID();
