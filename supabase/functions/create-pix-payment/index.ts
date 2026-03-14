@@ -129,7 +129,7 @@ serve(async (req) => {
     }
 
     // Also store client_reference_id mapping so the webhook can find this tx
-    // We'll use the nivus_transaction_id field to store external_id for lookup
+    // We'll use the horsepay_transaction_id field to store external_id for lookup
 
     if (!pixCode) {
       return new Response(

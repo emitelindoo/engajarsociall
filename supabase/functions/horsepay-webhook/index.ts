@@ -38,7 +38,7 @@ serve(async (req) => {
     const { error } = await supabase
       .from("transactions")
       .update({ status: mappedStatus })
-      .eq("nivus_transaction_id", externalId);
+      .eq("horsepay_transaction_id", externalId);
 
     if (error) {
       console.error("Error updating transaction:", error);
