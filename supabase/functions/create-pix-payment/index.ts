@@ -109,7 +109,7 @@ serve(async (req) => {
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        nivus_transaction_id: externalId,
+        horsepay_transaction_id: externalId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
@@ -129,7 +129,7 @@ serve(async (req) => {
     }
 
     // Also store client_reference_id mapping so the webhook can find this tx
-    // We'll use the nivus_transaction_id field to store external_id for lookup
+    // We'll use the horsepay_transaction_id field to store external_id for lookup
 
     if (!pixCode) {
       return new Response(

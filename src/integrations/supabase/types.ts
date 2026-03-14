@@ -21,8 +21,8 @@ export type Database = {
           customer_email: string
           customer_name: string
           extras: string[] | null
+          horsepay_transaction_id: string | null
           id: string
-          nivus_transaction_id: string | null
           pix_code: string | null
           plan_id: string
           plan_name: string
@@ -37,8 +37,8 @@ export type Database = {
           customer_email: string
           customer_name: string
           extras?: string[] | null
+          horsepay_transaction_id?: string | null
           id?: string
-          nivus_transaction_id?: string | null
           pix_code?: string | null
           plan_id: string
           plan_name: string
@@ -53,8 +53,8 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           extras?: string[] | null
+          horsepay_transaction_id?: string | null
           id?: string
-          nivus_transaction_id?: string | null
           pix_code?: string | null
           plan_id?: string
           plan_name?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.transactions RENAME COLUMN nivus_transaction_id TO horsepay_transaction_id;
