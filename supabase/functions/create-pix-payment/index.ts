@@ -109,7 +109,7 @@ serve(async (req) => {
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        nivus_transaction_id: externalId,
+        horsepay_transaction_id: externalId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
