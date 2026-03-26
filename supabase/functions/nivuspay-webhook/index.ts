@@ -18,27 +18,49 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const payload = await req.json();
-    console.log("HorsePay webhook received:", JSON.stringify(payload));
+    console.log("NivusPay webhook received:", JSON.stringify(payload));
 
-    const externalId = payload.external_id?.toString();
-    const statusBool = payload.status;
-
-    if (!externalId) {
-      console.error("No external_id in webhook payload");
+    // NivusPay postback format: { type: "transaction", objectId: "...", data: { id, status, ... } }
+    const transactionData = payload.data;
+    if (!transactionData || !transactionData.id) {
+      console.error("No transaction data in webhook payload");
       return new Response(JSON.stringify({ received: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const mappedStatus = statusBool === true ? "paid" : "failed";
+    const nivusId = transactionData.id.toString();
+    const nivusStatus = transactionData.status;
 
-    console.log(`Updating transaction external_id=${externalId} to status: ${mappedStatus}`);
+    // Map NivusPay statuses to our internal statuses
+    let mappedStatus: string;
+    switch (nivusStatus) {
+      case "paid":
+      case "approved":
+        mappedStatus = "paid";
+        break;
+      case "refused":
+      case "cancelled":
+      case "chargeback":
+        mappedStatus = "failed";
+        break;
+      case "refunded":
+        mappedStatus = "refunded";
+        break;
+      case "waiting_payment":
+      case "pending":
+      default:
+        mappedStatus = "pending";
+        break;
+    }
+
+    console.log(`Updating transaction nivus_id=${nivusId} to status: ${mappedStatus}`);
 
     const { error } = await supabase
       .from("transactions")
       .update({ status: mappedStatus })
-      .eq("horsepay_transaction_id", externalId);
+      .eq("horsepay_transaction_id", nivusId);
 
     if (error) {
       console.error("Error updating transaction:", error);
