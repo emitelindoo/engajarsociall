@@ -7,27 +7,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const HORSEPAY_API = "https://api.horsepay.io";
+const NIVUSPAY_API = "https://api.nivuspayments.com.br/v1";
 
-async function getAccessToken(): Promise<string> {
-  const clientKey = Deno.env.get("HORSEPAY_CLIENT_KEY");
-  const clientSecret = Deno.env.get("HORSEPAY_CLIENT_SECRET");
-  if (!clientKey || !clientSecret) throw new Error("HorsePay credentials not configured");
+function getNivusAuthHeader(): string {
+  const publicKey = Deno.env.get("NIVUSPAY_PUBLIC_KEY");
+  const secretKey = Deno.env.get("NIVUSPAY_SECRET_KEY");
+  if (!publicKey || !secretKey) throw new Error("NivusPay credentials not configured");
 
-  const res = await fetch(`${HORSEPAY_API}/auth/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ client_key: clientKey, client_secret: clientSecret }),
-  });
-
-  const data = await res.json();
-  console.log("HorsePay auth response status:", res.status);
-
-  if (!res.ok || !data.access_token) {
-    throw new Error(data.message || data.error || "Falha na autenticação HorsePay");
-  }
-
-  return data.access_token;
+  const encoded = btoa(`${publicKey}:${secretKey}`);
+  return `Basic ${encoded}`;
 }
 
 serve(async (req) => {
@@ -45,6 +33,7 @@ serve(async (req) => {
       description,
       customer_name,
       customer_email,
+      customer_cpf,
       customer_phone,
       plan_id,
       plan_name,
@@ -60,37 +49,55 @@ serve(async (req) => {
       });
     }
 
-    // 1. Authenticate with HorsePay
-    const accessToken = await getAccessToken();
+    const authHeader = getNivusAuthHeader();
+    const callbackUrl = `${supabaseUrl}/functions/v1/nivuspay-webhook`;
+    const externalRef = crypto.randomUUID();
 
-    // 2. Build the webhook callback URL
-    const callbackUrl = `${supabaseUrl}/functions/v1/horsepay-webhook`;
+    // NivusPay expects amount in centavos (e.g. 100 = R$1,00)
+    const amountInCents = Math.round(amount * 100);
 
-    // 3. Create a unique reference to link callback to our DB
-    const clientReferenceId = crypto.randomUUID();
-
-    // 4. Create order on HorsePay
     const orderBody = {
-      payer_name: customer_name || "Cliente",
-      amount: amount, // HorsePay expects value in reais (not cents)
-      callback_url: callbackUrl,
-      client_reference_id: clientReferenceId,
-      phone: (customer_phone || "11999999999").replace(/\D/g, ""),
+      amount: amountInCents,
+      paymentMethod: "pix",
+      pix: {
+        expirationDate: new Date(Date.now() + 30 * 60 * 1000).toISOString().split("T")[0], // 30 min expiry
+      },
+      items: [
+        {
+          title: description || plan_name || "Serviço Engajar Social",
+          unitPrice: amountInCents,
+          quantity: 1,
+          tangible: false,
+        },
+      ],
+      customer: {
+        name: customer_name || "Cliente",
+        email: customer_email || "cliente@email.com",
+        phone: (customer_phone || "11999999999").replace(/\D/g, ""),
+        document: {
+          type: "cpf",
+          number: (customer_cpf || "00000000000").replace(/\D/g, ""),
+        },
+      },
+      postbackUrl: callbackUrl,
+      externalRef: externalRef,
+      metadata: JSON.stringify({ plan_id, platform, username }),
     };
 
-    console.log("Sending to HorsePay:", JSON.stringify(orderBody));
+    console.log("Sending to NivusPay:", JSON.stringify(orderBody));
 
-    const orderRes = await fetch(`${HORSEPAY_API}/transaction/neworder`, {
+    const orderRes = await fetch(`${NIVUSPAY_API}/transactions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: authHeader,
+        Accept: "application/json",
       },
       body: JSON.stringify(orderBody),
     });
 
     const orderData = await orderRes.json();
-    console.log("HorsePay response:", JSON.stringify(orderData));
+    console.log("NivusPay response:", JSON.stringify(orderData));
 
     if (!orderRes.ok) {
       const reason = orderData.message || orderData.error || "Erro ao criar pedido no gateway";
@@ -100,16 +107,15 @@ serve(async (req) => {
       });
     }
 
-    // HorsePay response: { copy_past, external_id, payer_name, payment (base64 QR), status }
-    const pixCode = orderData.copy_past || orderData.copy_paste || null;
-    const qrImage = orderData.payment || null; // base64 data URI
-    const externalId = orderData.external_id?.toString() || null;
+    // NivusPay PIX response: pix.qrcode contains the copia-e-cola code
+    const pixCode = orderData.pix?.qrcode || null;
+    const nivusTransactionId = orderData.id?.toString() || null;
 
-    // 5. Save transaction to DB
+    // Save transaction to DB
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        horsepay_transaction_id: externalId,
+        horsepay_transaction_id: nivusTransactionId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
@@ -127,9 +133,6 @@ serve(async (req) => {
     if (txError) {
       console.error("Error saving transaction:", txError);
     }
-
-    // Also store client_reference_id mapping so the webhook can find this tx
-    // We'll use the horsepay_transaction_id field to store external_id for lookup
 
     if (!pixCode) {
       return new Response(
@@ -150,7 +153,7 @@ serve(async (req) => {
         success: true,
         transaction_id: txRow?.id || null,
         pix_code: pixCode,
-        qr_code_image: qrImage,
+        qr_code_image: null, // NivusPay doesn't return base64 QR, we generate on frontend
         amount: amount,
         status: "pending",
       }),
