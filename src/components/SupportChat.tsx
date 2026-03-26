@@ -30,7 +30,7 @@ const AUTO_REPLIES: Record<string, { answer: string; followUp?: string[] }> = {
   },
   "Quero falar com atendente": {
     answer:
-      "👋 Nosso atendimento é pelo TikTok!\n\n📲 Siga @engajarsocial e envie uma mensagem. Respondemos super rápido!\n\nhttps://www.tiktok.com/@engajarsocial",
+      "👋 Entre no nosso grupo do WhatsApp para suporte!\n\n📲 Clique no link abaixo e fale diretamente com a gente:\n\nhttps://chat.whatsapp.com/G6t4if0sBK0JeRePlp36ic",
     followUp: ["Como funciona?", "É seguro?"],
   },
 };
