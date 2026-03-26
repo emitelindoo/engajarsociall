@@ -30,8 +30,9 @@ const AUTO_REPLIES: Record<string, { answer: string; followUp?: string[] }> = {
   },
   "Quero falar com atendente": {
     answer:
-      "👋 Entre no nosso grupo do WhatsApp para suporte!\n\n📲 Clique no link abaixo e fale diretamente com a gente:\n\nhttps://chat.whatsapp.com/G6t4if0sBK0JeRePlp36ic",
+      "👋 Clique no botão abaixo para entrar no nosso grupo de suporte no WhatsApp!",
     followUp: ["Como funciona?", "É seguro?"],
+    action: { label: "Abrir WhatsApp", url: "https://chat.whatsapp.com/G6t4if0sBK0JeRePlp36ic" },
   },
 };
 
