@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send } from "lucide-react";
+import { MessageCircle, X, ExternalLink } from "lucide-react";
 
 interface Message {
   from: "bot" | "user";
   text: string;
   options?: string[];
+  action?: { label: string; url: string };
 }
 
-const AUTO_REPLIES: Record<string, { answer: string; followUp?: string[] }> = {
+const AUTO_REPLIES: Record<string, { answer: string; followUp?: string[]; action?: { label: string; url: string } }> = {
   "Como funciona?": {
     answer:
       "É simples! 😊\n\n1️⃣ Escolha o serviço e a quantidade\n2️⃣ Adicione ao carrinho\n3️⃣ Preencha seus dados e pague via PIX\n4️⃣ Receba automaticamente!\n\nTodo o processo é seguro e sem necessidade de senha.",
@@ -60,6 +61,7 @@ const SupportChat = () => {
         from: "bot",
         text: reply.answer,
         options: reply.followUp,
+        action: reply.action,
       };
       setMessages((prev) => [...prev, userMsg, botMsg]);
     } else {
@@ -113,6 +115,17 @@ const SupportChat = () => {
                 >
                   {msg.text}
                 </div>
+                {msg.action && (
+                  <a
+                    href={msg.action.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-[#25D366] text-white hover:bg-[#1ebe57] transition-colors shadow-md"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    {msg.action.label}
+                  </a>
+                )}
                 {msg.options && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {msg.options.map((opt) => (
