@@ -78,7 +78,7 @@ const Checkout = () => {
   }, [transactionId]);
 
   const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
-  const isFormValid = customerName.trim() && customerEmail.trim() && items.length > 0 && allTargetsFilled;
+  const isFormValid = customerName.trim() && customerEmail.trim() && customerCpf.replace(/\D/g, "").length === 11 && items.length > 0 && allTargetsFilled;
 
   const handlePayment = async () => {
     if (!isFormValid) return;
