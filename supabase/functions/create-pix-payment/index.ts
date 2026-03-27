@@ -54,7 +54,7 @@ serve(async (req) => {
         name: customer_name || "Cliente",
         email: customer_email || "cliente@email.com",
         phone: (customer_phone || "11999999999").replace(/\D/g, ""),
-        document: (customer_cpf || "00000000000").replace(/\D/g, ""),
+        document: formatCpf((customer_cpf || "00000000000").replace(/\D/g, "")),
       },
       products: [
         {
