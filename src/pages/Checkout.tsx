@@ -9,6 +9,43 @@ import { QRCodeSVG } from "qrcode.react";
 import { fbEvent, fbSetUserData } from "@/lib/fbpixel";
 import { useCart, getTargetLabel } from "@/contexts/CartContext";
 
+const onlyDigits = (value: string) => value.replace(/\D/g, "");
+
+const formatCpf = (value: string) => {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+};
+
+const isValidCpf = (value: string) => {
+  const digits = onlyDigits(value);
+
+  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
+
+  let sum = 0;
+  for (let index = 0; index < 9; index += 1) {
+    sum += Number(digits[index]) * (10 - index);
+  }
+
+  let firstDigit = (sum * 10) % 11;
+  if (firstDigit === 10) firstDigit = 0;
+  if (firstDigit !== Number(digits[9])) return false;
+
+  sum = 0;
+  for (let index = 0; index < 10; index += 1) {
+    sum += Number(digits[index]) * (11 - index);
+  }
+
+  let secondDigit = (sum * 10) % 11;
+  if (secondDigit === 10) secondDigit = 0;
+
+  return secondDigit === Number(digits[10]);
+};
+
 const Checkout = () => {
   const { planId } = useParams();
   const navigate = useNavigate();
@@ -77,8 +114,10 @@ const Checkout = () => {
     return () => clearInterval(interval);
   }, [transactionId]);
 
+  const cpfDigits = onlyDigits(customerCpf);
+  const isCpfValid = cpfDigits.length === 11 && isValidCpf(cpfDigits);
   const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
-  const isFormValid = customerName.trim() && customerEmail.trim() && customerCpf.replace(/\D/g, "").length === 11 && items.length > 0 && allTargetsFilled;
+  const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && isCpfValid && items.length > 0 && allTargetsFilled);
 
   const handlePayment = async () => {
     if (!isFormValid) return;
@@ -92,6 +131,10 @@ const Checkout = () => {
     });
 
     try {
+      if (!isCpfValid) {
+        throw new Error("Digite um CPF válido para gerar o PIX.");
+      }
+
       const itemDescriptions = items.map(
         (i) => `${i.plan.quantity} ${i.plan.serviceType} (${i.plan.platform}) → ${i.target}`
       );
@@ -101,9 +144,9 @@ const Checkout = () => {
         body: {
           amount: total,
           description: `Engajar Social: ${itemDescriptions.join(", ")}`,
-          customer_name: customerName,
-          customer_email: customerEmail,
-          customer_cpf: customerCpf.replace(/\D/g, ""),
+          customer_name: customerName.trim(),
+          customer_email: customerEmail.trim(),
+          customer_cpf: cpfDigits,
           customer_phone: "11999999999",
           plan_id: items[0].plan.id,
           plan_name: items.map((i) => i.plan.name).join(" + "),
@@ -246,14 +289,11 @@ const Checkout = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1">CPF</label>
-                  <input type="text" value={customerCpf} onChange={(e) => {
-                    const v = e.target.value.replace(/\D/g, "").slice(0, 11);
-                    const formatted = v.replace(/(\d{3})(\d{3})?(\d{3})?(\d{2})?/, (_, a, b, c, d) => 
-                      [a, b, c].filter(Boolean).join(".") + (d ? `-${d}` : "")
-                    );
-                    setCustomerCpf(formatted);
-                  }} placeholder="000.000.000-00" maxLength={14}
+                  <input type="text" value={customerCpf} onChange={(e) => setCustomerCpf(formatCpf(e.target.value))} placeholder="000.000.000-00" maxLength={14}
                     className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+                  {cpfDigits.length === 11 && !isCpfValid && (
+                    <p className="text-xs text-destructive mt-1">Digite um CPF válido.</p>
+                  )}
                 </div>
               </div>
               <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
@@ -301,6 +341,9 @@ const Checkout = () => {
               </div>
               {!allTargetsFilled && (
                 <p className="text-xs text-destructive mb-3 text-center">Preencha o @ ou link de cada item acima</p>
+              )}
+              {!isCpfValid && cpfDigits.length === 11 && (
+                <p className="text-xs text-destructive mb-3 text-center">Digite um CPF válido para continuar</p>
               )}
               <button onClick={handlePayment} disabled={!isFormValid || loading}
                 className="w-full brand-gradient-bg text-primary-foreground py-4 rounded-xl font-bold text-base transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">

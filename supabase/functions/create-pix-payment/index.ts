@@ -7,12 +7,43 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const PAYFORGE_API = Deno.env.get("PAYFORGE_API") || "https://dashboard.payforge.group/api/v1";
+
+const onlyDigits = (value: string) => value.replace(/\D/g, "");
+
 function formatCpf(cpf: string): string {
-  const digits = cpf.replace(/\D/g, "").padStart(11, "0").slice(0, 11);
+  const digits = onlyDigits(cpf);
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
 }
 
-const PAYFORGE_API = "https://dashboard.payforge.group/api/v1";
+function isValidCpf(cpf: string): boolean {
+  const digits = onlyDigits(cpf);
+
+  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) {
+    return false;
+  }
+
+  let sum = 0;
+  for (let index = 0; index < 9; index += 1) {
+    sum += Number(digits[index]) * (10 - index);
+  }
+
+  let firstDigit = (sum * 10) % 11;
+  if (firstDigit === 10) firstDigit = 0;
+  if (firstDigit !== Number(digits[9])) {
+    return false;
+  }
+
+  sum = 0;
+  for (let index = 0; index < 10; index += 1) {
+    sum += Number(digits[index]) * (11 - index);
+  }
+
+  let secondDigit = (sum * 10) % 11;
+  if (secondDigit === 10) secondDigit = 0;
+
+  return secondDigit === Number(digits[10]);
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -42,8 +73,16 @@ serve(async (req) => {
       extras,
     } = await req.json();
 
-    if (!amount || amount <= 0) {
-      return new Response(JSON.stringify({ error: "Valor inválido" }), {
+    if (!amount || Number(amount) <= 0) {
+      return new Response(JSON.stringify({ success: false, error: "Valor inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const normalizedCpf = onlyDigits(customer_cpf || "");
+    if (!isValidCpf(normalizedCpf)) {
+      return new Response(JSON.stringify({ success: false, error: "CPF inválido. Digite um CPF válido." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -56,24 +95,33 @@ serve(async (req) => {
       identifier,
       amount: Number(amount),
       client: {
-        name: customer_name || "Cliente",
-        email: customer_email || "cliente@email.com",
-        phone: (customer_phone || "11999999999").replace(/\D/g, ""),
-        document: formatCpf((customer_cpf || "00000000000").replace(/\D/g, "")),
+        name: String(customer_name || "Cliente").trim().slice(0, 120),
+        email: String(customer_email || "cliente@email.com").trim().slice(0, 255),
+        phone: onlyDigits(customer_phone || "11999999999").slice(0, 11),
+        document: formatCpf(normalizedCpf),
       },
       products: [
         {
-          id: plan_id || "plan",
-          name: description || plan_name || "Serviço Engajar Social",
+          id: String(plan_id || "plan").slice(0, 100),
+          name: String(description || plan_name || "Serviço Engajar Social").trim().slice(0, 255),
           quantity: 1,
           price: Number(amount),
         },
       ],
-      metadata: { plan_id, platform, username },
+      metadata: {
+        plan_id: String(plan_id || "").slice(0, 100),
+        platform: String(platform || "").slice(0, 100),
+        username: String(username || "").slice(0, 100),
+      },
       callbackUrl,
     };
 
-    console.log("Sending to PayForge:", JSON.stringify(orderBody));
+    console.log("Creating PayForge PIX transaction", {
+      identifier,
+      amount: Number(amount),
+      plan_id: plan_id || null,
+      platform: platform || null,
+    });
 
     const orderRes = await fetch(`${PAYFORGE_API}/gateway/pix/receive`, {
       method: "POST",
@@ -85,11 +133,28 @@ serve(async (req) => {
       body: JSON.stringify(orderBody),
     });
 
-    const orderData = await orderRes.json();
-    console.log("PayForge response:", JSON.stringify(orderData));
+    const responseText = await orderRes.text();
+    let orderData: Record<string, unknown> = {};
+
+    try {
+      orderData = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      orderData = {};
+    }
+
+    console.log("PayForge create PIX response", {
+      status: orderRes.status,
+      contentType: orderRes.headers.get("content-type"),
+      gatewayStatus: orderData?.status || null,
+      errorCode: orderData?.errorCode || null,
+    });
 
     if (!orderRes.ok) {
-      const reason = orderData.message || orderData.error || "Erro ao criar pedido no gateway";
+      const isHtmlResponse = responseText.trim().startsWith("<!doctype") || responseText.trim().startsWith("<html");
+      const reason = isHtmlResponse
+        ? "A PayForge bloqueou esta requisição por localização/IP do servidor. Libere o acesso da API no painel deles ou peça ao suporte a liberação do ambiente."
+        : String(orderData.message || orderData.error || "Erro ao criar pedido no gateway");
+
       return new Response(JSON.stringify({ success: false, error: reason }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -100,7 +165,6 @@ serve(async (req) => {
     const qrCodeBase64 = orderData.pix?.base64 || null;
     const payforgeTransactionId = orderData.transactionId || null;
 
-    // Save transaction to DB
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
@@ -120,7 +184,7 @@ serve(async (req) => {
       .single();
 
     if (txError) {
-      console.error("Error saving transaction:", txError);
+      console.error("Error saving transaction", txError);
     }
 
     if (!pixCode) {
@@ -143,7 +207,7 @@ serve(async (req) => {
         transaction_id: txRow?.id || null,
         pix_code: pixCode,
         qr_code_image: qrCodeBase64,
-        amount: amount,
+        amount,
         status: "pending",
       }),
       {
@@ -152,7 +216,7 @@ serve(async (req) => {
       },
     );
   } catch (error: unknown) {
-    console.error("Error creating PIX payment:", error);
+    console.error("Error creating PIX payment", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       status: 500,
