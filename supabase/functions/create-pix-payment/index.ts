@@ -133,15 +133,28 @@ serve(async (req) => {
       body: JSON.stringify(orderBody),
     });
 
-    const orderData = await orderRes.json();
+    const responseText = await orderRes.text();
+    let orderData: Record<string, unknown> = {};
+
+    try {
+      orderData = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      orderData = {};
+    }
+
     console.log("PayForge create PIX response", {
       status: orderRes.status,
+      contentType: orderRes.headers.get("content-type"),
       gatewayStatus: orderData?.status || null,
       errorCode: orderData?.errorCode || null,
     });
 
     if (!orderRes.ok) {
-      const reason = orderData.message || orderData.error || "Erro ao criar pedido no gateway";
+      const isHtmlResponse = responseText.trim().startsWith("<!doctype") || responseText.trim().startsWith("<html");
+      const reason = isHtmlResponse
+        ? "A PayForge bloqueou esta requisição por localização/IP do servidor. Libere o acesso da API no painel deles ou peça ao suporte a liberação do ambiente."
+        : String(orderData.message || orderData.error || "Erro ao criar pedido no gateway");
+
       return new Response(JSON.stringify({ success: false, error: reason }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
