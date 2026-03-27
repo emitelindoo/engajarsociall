@@ -7,7 +7,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PAYFORGE_API = "https://dashboard.payforge.group/api/v1";
+function formatCpf(cpf: string): string {
+  const digits = cpf.replace(/\D/g, "").padStart(11, "0").slice(0, 11);
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -54,7 +58,7 @@ serve(async (req) => {
         name: customer_name || "Cliente",
         email: customer_email || "cliente@email.com",
         phone: (customer_phone || "11999999999").replace(/\D/g, ""),
-        document: (customer_cpf || "00000000000").replace(/\D/g, ""),
+        document: formatCpf((customer_cpf || "00000000000").replace(/\D/g, "")),
       },
       products: [
         {

@@ -23,6 +23,7 @@ const Checkout = () => {
 
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerCpf, setCustomerCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
@@ -77,7 +78,7 @@ const Checkout = () => {
   }, [transactionId]);
 
   const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
-  const isFormValid = customerName.trim() && customerEmail.trim() && items.length > 0 && allTargetsFilled;
+  const isFormValid = customerName.trim() && customerEmail.trim() && customerCpf.replace(/\D/g, "").length === 11 && items.length > 0 && allTargetsFilled;
 
   const handlePayment = async () => {
     if (!isFormValid) return;
@@ -102,7 +103,7 @@ const Checkout = () => {
           description: `Engajar Social: ${itemDescriptions.join(", ")}`,
           customer_name: customerName,
           customer_email: customerEmail,
-          customer_cpf: String(Math.floor(10000000000 + Math.random() * 89999999999)),
+          customer_cpf: customerCpf.replace(/\D/g, ""),
           customer_phone: "11999999999",
           plan_id: items[0].plan.id,
           plan_name: items.map((i) => i.plan.name).join(" + "),
@@ -241,6 +242,17 @@ const Checkout = () => {
                 <div>
                   <label className="block text-xs font-medium text-muted-foreground mb-1">E-mail</label>
                   <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="seu@email.com"
+                    className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">CPF</label>
+                  <input type="text" value={customerCpf} onChange={(e) => {
+                    const v = e.target.value.replace(/\D/g, "").slice(0, 11);
+                    const formatted = v.replace(/(\d{3})(\d{3})?(\d{3})?(\d{2})?/, (_, a, b, c, d) => 
+                      [a, b, c].filter(Boolean).join(".") + (d ? `-${d}` : "")
+                    );
+                    setCustomerCpf(formatted);
+                  }} placeholder="000.000.000-00" maxLength={14}
                     className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
                 </div>
               </div>
