@@ -16,7 +16,7 @@ const Hero = () => {
       <div className="container mx-auto max-w-xl text-center">
         {/* Social proof pill */}
         <div className="inline-flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2 mb-6 card-shadow">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <div className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)] animate-pulse" />
           <span className="text-xs font-semibold text-foreground">1.247 pedidos hoje</span>
           <div className="flex">
             {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 text-accent fill-accent" />)}
