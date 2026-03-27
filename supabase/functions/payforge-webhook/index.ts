@@ -18,10 +18,13 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const payload = await req.json();
-    console.log("NivusPay webhook received:", JSON.stringify(payload));
+    console.log("PayForge webhook received:", JSON.stringify(payload));
 
-    // NivusPay postback format: { type: "transaction", objectId: "...", data: { id, status, ... } }
-    const transactionData = payload.data;
+    // PayForge webhook format:
+    // { event: "TRANSACTION_PAID", transaction: { id, identifier, status, ... }, ... }
+    const event = payload.event;
+    const transactionData = payload.transaction;
+
     if (!transactionData || !transactionData.id) {
       console.error("No transaction data in webhook payload");
       return new Response(JSON.stringify({ received: true }), {
@@ -30,37 +33,44 @@ serve(async (req) => {
       });
     }
 
-    const nivusId = transactionData.id.toString();
-    const nivusStatus = transactionData.status;
+    const payforgeId = transactionData.id.toString();
+    const txStatus = transactionData.status;
 
-    // Map NivusPay statuses to our internal statuses
+    // Map PayForge statuses to internal statuses
     let mappedStatus: string;
-    switch (nivusStatus) {
-      case "paid":
-      case "approved":
+    switch (txStatus) {
+      case "COMPLETED":
         mappedStatus = "paid";
         break;
-      case "refused":
-      case "cancelled":
-      case "chargeback":
+      case "FAILED":
+      case "CANCELED":
         mappedStatus = "failed";
         break;
-      case "refunded":
+      case "REFUNDED":
+      case "CHARGED_BACK":
         mappedStatus = "refunded";
         break;
-      case "waiting_payment":
-      case "pending":
+      case "PENDING":
       default:
         mappedStatus = "pending";
         break;
     }
 
-    console.log(`Updating transaction nivus_id=${nivusId} to status: ${mappedStatus}`);
+    // Also map by event name as fallback
+    if (event === "TRANSACTION_PAID" && mappedStatus !== "paid") {
+      mappedStatus = "paid";
+    } else if (event === "TRANSACTION_CANCELED" && mappedStatus === "pending") {
+      mappedStatus = "failed";
+    } else if (event === "TRANSACTION_REFUNDED") {
+      mappedStatus = "refunded";
+    }
+
+    console.log(`Updating transaction payforge_id=${payforgeId} to status: ${mappedStatus} (event: ${event})`);
 
     const { error } = await supabase
       .from("transactions")
       .update({ status: mappedStatus })
-      .eq("horsepay_transaction_id", nivusId);
+      .eq("horsepay_transaction_id", payforgeId);
 
     if (error) {
       console.error("Error updating transaction:", error);
