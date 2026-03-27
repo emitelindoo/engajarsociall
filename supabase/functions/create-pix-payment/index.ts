@@ -7,7 +7,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PAYFORGE_API = "https://dashboard.payforge.group/api/v1";
+function formatCpf(cpf: string): string {
+  const digits = cpf.replace(/\D/g, "").padStart(11, "0").slice(0, 11);
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+}
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
