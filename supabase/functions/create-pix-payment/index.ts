@@ -7,16 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const NIVUSPAY_API = "https://api.nivuspayments.com.br/v1";
-
-function getNivusAuthHeader(): string {
-  const publicKey = Deno.env.get("NIVUSPAY_PUBLIC_KEY");
-  const secretKey = Deno.env.get("NIVUSPAY_SECRET_KEY");
-  if (!publicKey || !secretKey) throw new Error("NivusPay credentials not configured");
-
-  const encoded = btoa(`${publicKey}:${secretKey}`);
-  return `Basic ${encoded}`;
-}
+const PAYFORGE_API = "https://dashboard.payforge.group/api/v1";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -27,6 +18,10 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const publicKey = Deno.env.get("PAYFORGE_PUBLIC_KEY");
+    const secretKey = Deno.env.get("PAYFORGE_SECRET_KEY");
+    if (!publicKey || !secretKey) throw new Error("PayForge credentials not configured");
 
     const {
       amount,
@@ -49,55 +44,44 @@ serve(async (req) => {
       });
     }
 
-    const authHeader = getNivusAuthHeader();
-    const callbackUrl = `${supabaseUrl}/functions/v1/nivuspay-webhook`;
-    const externalRef = crypto.randomUUID();
-
-    // NivusPay expects amount in centavos (e.g. 100 = R$1,00)
-    const amountInCents = Math.round(amount * 100);
+    const identifier = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    const callbackUrl = `${supabaseUrl}/functions/v1/payforge-webhook`;
 
     const orderBody = {
-      amount: amountInCents,
-      paymentMethod: "pix",
-      pix: {
-        expirationDate: new Date(Date.now() + 30 * 60 * 1000).toISOString().split("T")[0], // 30 min expiry
-      },
-      items: [
-        {
-          title: description || plan_name || "Serviço Engajar Social",
-          unitPrice: amountInCents,
-          quantity: 1,
-          tangible: false,
-        },
-      ],
-      customer: {
+      identifier,
+      amount: Number(amount),
+      client: {
         name: customer_name || "Cliente",
         email: customer_email || "cliente@email.com",
         phone: (customer_phone || "11999999999").replace(/\D/g, ""),
-        document: {
-          type: "cpf",
-          number: (customer_cpf || "00000000000").replace(/\D/g, ""),
-        },
+        document: (customer_cpf || "00000000000").replace(/\D/g, ""),
       },
-      postbackUrl: callbackUrl,
-      externalRef: externalRef,
-      metadata: JSON.stringify({ plan_id, platform, username }),
+      products: [
+        {
+          id: plan_id || "plan",
+          name: description || plan_name || "Serviço Engajar Social",
+          quantity: 1,
+          price: Number(amount),
+        },
+      ],
+      metadata: { plan_id, platform, username },
+      callbackUrl,
     };
 
-    console.log("Sending to NivusPay:", JSON.stringify(orderBody));
+    console.log("Sending to PayForge:", JSON.stringify(orderBody));
 
-    const orderRes = await fetch(`${NIVUSPAY_API}/transactions`, {
+    const orderRes = await fetch(`${PAYFORGE_API}/gateway/pix/receive`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: authHeader,
-        Accept: "application/json",
+        "x-public-key": publicKey,
+        "x-secret-key": secretKey,
       },
       body: JSON.stringify(orderBody),
     });
 
     const orderData = await orderRes.json();
-    console.log("NivusPay response:", JSON.stringify(orderData));
+    console.log("PayForge response:", JSON.stringify(orderData));
 
     if (!orderRes.ok) {
       const reason = orderData.message || orderData.error || "Erro ao criar pedido no gateway";
@@ -107,15 +91,15 @@ serve(async (req) => {
       });
     }
 
-    // NivusPay PIX response: pix.qrcode contains the copia-e-cola code
-    const pixCode = orderData.pix?.qrcode || null;
-    const nivusTransactionId = orderData.id?.toString() || null;
+    const pixCode = orderData.pix?.code || null;
+    const qrCodeBase64 = orderData.pix?.base64 || null;
+    const payforgeTransactionId = orderData.transactionId || null;
 
     // Save transaction to DB
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        horsepay_transaction_id: nivusTransactionId,
+        horsepay_transaction_id: payforgeTransactionId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
@@ -153,7 +137,7 @@ serve(async (req) => {
         success: true,
         transaction_id: txRow?.id || null,
         pix_code: pixCode,
-        qr_code_image: null, // NivusPay doesn't return base64 QR, we generate on frontend
+        qr_code_image: qrCodeBase64,
         amount: amount,
         status: "pending",
       }),

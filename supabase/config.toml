@@ -3,5 +3,5 @@ project_id = "gqwrfubnniqjwetrojxd"
 [functions.create-pix-payment]
 verify_jwt = false
 
-[functions.horsepay-webhook]
+[functions.payforge-webhook]
 verify_jwt = false
