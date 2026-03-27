@@ -12,13 +12,37 @@ const Hero = () => {
   };
 
   return (
-    <section className="pt-20 pb-16 px-4" style={{ background: "var(--ig-gradient-soft)" }}>
-      <div className="container mx-auto max-w-2xl text-center">
-        <div className="flex justify-center gap-4 mb-8">
+    <section className="pt-24 pb-14 px-4" style={{ background: "var(--ig-gradient-soft)" }}>
+      <div className="container mx-auto max-w-xl text-center">
+        {/* Social proof pill */}
+        <div className="inline-flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2 mb-6 card-shadow">
+          <div className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)] animate-pulse" />
+          <span className="text-xs font-semibold text-foreground">1.247 pedidos hoje</span>
+          <div className="flex">
+            {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 text-accent fill-accent" />)}
+          </div>
+        </div>
+
+        <h1 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+          Turbine seu perfil com <span className="ig-gradient-text">seguidores reais</span>
+        </h1>
+        <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+          Seguidores brasileiros, entrega rápida e sem precisar da sua senha.
+          Funciona no Instagram, TikTok, YouTube e mais.
+        </p>
+
+        <div className="flex gap-3 justify-center flex-wrap mb-10">
+          <button onClick={() => scrollTo("precos")} className="ig-gradient-bg text-primary-foreground px-7 py-3.5 rounded-full font-bold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg text-sm">
+            <Instagram className="w-5 h-5" /> Ver Planos e Preços
+          </button>
+        </div>
+
+        {/* Quick service links */}
+        <div className="flex justify-center gap-5 mb-10">
           {[
-            { label: "Seguidores", serviceId: "seg", icon: <Users className="w-6 h-6 text-foreground" /> },
-            { label: "Curtidas", serviceId: "curt", icon: <span className="text-xl">❤️</span> },
-            { label: "Views", serviceId: "views", icon: <span className="text-xl">👁️</span> },
+            { label: "Seguidores", serviceId: "seg", icon: <Users className="w-5 h-5 text-foreground" /> },
+            { label: "Curtidas", serviceId: "curt", icon: <span className="text-lg">❤️</span> },
+            { label: "Views", serviceId: "views", icon: <span className="text-lg">👁️</span> },
           ].map((item) => (
             <button
               key={item.label}
@@ -28,54 +52,35 @@ const Hero = () => {
                   document.getElementById("seletor-plano")?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }, 100);
               }}
-              className="flex flex-col items-center gap-1 group cursor-pointer"
+              className="flex flex-col items-center gap-1.5 group cursor-pointer"
             >
-              <div className="ig-gradient-border group-hover:scale-110 transition-transform">
-                <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center">
+              <div className="ig-gradient-border group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-full bg-background flex items-center justify-center">
                   {item.icon}
                 </div>
               </div>
-              <span className="text-xs text-muted-foreground font-medium group-hover:text-foreground transition-colors">{item.label}</span>
+              <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
             </button>
           ))}
         </div>
 
-        <div className="inline-flex items-center gap-2 bg-card border border-border rounded-full px-4 py-2 mb-6 card-shadow">
-          <ShieldCheck className="w-4 h-4 text-primary" />
-          <span className="text-xs font-semibold text-foreground">+50.000 clientes</span>
-          <div className="flex">
-            {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 text-accent fill-accent" />)}
+        {/* Stats */}
+        <div className="flex justify-center gap-8 text-center">
+          <div>
+            <p className="text-lg font-bold text-foreground">50.000+</p>
+            <p className="text-[11px] text-muted-foreground">clientes atendidos</p>
           </div>
-        </div>
-
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3 leading-tight">
-          Compre <span className="ig-gradient-text">Seguidores Reais</span>
-        </h1>
-        <p className="text-lg text-muted-foreground mb-2">100% Brasileiros · Entrega Imediata · Sem Senha</p>
-        <p className="text-sm text-muted-foreground mb-8 max-w-md mx-auto">
-          Aumente o crescimento, engajamento e credibilidade do seu perfil e veja seu Instagram ou TikTok disparar!
-        </p>
-
-        <div className="flex gap-3 justify-center flex-wrap mb-10">
-          <button onClick={() => scrollTo("precos")} className="ig-gradient-bg text-primary-foreground px-7 py-3 rounded-full font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity card-shadow">
-            <Instagram className="w-5 h-5" /> Começar Agora
-          </button>
-        </div>
-
-        <div className="flex justify-center gap-8">
-          <div className="text-center">
-            <p className="text-xl font-bold text-foreground">50k+</p>
-            <p className="text-xs text-muted-foreground">Clientes</p>
+          <div className="w-px bg-border" />
+          <div>
+            <p className="text-lg font-bold text-foreground">4.9/5</p>
+            <p className="text-[11px] text-muted-foreground">nota dos clientes</p>
           </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-foreground">⭐ 4.9</p>
-            <p className="text-xs text-muted-foreground">Avaliação</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl font-bold text-foreground">
-              <Zap className="w-4 h-4 inline text-accent" /> Imediata
+          <div className="w-px bg-border" />
+          <div>
+            <p className="text-lg font-bold text-foreground flex items-center gap-1">
+              <Zap className="w-4 h-4 text-accent" /> &lt;30min
             </p>
-            <p className="text-xs text-muted-foreground">Entrega</p>
+            <p className="text-[11px] text-muted-foreground">tempo médio entrega</p>
           </div>
         </div>
       </div>
