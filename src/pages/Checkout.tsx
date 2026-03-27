@@ -103,7 +103,7 @@ const Checkout = () => {
           description: `Engajar Social: ${itemDescriptions.join(", ")}`,
           customer_name: customerName,
           customer_email: customerEmail,
-          customer_cpf: String(Math.floor(10000000000 + Math.random() * 89999999999)),
+          customer_cpf: customerCpf.replace(/\D/g, ""),
           customer_phone: "11999999999",
           plan_id: items[0].plan.id,
           plan_name: items.map((i) => i.plan.name).join(" + "),
