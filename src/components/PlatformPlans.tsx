@@ -125,6 +125,8 @@ const PlatformPlans = () => {
     if (inCart) return;
     fbEvent("AddToCart", {
       content_name: `${currentPlan.serviceType} - ${currentPlan.name}`,
+      content_ids: [currentPlan.id],
+      content_type: "product",
       content_category: currentPlan.platform,
       value: currentPlan.priceNum,
       currency: "BRL",

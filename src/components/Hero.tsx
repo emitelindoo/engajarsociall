@@ -78,9 +78,9 @@ const Hero = () => {
           <div className="w-px bg-border" />
           <div>
             <p className="text-lg font-bold text-foreground flex items-center gap-1">
-              <Zap className="w-4 h-4 text-accent" /> &lt;30min
+              <Zap className="w-4 h-4 text-accent" /> Imediata
             </p>
-            <p className="text-[11px] text-muted-foreground">tempo médio entrega</p>
+            <p className="text-[11px] text-muted-foreground">entrega garantida</p>
           </div>
         </div>
       </div>
