@@ -18,6 +18,8 @@ const PricingCard = ({ plan }: { plan: PlanData }) => {
     if (inCart) return;
     fbEvent("AddToCart", {
       content_name: `${plan.serviceType} - ${plan.name}`,
+      content_ids: [plan.id],
+      content_type: "product",
       content_category: plan.platform,
       value: plan.priceNum,
       currency: "BRL",
