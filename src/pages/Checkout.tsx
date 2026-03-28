@@ -71,6 +71,9 @@ const Checkout = () => {
     if (items.length > 0) {
       fbEvent("InitiateCheckout", {
         content_name: items.map((i) => i.plan.quantity).join(", "),
+        content_ids: items.map((i) => i.plan.id),
+        content_type: "product",
+        num_items: items.length,
         value: total,
         currency: "BRL",
       });

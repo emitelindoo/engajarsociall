@@ -34,8 +34,10 @@ const ThankYou = () => {
     fbEvent("Purchase", {
       content_name: planName,
       content_category: platform,
+      content_type: "product",
       value: parseFloat(amount),
       currency: "BRL",
+      num_items: 1,
     });
   }, [planName, platform, amount, customerName, customerEmail, username]);
 
