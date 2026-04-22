@@ -8,6 +8,7 @@ interface Message {
   text: string;
   options?: string[];
   action?: { label: string; url: string };
+  system?: boolean;
 }
 
 const AUTO_REPLIES: Record<string, { answer: string; followUp?: string[]; action?: { label: string; url: string } }> = {
