@@ -79,7 +79,7 @@ const SupportChat = () => {
     }
   };
 
-  const dismissNotification = (e: React.MouseEvent) => {
+  const dismissNotification = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
     setShowNotification(false);
     setNotificationDismissed(true);
