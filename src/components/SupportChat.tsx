@@ -49,41 +49,17 @@ const SupportChat = () => {
   const [aiMode, setAiMode] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationDismissed, setNotificationDismissed] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, connecting]);
 
   useEffect(() => {
     if (aiMode) inputRef.current?.focus();
   }, [aiMode]);
-
-  // Aviso de atendente disponível após 8s
-  useEffect(() => {
-    if (notificationDismissed || open) return;
-    const timer = setTimeout(() => setShowNotification(true), 8000);
-    return () => clearTimeout(timer);
-  }, [notificationDismissed, open]);
-
-  const openFromNotification = () => {
-    setShowNotification(false);
-    setNotificationDismissed(true);
-    setOpen(true);
-    // Já entra direto no modo atendente IA
-    if (!aiMode) {
-      handleOption("Quero falar com atendente");
-    }
-  };
-
-  const dismissNotification = (e: React.MouseEvent | React.KeyboardEvent) => {
-    e.stopPropagation();
-    setShowNotification(false);
-    setNotificationDismissed(true);
-  };
 
   const sendToAI = async (userText: string, history: Message[]) => {
     setLoading(true);
@@ -127,9 +103,38 @@ const SupportChat = () => {
     const reply = AUTO_REPLIES[option];
 
     if (option === "Quero falar com atendente") {
-      const botMsg: Message = { from: "bot", text: reply.answer };
-      setMessages((prev) => [...prev, userMsg, botMsg]);
-      setAiMode(true);
+      // Mensagem de sistema "conectando com atendente"
+      const systemMsg: Message = {
+        from: "bot",
+        text: "🔔 Conectando você com um atendente...",
+        system: true,
+      };
+      setMessages((prev) => [...prev, userMsg, systemMsg]);
+      setConnecting(true);
+
+      // Após 2.5s, atendente "entra" no chat
+      setTimeout(() => {
+        const enteredMsg: Message = {
+          from: "bot",
+          text: "✅ Carla entrou no atendimento",
+          system: true,
+        };
+        setMessages((prev) => [...prev, enteredMsg]);
+        setConnecting(false);
+        setAiMode(true);
+
+        // Após mais 1.5s, Carla começa a "digitar" e manda saudação
+        setTimeout(() => {
+          setLoading(true);
+          setTimeout(() => {
+            setMessages((prev) => [
+              ...prev,
+              { from: "bot", text: reply.answer },
+            ]);
+            setLoading(false);
+          }, 1800);
+        }, 1200);
+      }, 2500);
       return;
     }
 
@@ -234,7 +239,12 @@ const SupportChat = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
             {messages.map((msg, i) => (
               <div key={i}>
-                <div
+                {msg.system ? (
+                  <div className="text-center text-[11px] text-muted-foreground py-1 px-3 italic">
+                    {msg.text}
+                  </div>
+                ) : (
+                  <div
                   className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line ${
                     msg.from === "bot"
                       ? "bg-muted text-foreground rounded-bl-md"
@@ -243,6 +253,7 @@ const SupportChat = () => {
                 >
                   {msg.text}
                 </div>
+                )}
                 {msg.action && (
                   <a
                     href={msg.action.url}
@@ -269,7 +280,7 @@ const SupportChat = () => {
                 )}
               </div>
             ))}
-            {loading && (
+            {(loading || connecting) && (
               <div className="bg-muted text-foreground rounded-2xl rounded-bl-md px-4 py-2.5 max-w-[85%] flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
