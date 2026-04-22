@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, ExternalLink } from "lucide-react";
+import { MessageCircle, X, ExternalLink, Send, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface Message {
   from: "bot" | "user";
@@ -31,9 +33,7 @@ const AUTO_REPLIES: Record<string, { answer: string; followUp?: string[]; action
   },
   "Quero falar com atendente": {
     answer:
-      "👋 Clique no botão abaixo para entrar no nosso grupo de suporte no WhatsApp!",
-    followUp: ["Como funciona?", "É seguro?"],
-    action: { label: "Abrir WhatsApp", url: "https://chat.whatsapp.com/G6t4if0sBK0JeRePlp36ic" },
+      "Oi! Sou a Carla 💜 Tô aqui pra te ajudar. Me conta: você tá querendo turbinar qual rede social hoje?",
   },
 };
 
@@ -46,15 +46,67 @@ const INITIAL_MESSAGE: Message = {
 const SupportChat = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const [aiMode, setAiMode] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, loading]);
+
+  useEffect(() => {
+    if (aiMode) inputRef.current?.focus();
+  }, [aiMode]);
+
+  const sendToAI = async (userText: string, history: Message[]) => {
+    setLoading(true);
+    try {
+      const aiMessages = history
+        .filter((m) => m.text)
+        .map((m) => ({
+          role: m.from === "user" ? "user" : "assistant",
+          content: m.text,
+        }));
+      aiMessages.push({ role: "user", content: userText });
+
+      const { data, error } = await supabase.functions.invoke("sales-chat", {
+        body: { messages: aiMessages },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const reply: string = data?.reply ?? "Pode repetir, amor? Não entendi 💜";
+      setMessages((prev) => [...prev, { from: "bot", text: reply }]);
+    } catch (err) {
+      console.error(err);
+      const errorMsg = err instanceof Error ? err.message : "Erro de conexão";
+      toast({ title: "Ops", description: errorMsg, variant: "destructive" });
+      setMessages((prev) => [
+        ...prev,
+        {
+          from: "bot",
+          text: "Tive um probleminha aqui 😅 Se preferir, fala comigo no WhatsApp:",
+          action: { label: "Abrir WhatsApp", url: "https://chat.whatsapp.com/G6t4if0sBK0JeRePlp36ic" },
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOption = (option: string) => {
     const userMsg: Message = { from: "user", text: option };
     const reply = AUTO_REPLIES[option];
+
+    if (option === "Quero falar com atendente") {
+      const botMsg: Message = { from: "bot", text: reply.answer };
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+      setAiMode(true);
+      return;
+    }
 
     if (reply) {
       const botMsg: Message = {
@@ -73,12 +125,24 @@ const SupportChat = () => {
     }
   };
 
+  const handleSend = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput("");
+    const userMsg: Message = { from: "user", text };
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
+    await sendToAI(text, messages);
+  };
+
   return (
     <>
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
         className="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full ig-gradient-bg text-primary-foreground flex items-center justify-center shadow-xl hover:scale-105 transition-transform"
+        aria-label="Abrir suporte"
       >
         {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
       </button>
@@ -93,8 +157,13 @@ const SupportChat = () => {
                 <MessageCircle className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <p className="text-sm font-bold text-primary-foreground">Suporte Engajar</p>
-                <p className="text-[10px] text-primary-foreground/70">Online agora</p>
+                <p className="text-sm font-bold text-primary-foreground">
+                  {aiMode ? "Carla • Atendimento" : "Suporte Engajar"}
+                </p>
+                <p className="text-[10px] text-primary-foreground/70 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                  Online agora
+                </p>
               </div>
             </div>
             <button onClick={() => setOpen(false)}>
@@ -141,8 +210,38 @@ const SupportChat = () => {
                 )}
               </div>
             ))}
+            {loading && (
+              <div className="bg-muted text-foreground rounded-2xl rounded-bl-md px-4 py-2.5 max-w-[85%] flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+              </div>
+            )}
             <div ref={bottomRef} />
           </div>
+
+          {/* Input (apenas no modo IA) */}
+          {aiMode && (
+            <form onSubmit={handleSend} className="border-t border-border p-3 flex items-center gap-2 flex-shrink-0 bg-background">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Digite sua mensagem..."
+                disabled={loading}
+                className="flex-1 px-3 py-2 text-sm rounded-full bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="w-9 h-9 rounded-full ig-gradient-bg text-primary-foreground flex items-center justify-center disabled:opacity-50 hover:scale-105 transition-transform"
+                aria-label="Enviar"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </button>
+            </form>
+          )}
         </div>
       )}
     </>
