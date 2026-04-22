@@ -169,37 +169,6 @@ const SupportChat = () => {
 
   return (
     <>
-      {/* Notificação de atendente disponível */}
-      {showNotification && !open && (
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={openFromNotification}
-          onKeyDown={(e) => e.key === "Enter" && openFromNotification()}
-          className="fixed bottom-24 right-4 left-4 md:left-auto md:w-[320px] z-50 bg-card border border-border rounded-2xl shadow-2xl p-3 flex items-start gap-3 text-left animate-in slide-in-from-bottom-4 fade-in duration-500 hover:scale-[1.02] transition-transform"
-        >
-          <div className="relative flex-shrink-0">
-            <div className="w-10 h-10 rounded-full ig-gradient-bg flex items-center justify-center">
-              <span className="text-base font-bold text-primary-foreground">C</span>
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-card" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <p className="text-sm font-bold text-foreground truncate">Carla • Engajar Social</p>
-              <span className="text-[10px] text-muted-foreground flex-shrink-0">agora</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-snug line-clamp-2">
-              Oi! 👋 Vi que você tá olhando nossos planos. Posso te ajudar a escolher o ideal? 💜
-            </p>
-          </div>
-          <X
-            onClick={dismissNotification}
-            className="w-4 h-4 text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer"
-          />
-        </div>
-      )}
-
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
@@ -207,9 +176,6 @@ const SupportChat = () => {
         aria-label="Abrir suporte"
       >
         {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-        {showNotification && !open && (
-          <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-        )}
       </button>
 
       {/* Chat Window */}
