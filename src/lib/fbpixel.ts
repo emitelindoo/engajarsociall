@@ -24,6 +24,6 @@ export const fbSetUserData = (userData: {
 }) => {
   if (typeof window !== "undefined" && window.fbq) {
     // Re-init pixel with user data for advanced matching
-    window.fbq("init", "785061701305440", userData);
+    window.fbq("init", "2206633563482874", userData);
   }
 };
