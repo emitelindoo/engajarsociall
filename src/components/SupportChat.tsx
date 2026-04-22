@@ -79,7 +79,7 @@ const SupportChat = () => {
     }
   };
 
-  const dismissNotification = (e: React.MouseEvent) => {
+  const dismissNotification = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
     setShowNotification(false);
     setNotificationDismissed(true);
@@ -165,8 +165,11 @@ const SupportChat = () => {
     <>
       {/* Notificação de atendente disponível */}
       {showNotification && !open && (
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={openFromNotification}
+          onKeyDown={(e) => e.key === "Enter" && openFromNotification()}
           className="fixed bottom-24 right-4 left-4 md:left-auto md:w-[320px] z-50 bg-card border border-border rounded-2xl shadow-2xl p-3 flex items-start gap-3 text-left animate-in slide-in-from-bottom-4 fade-in duration-500 hover:scale-[1.02] transition-transform"
         >
           <div className="relative flex-shrink-0">
@@ -188,7 +191,7 @@ const SupportChat = () => {
             onClick={dismissNotification}
             className="w-4 h-4 text-muted-foreground hover:text-foreground flex-shrink-0 cursor-pointer"
           />
-        </button>
+        </div>
       )}
 
       {/* Floating Button */}
