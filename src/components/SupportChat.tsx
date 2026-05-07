@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, ExternalLink, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, ExternalLink, Send, Loader2, ArrowDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -8,6 +8,7 @@ interface Message {
   text: string;
   options?: string[];
   action?: { label: string; url: string };
+  scrollToPlans?: boolean;
   system?: boolean;
 }
 
@@ -81,7 +82,15 @@ const SupportChat = () => {
       if (data?.error) throw new Error(data.error);
 
       const reply: string = data?.reply ?? "Pode repetir, amor? Não entendi 💜";
-      setMessages((prev) => [...prev, { from: "bot", text: reply }]);
+      // Detecta intenção de fechamento/escolha de plano para mostrar CTA dos planos
+      const lower = reply.toLowerCase();
+      const userCount = history.filter((m) => m.from === "user").length + 1;
+      const triggers = ["plano", "pacote", "checkout", "link", "carrinho", "fechar", "comprar", "preço", "preco"];
+      const shouldShowCTA = triggers.some((t) => lower.includes(t)) || userCount >= 3;
+      setMessages((prev) => [
+        ...prev,
+        { from: "bot", text: reply, scrollToPlans: shouldShowCTA },
+      ]);
     } catch (err) {
       console.error(err);
       const errorMsg = err instanceof Error ? err.message : "Erro de conexão";
@@ -97,6 +106,13 @@ const SupportChat = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToPlans = () => {
+    setOpen(false);
+    setTimeout(() => {
+      document.getElementById("precos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 250);
   };
 
   const handleOption = (option: string) => {
@@ -231,6 +247,15 @@ const SupportChat = () => {
                     <ExternalLink className="w-4 h-4" />
                     {msg.action.label}
                   </a>
+                )}
+                {msg.scrollToPlans && (
+                  <button
+                    onClick={goToPlans}
+                    className="mt-2 inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl ig-gradient-bg text-primary-foreground shadow-md hover:opacity-90 transition-opacity"
+                  >
+                    <ArrowDown className="w-4 h-4" />
+                    Ver planos agora
+                  </button>
                 )}
                 {msg.options && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
