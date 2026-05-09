@@ -21,13 +21,19 @@ const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", 
 
 // ─── INSTAGRAM ────────────────────────────────────────────
 export const igSeguidores: PlanData[] = [
-  { id: "ig-seg-1500", name: "Starter", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$25,90", price: "R$12,99", priceNum: 12.99, quantity: "1.500 + 500 Seguidores Bônus", features: segFeatures },
-  { id: "ig-seg-3500", name: "Básico", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$29,90", price: "R$13,80", priceNum: 13.80, quantity: "3.500 + 1.000 Seguidores Bônus", features: segFeatures },
-  { id: "ig-seg-5k", name: "Intermediário", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$34,90", price: "R$15,99", priceNum: 15.99, quantity: "5.000 + 2.000 Seguidores Bônus", features: segFeatures },
-  { id: "ig-seg-10k", name: "Profissional", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$49,90", price: "R$22,00", priceNum: 22.00, quantity: "10.000 + 4.000 Seguidores Bônus", features: segFeatures, highlighted: true },
-  { id: "ig-seg-20k", name: "Elite", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$69,90", price: "R$30,50", priceNum: 30.50, quantity: "20.000 + 5.000 Seguidores Bônus", features: segFeatures },
-  { id: "ig-seg-50k", name: "Premium", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$119,90", price: "R$54,90", priceNum: 54.90, quantity: "50.000 + 8.000 Seguidores Bônus", features: segFeatures },
-  { id: "ig-seg-100k", name: "VIP", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$229,90", price: "R$102,90", priceNum: 102.90, quantity: "100.000 + 10.000 Seguidores Bônus", features: segFeatures },
+  { id: "ig-seg-100",  name: "Teste",         platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$9,90",   price: "R$4,90",   priceNum: 4.90,   quantity: "100 Seguidores",     features: segFeatures },
+  { id: "ig-seg-250",  name: "Starter",       platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$13,90",  price: "R$6,90",   priceNum: 6.90,   quantity: "250 Seguidores",     features: segFeatures },
+  { id: "ig-seg-500",  name: "Iniciante",     platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$17,90",  price: "R$8,90",   priceNum: 8.90,   quantity: "500 Seguidores",     features: segFeatures },
+  { id: "ig-seg-1k",   name: "Básico",        platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$21,90",  price: "R$10,90",  priceNum: 10.90,  quantity: "1.000 Seguidores",   features: segFeatures },
+  { id: "ig-seg-2500", name: "Intermediário", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$27,90",  price: "R$13,90",  priceNum: 13.90,  quantity: "2.500 Seguidores",   features: segFeatures },
+  { id: "ig-seg-5k",   name: "Avançado",      platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$35,90",  price: "R$17,90",  priceNum: 17.90,  quantity: "5.000 Seguidores",   features: segFeatures },
+  { id: "ig-seg-10k",  name: "Profissional",  platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$44,90",  price: "R$22,00",  priceNum: 22.00,  quantity: "10.000 Seguidores",  features: segFeatures, highlighted: true },
+  { id: "ig-seg-25k",  name: "Premium",       platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$79,90",  price: "R$39,90",  priceNum: 39.90,  quantity: "25.000 Seguidores",  features: segFeatures },
+  { id: "ig-seg-50k",  name: "Elite",         platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$109,90", price: "R$54,90",  priceNum: 54.90,  quantity: "50.000 Seguidores",  features: segFeatures },
+  { id: "ig-seg-100k", name: "VIP",           platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$209,90", price: "R$102,90", priceNum: 102.90, quantity: "100.000 Seguidores", features: segFeatures },
+  { id: "ig-seg-200k", name: "Master",        platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$379,90", price: "R$189,90", priceNum: 189.90, quantity: "200.000 Seguidores", features: segFeatures },
+  { id: "ig-seg-300k", name: "Black",         platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$549,90", price: "R$269,90", priceNum: 269.90, quantity: "300.000 Seguidores", features: segFeatures },
+  { id: "ig-seg-500k", name: "Diamond",       platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$859,90", price: "R$429,90", priceNum: 429.90, quantity: "500.000 Seguidores", features: segFeatures },
 ];
 
 export const igCurtidas: PlanData[] = [
