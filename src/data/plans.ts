@@ -20,19 +20,8 @@ const commentFeatures = ["Comentários positivos", "Perfis brasileiros reais", "
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── INSTAGRAM ────────────────────────────────────────────
-// Preço dinâmico por quantidade — escala que beneficia o cliente em pacotes maiores.
-// 100 → R$4,90 | 1.000 → ~R$10,90 | 10.000 → ~R$22,00 | 50.000 → ~R$54,90
-const calcSegPriceNum = (qty: number): number => {
-  let p: number;
-  if (qty <= 1000) {
-    p = 4.9 + ((qty - 100) / 900) * 6.0; // 4.90 → 10.90
-  } else if (qty <= 10000) {
-    p = 10.9 + ((qty - 1000) / 9000) * 11.1; // 10.90 → 22.00
-  } else {
-    p = 22 + ((qty - 10000) / 40000) * 32.9; // 22.00 → 54.90
-  }
-  return Math.round(p * 100) / 100;
-};
+// Preço linear: cada 10 seguidores = R$0,50 (R$0,05 por seguidor).
+const calcSegPriceNum = (qty: number): number => Math.round((qty / 10) * 0.5 * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
 const fmtQty = (n: number) => n.toLocaleString("pt-BR");
