@@ -20,21 +20,51 @@ const commentFeatures = ["Comentários positivos", "Perfis brasileiros reais", "
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── INSTAGRAM ────────────────────────────────────────────
-export const igSeguidores: PlanData[] = [
-  { id: "ig-seg-100",  name: "Teste",         platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$9,90",   price: "R$4,90",   priceNum: 4.90,   quantity: "100 Seguidores",     features: segFeatures },
-  { id: "ig-seg-250",  name: "Starter",       platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$13,90",  price: "R$6,90",   priceNum: 6.90,   quantity: "250 Seguidores",     features: segFeatures },
-  { id: "ig-seg-500",  name: "Iniciante",     platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$17,90",  price: "R$8,90",   priceNum: 8.90,   quantity: "500 Seguidores",     features: segFeatures },
-  { id: "ig-seg-1k",   name: "Básico",        platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$21,90",  price: "R$10,90",  priceNum: 10.90,  quantity: "1.000 Seguidores",   features: segFeatures },
-  { id: "ig-seg-2500", name: "Intermediário", platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$27,90",  price: "R$13,90",  priceNum: 13.90,  quantity: "2.500 Seguidores",   features: segFeatures },
-  { id: "ig-seg-5k",   name: "Avançado",      platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$35,90",  price: "R$17,90",  priceNum: 17.90,  quantity: "5.000 Seguidores",   features: segFeatures },
-  { id: "ig-seg-10k",  name: "Profissional",  platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$44,90",  price: "R$22,00",  priceNum: 22.00,  quantity: "10.000 Seguidores",  features: segFeatures, highlighted: true },
-  { id: "ig-seg-25k",  name: "Premium",       platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$79,90",  price: "R$39,90",  priceNum: 39.90,  quantity: "25.000 Seguidores",  features: segFeatures },
-  { id: "ig-seg-50k",  name: "Elite",         platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$109,90", price: "R$54,90",  priceNum: 54.90,  quantity: "50.000 Seguidores",  features: segFeatures },
-  { id: "ig-seg-100k", name: "VIP",           platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$209,90", price: "R$102,90", priceNum: 102.90, quantity: "100.000 Seguidores", features: segFeatures },
-  { id: "ig-seg-200k", name: "Master",        platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$379,90", price: "R$189,90", priceNum: 189.90, quantity: "200.000 Seguidores", features: segFeatures },
-  { id: "ig-seg-300k", name: "Black",         platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$549,90", price: "R$269,90", priceNum: 269.90, quantity: "300.000 Seguidores", features: segFeatures },
-  { id: "ig-seg-500k", name: "Diamond",       platform: "Instagram", serviceType: "Seguidores", originalPrice: "R$859,90", price: "R$429,90", priceNum: 429.90, quantity: "500.000 Seguidores", features: segFeatures },
-];
+// Preço dinâmico por quantidade — escala que beneficia o cliente em pacotes maiores.
+// 100 → R$4,90 | 1.000 → ~R$10,90 | 10.000 → ~R$22,00 | 50.000 → ~R$54,90
+const calcSegPriceNum = (qty: number): number => {
+  let p: number;
+  if (qty <= 1000) {
+    p = 4.9 + ((qty - 100) / 900) * 6.0; // 4.90 → 10.90
+  } else if (qty <= 10000) {
+    p = 10.9 + ((qty - 1000) / 9000) * 11.1; // 10.90 → 22.00
+  } else {
+    p = 22 + ((qty - 10000) / 40000) * 32.9; // 22.00 → 54.90
+  }
+  return Math.round(p * 100) / 100;
+};
+
+const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
+const fmtQty = (n: number) => n.toLocaleString("pt-BR");
+
+const buildIgSeguidores = (): PlanData[] => {
+  const list: PlanData[] = [];
+  // Steps: 10 entre 100-500, 50 entre 500-2k, 100 entre 2k-10k, 500 entre 10k-50k
+  const steps: number[] = [];
+  for (let q = 100; q < 500; q += 10) steps.push(q);
+  for (let q = 500; q < 2000; q += 50) steps.push(q);
+  for (let q = 2000; q < 10000; q += 100) steps.push(q);
+  for (let q = 10000; q <= 50000; q += 500) steps.push(q);
+
+  return steps.map((qty) => {
+    const priceNum = calcSegPriceNum(qty);
+    const originalNum = Math.round(priceNum * 2 * 100) / 100;
+    return {
+      id: `ig-seg-${qty}`,
+      name: qty >= 10000 ? "Profissional" : qty >= 2000 ? "Avançado" : qty >= 500 ? "Básico" : "Iniciante",
+      platform: "Instagram",
+      serviceType: "Seguidores",
+      originalPrice: fmtBRL(originalNum),
+      price: fmtBRL(priceNum),
+      priceNum,
+      quantity: `${fmtQty(qty)} Seguidores`,
+      features: segFeatures,
+      highlighted: qty === 10000,
+    };
+  });
+};
+
+export const igSeguidores: PlanData[] = buildIgSeguidores();
 
 export const igCurtidas: PlanData[] = [
   { id: "ig-curt-100", name: "Iniciante", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$6,90", priceNum: 6.9, quantity: "100 Curtidas", features: curtidaFeatures },
