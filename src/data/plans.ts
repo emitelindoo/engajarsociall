@@ -20,8 +20,8 @@ const commentFeatures = ["Comentários positivos", "Perfis brasileiros reais", "
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── INSTAGRAM ────────────────────────────────────────────
-// Preço linear: cada 10 seguidores = R$0,50 (R$0,05 por seguidor).
-const calcSegPriceNum = (qty: number): number => Math.round((qty / 10) * 0.5 * 100) / 100;
+// Preço linear: cada 10 seguidores = R$0,25 (R$0,025 por seguidor).
+const calcSegPriceNum = (qty: number): number => Math.round((qty / 10) * 0.25 * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
 const fmtQty = (n: number) => n.toLocaleString("pt-BR");
