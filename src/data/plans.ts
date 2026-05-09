@@ -30,17 +30,14 @@ const buildIgSeguidores = (): PlanData[] => {
   const list: PlanData[] = [];
   // Steps: 10 entre 100-500, 50 entre 500-2k, 100 entre 2k-10k, 500 entre 10k-50k
   const steps: number[] = [];
-  for (let q = 100; q < 500; q += 10) steps.push(q);
-  for (let q = 500; q < 2000; q += 50) steps.push(q);
-  for (let q = 2000; q < 10000; q += 100) steps.push(q);
-  for (let q = 10000; q <= 50000; q += 500) steps.push(q);
+  for (let q = 100; q <= 500; q += 10) steps.push(q);
 
   return steps.map((qty) => {
     const priceNum = calcSegPriceNum(qty);
     const originalNum = Math.round(priceNum * 2 * 100) / 100;
     return {
       id: `ig-seg-${qty}`,
-      name: qty >= 10000 ? "Profissional" : qty >= 2000 ? "Avançado" : qty >= 500 ? "Básico" : "Iniciante",
+      name: qty >= 400 ? "Avançado" : qty >= 250 ? "Básico" : "Iniciante",
       platform: "Instagram",
       serviceType: "Seguidores",
       originalPrice: fmtBRL(originalNum),
@@ -48,7 +45,7 @@ const buildIgSeguidores = (): PlanData[] => {
       priceNum,
       quantity: `${fmtQty(qty)} Seguidores`,
       features: segFeatures,
-      highlighted: qty === 10000,
+      highlighted: qty === 300,
     };
   });
 };
