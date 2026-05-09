@@ -8,6 +8,7 @@ const feedbacks = [
     text: "Comprei 5.000 seguidores pro meu perfil de loja e já notei diferença no alcance dos stories. Recebi tudo em umas 2 horas.",
     date: "3 dias atrás",
     verified: true,
+    img: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=200",
   },
   {
     name: "Carlos Mendes",
@@ -16,6 +17,7 @@ const feedbacks = [
     text: "Já é a segunda vez que compro aqui. Sempre entrega certinho e os seguidores não caem. O suporte pelo WhatsApp é rápido.",
     date: "5 dias atrás",
     verified: true,
+    img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=200",
   },
   {
     name: "Ana Silva",
@@ -24,6 +26,7 @@ const feedbacks = [
     text: "Tinha receio, mas fiz o teste com 1.000 e deu certo. Depois comprei 10k. Meu perfil parece muito mais profissional agora.",
     date: "1 semana atrás",
     verified: true,
+    img: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=200",
   },
   {
     name: "Pedro Henrique",
@@ -32,6 +35,7 @@ const feedbacks = [
     text: "Comprei curtidas e seguidores juntos. O processo é muito fácil — paguei no PIX e já começou a chegar.",
     date: "1 semana atrás",
     verified: true,
+    img: "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=200",
   },
   {
     name: "Fernanda Rodrigues",
@@ -40,6 +44,7 @@ const feedbacks = [
     text: "Testei 3 sites diferentes antes e esse foi o único que entregou seguidores brasileiros de verdade, sem bot.",
     date: "2 semanas atrás",
     verified: true,
+    img: "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200",
   },
   {
     name: "Gustavo Lima",
@@ -48,6 +53,7 @@ const feedbacks = [
     text: "Demorou um pouco mais que o esperado (umas 4h), mas veio tudo certinho. O selo de verificação ficou show.",
     date: "2 semanas atrás",
     verified: true,
+    img: "https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=200",
   },
 ];
 
@@ -77,9 +83,12 @@ const FeedbackSection = () => (
             className="bg-card rounded-2xl border border-border p-5 card-shadow"
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-foreground font-bold text-xs">
-                {fb.name.split(" ").map(n => n[0]).join("")}
-              </div>
+              <img
+                src={fb.img}
+                alt={fb.name}
+                loading="lazy"
+                className="w-9 h-9 rounded-full object-cover bg-muted"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <p className="font-semibold text-foreground text-sm">{fb.name}</p>
