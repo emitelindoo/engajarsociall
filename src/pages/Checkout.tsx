@@ -307,64 +307,54 @@ const Checkout = () => {
 
           {/* PIX Result */}
           {pixCode && (
-            <div className="bg-card rounded-2xl border border-primary/30 p-5 card-shadow mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="w-5 h-5 text-accent" />
-                <h3 className="font-bold text-foreground">PIX gerado — falta só pagar! 🚀</h3>
-              </div>
+            <div className="bg-card rounded-2xl border border-primary/30 p-4 card-shadow mb-4">
+              <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-accent" /> PIX gerado — falta só pagar! 🚀
+              </h3>
 
-              {/* Motivational summary — what the customer is acquiring */}
-              <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-transparent border border-primary/20 rounded-xl p-4 mb-4">
-                <p className="text-[11px] uppercase tracking-wider font-bold text-primary mb-2">
-                  ✨ Você está adquirindo:
+              {/* Compact summary */}
+              <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl px-3 py-2.5 mb-3">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-primary mb-1.5">
+                  ✨ Você está adquirindo
                 </p>
-                <ul className="space-y-1.5 mb-3">
+                <ul className="space-y-0.5 mb-2">
                   {items.map((it) => (
-                    <li key={it.plan.id} className="flex items-start gap-2 text-sm text-foreground">
-                      <CheckCircle2 className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
-                      <span>
-                        <strong>{it.plan.quantity}</strong>
-                        <span className="text-muted-foreground"> · {it.plan.platform}</span>
-                      </span>
+                    <li key={it.plan.id} className="text-xs text-foreground leading-snug">
+                      <CheckCircle2 className="w-3 h-3 text-accent inline mr-1 -mt-0.5" />
+                      <strong>{it.plan.quantity}</strong>
+                      <span className="text-muted-foreground"> · {it.plan.platform}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                  <span className="text-xs text-muted-foreground font-medium">Total a pagar</span>
-                  <span className="text-xl font-bold text-accent">R${total.toFixed(2).replace(".", ",")}</span>
+                <div className="flex items-center justify-between pt-1.5 border-t border-border/50">
+                  <span className="text-[11px] text-muted-foreground">Total</span>
+                  <span className="text-base font-bold text-accent">R${total.toFixed(2).replace(".", ",")}</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-2 text-center">
-                  ⚡ Entrega inicia <strong className="text-foreground">automaticamente</strong> assim que o pagamento for confirmado.
-                </p>
               </div>
 
-              <div className="flex justify-center mb-4">
-                <div className="bg-white p-3 rounded-xl">
-                  <QRCodeSVG value={pixCode} size={200} level="M" />
+              <div className="flex justify-center mb-3">
+                <div className="bg-white p-2.5 rounded-xl">
+                  <QRCodeSVG value={pixCode} size={160} level="M" />
                 </div>
               </div>
-              <p className="text-xs text-foreground mb-2 font-semibold text-center">
-                📲 Aponte a câmera ou copie o código abaixo
-              </p>
-              <div className="bg-muted rounded-xl p-3 mb-3 break-all">
-                <p className="text-xs text-foreground font-mono leading-relaxed">{pixCode}</p>
+
+              <div className="bg-muted rounded-xl p-2.5 mb-2 break-all max-h-20 overflow-y-auto">
+                <p className="text-[10px] text-foreground font-mono leading-relaxed">{pixCode}</p>
               </div>
+
               <button onClick={copyPix}
                 className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                   copied ? "bg-accent text-accent-foreground" : "brand-gradient-bg text-primary-foreground hover:opacity-90"
                 }`}>
-                {copied ? <><CheckCircle2 className="w-4 h-4" /> Código copiado — finalize no seu banco!</> : <><Copy className="w-4 h-4" /> Copiar código e pagar agora</>}
+                {copied ? <><CheckCircle2 className="w-4 h-4" /> Copiado! Finalize no banco</> : <><Copy className="w-4 h-4" /> Copiar código e pagar</>}
               </button>
-              <p className="text-xs text-muted-foreground text-center mt-3 leading-relaxed">
-                Abra o app do seu banco → <strong className="text-foreground">PIX Copia e Cola</strong> → cole e confirme.
-                <br />Pronto! Seu pedido começa na hora. 💜
-              </p>
-              <div className="flex items-center justify-center gap-3 mt-4 pt-3 border-t border-border/50 text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-accent" /> 100% seguro</span>
+
+              <div className="flex items-center justify-center gap-2 mt-3 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-accent" /> Seguro</span>
                 <span>•</span>
-                <span className="flex items-center gap-1"><Lock className="w-3 h-3 text-accent" /> Sem senha</span>
+                <span className="flex items-center gap-1"><Zap className="w-3 h-3 text-accent" /> Entrega na hora</span>
                 <span>•</span>
-                <span className="flex items-center gap-1"><Zap className="w-3 h-3 text-accent" /> Entrega imediata</span>
+                <span>Sem senha</span>
               </div>
             </div>
           )}
