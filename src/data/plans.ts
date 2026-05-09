@@ -26,9 +26,13 @@ const calcSegPriceNum = (qty: number): number => Math.round((qty / 10) * 0.15 * 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
 const fmtQty = (n: number) => n.toLocaleString("pt-BR");
 
-const buildIgSeguidores = (): PlanData[] => {
-  const list: PlanData[] = [];
-  // Steps: 10 entre 100-500, 50 entre 500-2k, 100 entre 2k-10k, 500 entre 10k-50k
+const buildScalablePlans = (
+  idPrefix: string,
+  platform: string,
+  serviceType: string,
+  unit: string,
+  features: string[],
+): PlanData[] => {
   const steps: number[] = [];
   for (let q = 500; q < 2000; q += 50) steps.push(q);
   for (let q = 2000; q < 10000; q += 100) steps.push(q);
@@ -39,21 +43,22 @@ const buildIgSeguidores = (): PlanData[] => {
     const priceNum = calcSegPriceNum(qty);
     const originalNum = Math.round(priceNum * 2 * 100) / 100;
     return {
-      id: `ig-seg-${qty}`,
+      id: `${idPrefix}-${qty}`,
       name: qty >= 100000 ? "VIP" : qty >= 25000 ? "Premium" : qty >= 10000 ? "Profissional" : qty >= 2000 ? "Avançado" : "Básico",
-      platform: "Instagram",
-      serviceType: "Seguidores",
+      platform,
+      serviceType,
       originalPrice: fmtBRL(originalNum),
       price: fmtBRL(priceNum),
       priceNum,
-      quantity: `${fmtQty(qty)} Seguidores`,
-      features: segFeatures,
+      quantity: `${fmtQty(qty)} ${unit}`,
+      features,
       highlighted: qty === 10000,
     };
   });
 };
 
-export const igSeguidores: PlanData[] = buildIgSeguidores();
+export const igSeguidores: PlanData[] = buildScalablePlans("ig-seg", "Instagram", "Seguidores", "Seguidores", segFeatures);
+export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas", "Curtidas", curtidaFeatures);
 
 export const igCurtidas: PlanData[] = [
   { id: "ig-curt-100", name: "Iniciante", platform: "Instagram", serviceType: "Curtidas", originalPrice: "R$14,90", price: "R$6,90", priceNum: 6.9, quantity: "100 Curtidas", features: curtidaFeatures },
