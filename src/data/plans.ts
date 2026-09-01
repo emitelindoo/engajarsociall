@@ -16,7 +16,6 @@ export type { PlanData as PlanDataType };
 
 const segFeatures = ["100% Brasileiros", "Entrega imediata", "Garantia de reposição", "Sem informar senha", "Segurança garantida"];
 const curtidaFeatures = ["Curtidas brasileiras", "Distribuídas nos posts", "Entrega rápida", "Sem senha", "Garantia"];
-const commentFeatures = ["Comentários positivos", "Perfis brasileiros reais", "Entrega em até 24h", "Sem senha", "Garantia"];
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── PRICING ──────────────────────────────────────────────

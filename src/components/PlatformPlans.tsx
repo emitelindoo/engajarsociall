@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
+import { Heart, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
-  igSeguidores, igCurtidas, igComentarios, igVisualizacoes,
-  ttSeguidores, ttCurtidas, ttComentarios, ttVisualizacoes,
+  igSeguidores, igCurtidas, igVisualizacoes,
+  ttSeguidores, ttCurtidas, ttVisualizacoes,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
@@ -21,14 +21,12 @@ const igServices: ServiceConfig[] = [
   { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: igSeguidores },
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: igCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: igVisualizacoes },
-  { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: igComentarios },
 ];
 
 const ttServices: ServiceConfig[] = [
   { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: ttSeguidores },
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: ttCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ttVisualizacoes },
-  { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ttComentarios },
 ];
 
 const platforms = [
