@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Heart, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
+import { Heart, Eye, Users, Globe, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
-  igSeguidores, igCurtidas, igVisualizacoes,
-  ttSeguidores, ttCurtidas, ttVisualizacoes,
+  igSeguidores, igSeguidoresMundiais, igCurtidas, igCurtidasMundiais, igVisualizacoes,
+  ttSeguidores, ttSeguidoresMundiais, ttCurtidas, ttCurtidasMundiais, ttVisualizacoes,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
@@ -18,14 +18,18 @@ interface ServiceConfig {
 }
 
 const igServices: ServiceConfig[] = [
-  { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: igSeguidores },
-  { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: igCurtidas },
+  { id: "seg", label: "Seguidores BR", icon: <Users className="w-5 h-5" />, plans: igSeguidores },
+  { id: "seg-ww", label: "Seguidores Mundiais", icon: <Globe className="w-5 h-5" />, plans: igSeguidoresMundiais },
+  { id: "curt", label: "Curtidas BR", icon: <Heart className="w-5 h-5" />, plans: igCurtidas },
+  { id: "curt-ww", label: "Curtidas Mundiais", icon: <Globe className="w-5 h-5" />, plans: igCurtidasMundiais },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: igVisualizacoes },
 ];
 
 const ttServices: ServiceConfig[] = [
-  { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: ttSeguidores },
-  { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: ttCurtidas },
+  { id: "seg", label: "Seguidores BR", icon: <Users className="w-5 h-5" />, plans: ttSeguidores },
+  { id: "seg-ww", label: "Seguidores Mundiais", icon: <Globe className="w-5 h-5" />, plans: ttSeguidoresMundiais },
+  { id: "curt", label: "Curtidas BR", icon: <Heart className="w-5 h-5" />, plans: ttCurtidas },
+  { id: "curt-ww", label: "Curtidas Mundiais", icon: <Globe className="w-5 h-5" />, plans: ttCurtidasMundiais },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ttVisualizacoes },
 ];
 

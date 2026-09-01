@@ -14,13 +14,17 @@ export interface PlanData {
 // Keep backward compat
 export type { PlanData as PlanDataType };
 
-const segFeatures = ["100% Brasileiros", "Entrega imediata", "Garantia de reposição", "Sem informar senha", "Segurança garantida"];
-const curtidaFeatures = ["Curtidas brasileiras", "Distribuídas nos posts", "Entrega rápida", "Sem senha", "Garantia"];
+const segFeaturesBR = ["100% Brasileiros", "Perfis reais e ativos", "Entrega imediata", "Garantia de reposição", "Sem informar senha"];
+const segFeaturesWW = ["Seguidores mundiais", "Melhor custo-benefício", "Entrega imediata", "Garantia de reposição", "Sem informar senha"];
+const curtidaFeaturesBR = ["Curtidas brasileiras", "Distribuídas nos posts", "Entrega rápida", "Sem senha", "Garantia"];
+const curtidaFeaturesWW = ["Curtidas mundiais", "Preço mais baixo", "Entrega rápida", "Sem senha", "Garantia"];
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── PRICING ──────────────────────────────────────────────
-// Cada 10 unidades = R$0,15 (R$0,015 por unidade)
-const calcSegPriceNum = (qty: number): number => Math.round((qty / 10) * 0.15 * 100) / 100;
+// Brasileiros: cada 10 unidades = R$0,15 · Mundiais: cada 10 unidades = R$0,08
+const RATE_BR = 0.15;
+const RATE_WW = 0.08;
+const calcPriceNum = (qty: number, rate: number): number => Math.round((qty / 10) * rate * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
 const fmtQty = (n: number) => n.toLocaleString("pt-BR");
@@ -31,6 +35,7 @@ const buildScalablePlans = (
   serviceType: string,
   unit: string,
   features: string[],
+  rate: number = RATE_BR,
 ): PlanData[] => {
   const steps: number[] = [];
   for (let q = 100; q < 1000; q += 50) steps.push(q);
@@ -39,7 +44,7 @@ const buildScalablePlans = (
   for (let q = 50000; q <= 100000; q += 1000) steps.push(q);
 
   return steps.map((qty) => {
-    const priceNum = calcSegPriceNum(qty);
+    const priceNum = calcPriceNum(qty, rate);
     const originalNum = Math.round(priceNum * 2 * 100) / 100;
     return {
       id: `${idPrefix}-${qty}`,
@@ -57,8 +62,10 @@ const buildScalablePlans = (
 };
 
 // ─── INSTAGRAM ────────────────────────────────────────────
-export const igSeguidores: PlanData[] = buildScalablePlans("ig-seg", "Instagram", "Seguidores", "Seguidores", segFeatures);
-export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas", "Curtidas", curtidaFeatures);
+export const igSeguidores: PlanData[] = buildScalablePlans("ig-seg", "Instagram", "Seguidores Brasileiros", "Seguidores", segFeaturesBR, RATE_BR);
+export const igSeguidoresMundiais: PlanData[] = buildScalablePlans("ig-seg-ww", "Instagram", "Seguidores Mundiais", "Seguidores", segFeaturesWW, RATE_WW);
+export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas Brasileiras", "Curtidas", curtidaFeaturesBR, RATE_BR);
+export const igCurtidasMundiais: PlanData[] = buildScalablePlans("ig-curt-ww", "Instagram", "Curtidas Mundiais", "Curtidas", curtidaFeaturesWW, RATE_WW);
 
 export const igVisualizacoes: PlanData[] = [
   { id: "ig-views-1k", name: "Starter", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
@@ -69,8 +76,10 @@ export const igVisualizacoes: PlanData[] = [
 ];
 
 // ─── TIKTOK ───────────────────────────────────────────────
-export const ttSeguidores: PlanData[] = buildScalablePlans("tt-seg", "TikTok", "Seguidores", "Seguidores", segFeatures);
-export const ttCurtidas: PlanData[] = buildScalablePlans("tt-curt", "TikTok", "Curtidas", "Curtidas", curtidaFeatures);
+export const ttSeguidores: PlanData[] = buildScalablePlans("tt-seg", "TikTok", "Seguidores Brasileiros", "Seguidores", segFeaturesBR, RATE_BR);
+export const ttSeguidoresMundiais: PlanData[] = buildScalablePlans("tt-seg-ww", "TikTok", "Seguidores Mundiais", "Seguidores", segFeaturesWW, RATE_WW);
+export const ttCurtidas: PlanData[] = buildScalablePlans("tt-curt", "TikTok", "Curtidas Brasileiras", "Curtidas", curtidaFeaturesBR, RATE_BR);
+export const ttCurtidasMundiais: PlanData[] = buildScalablePlans("tt-curt-ww", "TikTok", "Curtidas Mundiais", "Curtidas", curtidaFeaturesWW, RATE_WW);
 
 export const ttVisualizacoes: PlanData[] = [
   { id: "tt-views-1k", name: "Starter", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
@@ -81,8 +90,8 @@ export const ttVisualizacoes: PlanData[] = [
 
 // ─── HELPERS ──────────────────────────────────────────────
 const allPlans: PlanData[] = [
-  ...igSeguidores, ...igCurtidas, ...igVisualizacoes,
-  ...ttSeguidores, ...ttCurtidas, ...ttVisualizacoes,
+  ...igSeguidores, ...igSeguidoresMundiais, ...igCurtidas, ...igCurtidasMundiais, ...igVisualizacoes,
+  ...ttSeguidores, ...ttSeguidoresMundiais, ...ttCurtidas, ...ttCurtidasMundiais, ...ttVisualizacoes,
 ];
 
 // backward compat exports
