@@ -38,12 +38,18 @@ const buildScalablePlans = (
   unit: string,
   features: string[],
   rate: number = RATE_BR,
+  step?: number,
 ): PlanData[] => {
   const steps: number[] = [];
-  for (let q = 100; q < 1000; q += 50) steps.push(q);
-  for (let q = 1000; q < 10000; q += 100) steps.push(q);
-  for (let q = 10000; q < 50000; q += 500) steps.push(q);
-  for (let q = 50000; q <= 100000; q += 1000) steps.push(q);
+  if (step) {
+    for (let q = 100; q <= 100000; q += step) steps.push(q);
+  } else {
+    for (let q = 100; q < 1000; q += 50) steps.push(q);
+    for (let q = 1000; q < 10000; q += 100) steps.push(q);
+    for (let q = 10000; q < 50000; q += 500) steps.push(q);
+    for (let q = 50000; q <= 100000; q += 1000) steps.push(q);
+  }
+
 
   return steps.map((qty) => {
     const priceNum = calcPriceNum(qty, rate);
