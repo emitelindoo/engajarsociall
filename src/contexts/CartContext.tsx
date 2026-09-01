@@ -27,7 +27,7 @@ export const useCart = () => {
 
 /** Returns the input label/placeholder based on service type */
 export const getTargetLabel = (serviceType: string) => {
-  if (serviceType === "Seguidores" || serviceType === "Inscritos") return { label: "@ do perfil ou link do canal", placeholder: "@seuusuario" };
+  if (serviceType === "Seguidores") return { label: "@ do perfil", placeholder: "@seuusuario" };
   return { label: "Link da publicação", placeholder: "https://..." };
 };
 

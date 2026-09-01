@@ -1,5 +1,5 @@
 const steps = [
-  { num: "1", title: "Escolha o serviço", desc: "Selecione a plataforma (Instagram, TikTok, etc.) e o tipo: seguidores, curtidas ou views." },
+  { num: "1", title: "Escolha o serviço", desc: "Selecione a plataforma (Instagram ou TikTok) e o tipo: seguidores, curtidas ou views." },
   { num: "2", title: "Informe seu @", desc: "Para seguidores, basta o @. Para curtidas e views, cole o link do post. Sem senha." },
   { num: "3", title: "Pague via PIX", desc: "Pagamento instantâneo. Assim que confirmado, a entrega começa automaticamente." },
 ];

@@ -27,8 +27,8 @@ const Hero = () => {
           Turbine seu perfil com <span className="ig-gradient-text">seguidores reais</span>
         </h1>
         <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-          Seguidores brasileiros, entrega rápida e sem precisar da sua senha.
-          Funciona no Instagram, TikTok, YouTube e mais.
+          Seguidores e curtidas brasileiros, entrega rápida e sem precisar da sua senha.
+          Funciona no Instagram e TikTok.
         </p>
 
         <div className="flex gap-3 justify-center flex-wrap mb-10">

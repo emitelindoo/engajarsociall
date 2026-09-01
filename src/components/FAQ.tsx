@@ -7,7 +7,7 @@ const faqs = [
   { q: "E se eu perder seguidores?", a: "Todos os planos incluem garantia de reposição por 30 dias. Se houver queda, repomos automaticamente sem custo adicional." },
   { q: "Minha conta pode ser prejudicada?", a: "Não. O processo simula crescimento natural — os seguidores chegam gradualmente. Nunca tivemos nenhum caso de penalização." },
   { q: "Quais formas de pagamento vocês aceitam?", a: "No momento, aceitamos pagamento via PIX. É instantâneo e a entrega começa assim que confirmamos o pagamento." },
-  { q: "Posso comprar para TikTok, YouTube e outras redes?", a: "Sim! Temos pacotes para Instagram, TikTok, YouTube, Kwai e Facebook. Basta selecionar a plataforma na hora da compra." },
+  { q: "Posso comprar para TikTok também?", a: "Sim! Temos pacotes para Instagram e TikTok. Basta selecionar a plataforma na hora da compra." },
 ];
 
 const FAQ = () => (
