@@ -60,13 +60,6 @@ const buildScalablePlans = (
 export const igSeguidores: PlanData[] = buildScalablePlans("ig-seg", "Instagram", "Seguidores", "Seguidores", segFeatures);
 export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas", "Curtidas", curtidaFeatures);
 
-export const igComentarios: PlanData[] = [
-  { id: "ig-com-10", name: "Starter", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$29,90", price: "R$14,90", priceNum: 14.9, quantity: "10 Comentários", features: commentFeatures },
-  { id: "ig-com-25", name: "Básico", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$49,90", price: "R$29,90", priceNum: 29.9, quantity: "25 Comentários", features: commentFeatures },
-  { id: "ig-com-50", name: "Profissional", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$89,90", price: "R$49,90", priceNum: 49.9, quantity: "50 Comentários", features: commentFeatures, highlighted: true },
-  { id: "ig-com-100", name: "Elite", platform: "Instagram", serviceType: "Comentários", originalPrice: "R$149,90", price: "R$79,90", priceNum: 79.9, quantity: "100 Comentários", features: commentFeatures },
-];
-
 export const igVisualizacoes: PlanData[] = [
   { id: "ig-views-1k", name: "Starter", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
   { id: "ig-views-5k", name: "Básico", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: viewFeatures },
@@ -79,13 +72,6 @@ export const igVisualizacoes: PlanData[] = [
 export const ttSeguidores: PlanData[] = buildScalablePlans("tt-seg", "TikTok", "Seguidores", "Seguidores", segFeatures);
 export const ttCurtidas: PlanData[] = buildScalablePlans("tt-curt", "TikTok", "Curtidas", "Curtidas", curtidaFeatures);
 
-export const ttComentarios: PlanData[] = [
-  { id: "tt-com-10", name: "Starter", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$34,90", price: "R$19,90", priceNum: 19.9, quantity: "10 Comentários", features: commentFeatures },
-  { id: "tt-com-25", name: "Básico", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$59,90", price: "R$34,90", priceNum: 34.9, quantity: "25 Comentários", features: commentFeatures },
-  { id: "tt-com-50", name: "Profissional", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$99,90", price: "R$54,90", priceNum: 54.9, quantity: "50 Comentários", features: commentFeatures, highlighted: true },
-  { id: "tt-com-100", name: "Elite", platform: "TikTok", serviceType: "Comentários", originalPrice: "R$169,90", price: "R$89,90", priceNum: 89.9, quantity: "100 Comentários", features: commentFeatures },
-];
-
 export const ttVisualizacoes: PlanData[] = [
   { id: "tt-views-1k", name: "Starter", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
   { id: "tt-views-5k", name: "Básico", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: viewFeatures },
@@ -95,8 +81,8 @@ export const ttVisualizacoes: PlanData[] = [
 
 // ─── HELPERS ──────────────────────────────────────────────
 const allPlans: PlanData[] = [
-  ...igSeguidores, ...igCurtidas, ...igComentarios, ...igVisualizacoes,
-  ...ttSeguidores, ...ttCurtidas, ...ttComentarios, ...ttVisualizacoes,
+  ...igSeguidores, ...igCurtidas, ...igVisualizacoes,
+  ...ttSeguidores, ...ttCurtidas, ...ttVisualizacoes,
 ];
 
 // backward compat exports
