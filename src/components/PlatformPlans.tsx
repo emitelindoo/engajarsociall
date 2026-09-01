@@ -106,7 +106,7 @@ const PlatformPlans = () => {
 
   // Calculate discount
   const discount = useMemo(() => {
-    const origNum = parseFloat(currentPlan.originalPrice.replace(/[R$\.\s]/g, "").replace(",", "."));
+    const origNum = parseFloat(currentPlan.originalPrice.replace(/[R$.\s]/g, "").replace(",", "."));
     return Math.round(((origNum - currentPlan.priceNum) / origNum) * 100);
   }, [currentPlan]);
 
