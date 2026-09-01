@@ -1,13 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck, BadgeCheck } from "lucide-react";
+import { Heart, MessageCircle, Eye, Users, Minus, Plus, ShoppingCart, Check, ShieldCheck } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
   igSeguidores, igCurtidas, igComentarios, igVisualizacoes,
   ttSeguidores, ttCurtidas, ttComentarios, ttVisualizacoes,
-  ytInscritos, ytCurtidas, ytVisualizacoes, ytComentarios,
-  kwSeguidores, kwCurtidas, kwVisualizacoes,
-  fbSeguidores, fbCurtidas, fbVisualizacoes, fbComentarios,
-  seloVerificacao,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
@@ -26,7 +22,6 @@ const igServices: ServiceConfig[] = [
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: igCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: igVisualizacoes },
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: igComentarios },
-  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const ttServices: ServiceConfig[] = [
@@ -34,38 +29,11 @@ const ttServices: ServiceConfig[] = [
   { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: ttCurtidas },
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ttVisualizacoes },
   { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ttComentarios },
-  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
-];
-
-const ytServices: ServiceConfig[] = [
-  { id: "seg", label: "Inscritos", icon: <Users className="w-5 h-5" />, plans: ytInscritos },
-  { id: "curt", label: "Likes", icon: <Heart className="w-5 h-5" />, plans: ytCurtidas },
-  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ytVisualizacoes },
-  { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: ytComentarios },
-  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
-];
-
-const kwServices: ServiceConfig[] = [
-  { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: kwSeguidores },
-  { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: kwCurtidas },
-  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: kwVisualizacoes },
-  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
-];
-
-const fbServices: ServiceConfig[] = [
-  { id: "seg", label: "Seguidores", icon: <Users className="w-5 h-5" />, plans: fbSeguidores },
-  { id: "curt", label: "Curtidas", icon: <Heart className="w-5 h-5" />, plans: fbCurtidas },
-  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: fbVisualizacoes },
-  { id: "com", label: "Comentários", icon: <MessageCircle className="w-5 h-5" />, plans: fbComentarios },
-  { id: "selo", label: "Selo ✓", icon: <BadgeCheck className="w-5 h-5" />, plans: seloVerificacao },
 ];
 
 const platforms = [
   { id: "instagram", label: "Instagram", services: igServices, gradient: "from-[hsl(43,96%,56%)] via-[hsl(350,96%,55%)] to-[hsl(316,73%,52%)]" },
   { id: "tiktok", label: "TikTok", services: ttServices, gradient: "from-[hsl(180,80%,50%)] via-[hsl(340,80%,55%)] to-[hsl(0,0%,15%)]" },
-  { id: "youtube", label: "YouTube", services: ytServices, gradient: "from-[hsl(0,100%,50%)] to-[hsl(0,80%,40%)]" },
-  { id: "kwai", label: "Kwai", services: kwServices, gradient: "from-[hsl(30,100%,50%)] to-[hsl(15,100%,45%)]" },
-  { id: "facebook", label: "Facebook", services: fbServices, gradient: "from-[hsl(220,80%,50%)] to-[hsl(220,70%,40%)]" },
 ];
 
 const PlatformPlans = () => {
@@ -137,8 +105,10 @@ const PlatformPlans = () => {
   };
 
   // Calculate discount
-  const origNum = parseFloat(currentPlan.originalPrice.replace(/[R$.\s]/g, "").replace(",", "."));
-  const discount = Math.round(((origNum - currentPlan.priceNum) / origNum) * 100);
+  const discount = useMemo(() => {
+    const origNum = parseFloat(currentPlan.originalPrice.replace(/[R$\.\s]/g, "").replace(",", "."));
+    return Math.round(((origNum - currentPlan.priceNum) / origNum) * 100);
+  }, [currentPlan]);
 
   return (
     <section id="precos" className="py-20 px-4 bg-background">
