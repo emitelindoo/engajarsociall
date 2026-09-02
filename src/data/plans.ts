@@ -21,11 +21,15 @@ const curtidaFeaturesWW = ["Curtidas mundiais", "Preço mais baixo", "Entrega r�
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── PRICING ──────────────────────────────────────────────
-// Brasileiros: cada 10 unidades = R$0,15 · Mundiais: cada 10 unidades = R$0,08
+// Curtidas/Visualizações padrão: cada 10 unidades = R$0,15 · Mundiais: cada 10 unidades = R$0,08
 const RATE_BR = 0.15;
 const RATE_WW = 0.08;
 // Instagram Seguidores Brasileiros: R$5,90 a cada 100 seguidores
 const RATE_IG_SEG_BR = 0.59;
+// Instagram Curtidas Brasileiras: R$4,90 a cada 100 curtidas
+const RATE_IG_CURT_BR = 0.49;
+// Instagram Curtidas Mundiais: R$3,90 a cada 100 curtidas
+const RATE_IG_CURT_WW = 0.39;
 const calcPriceNum = (qty: number, rate: number): number => Math.round((qty / 10) * rate * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
@@ -72,8 +76,8 @@ const buildScalablePlans = (
 // ─── INSTAGRAM ────────────────────────────────────────────
 export const igSeguidores: PlanData[] = buildScalablePlans("ig-seg", "Instagram", "Seguidores Brasileiros", "Seguidores", segFeaturesBR, RATE_IG_SEG_BR, 100);
 export const igSeguidoresMundiais: PlanData[] = buildScalablePlans("ig-seg-ww", "Instagram", "Seguidores Mundiais", "Seguidores", segFeaturesWW, RATE_WW);
-export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas Brasileiras", "Curtidas", curtidaFeaturesBR, RATE_BR);
-export const igCurtidasMundiais: PlanData[] = buildScalablePlans("ig-curt-ww", "Instagram", "Curtidas Mundiais", "Curtidas", curtidaFeaturesWW, RATE_WW);
+export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas Brasileiras", "Curtidas", curtidaFeaturesBR, RATE_IG_CURT_BR, 100);
+export const igCurtidasMundiais: PlanData[] = buildScalablePlans("ig-curt-ww", "Instagram", "Curtidas Mundiais", "Curtidas", curtidaFeaturesWW, RATE_IG_CURT_WW, 100);
 
 export const igVisualizacoes: PlanData[] = [
   { id: "ig-views-1k", name: "Starter", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
