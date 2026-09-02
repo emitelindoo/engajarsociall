@@ -332,11 +332,19 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center mb-3">
-                <div className="bg-white p-2.5 rounded-xl">
-                  <QRCodeSVG value={pixCode} size={160} level="M" />
-                </div>
-              </div>
+               <div className="flex justify-center mb-3">
+                 <div className="bg-white p-2.5 rounded-xl">
+                   {qrCodeImage ? (
+                     <img
+                       src={qrCodeImage.startsWith("data:") ? qrCodeImage : `data:image/png;base64,${qrCodeImage}`}
+                       alt="QR Code para pagamento PIX"
+                       className="w-[160px] h-[160px] object-contain"
+                     />
+                   ) : (
+                     <QRCodeSVG value={pixCode} size={160} level="M" />
+                   )}
+                 </div>
+               </div>
 
               <div className="bg-muted rounded-xl p-2.5 mb-2 break-all max-h-20 overflow-y-auto">
                 <p className="text-[10px] text-foreground font-mono leading-relaxed">{pixCode}</p>

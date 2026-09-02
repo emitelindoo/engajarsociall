@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const CAKTO_API = "https://api.cakto.com.br/public_api";
 const MIN_AMOUNT = 5;
-const DEFAULT_OFFER_ID = "mauxop3_1079808";
+const DEFAULT_PRODUCT_ID = "1079808";
 
 type CaktoResponse = Record<string, any>;
 
@@ -75,26 +75,55 @@ async function getCaktoToken(): Promise<string> {
   return body.access_token;
 }
 
-async function createCaktoPix(token: string, payload: Record<string, unknown>, idempotencyKey: string) {
-  const paymentResponse = await fetch(`${CAKTO_API}/payments/`, {
-    method: "POST",
+async function caktoFetch(token: string, path: string, init: RequestInit = {}) {
+  const result = await fetch(`${CAKTO_API}${path}`, {
+    ...init,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
-      "X-Idempotency-Key": idempotencyKey,
+      ...(init.headers || {}),
     },
-    body: JSON.stringify(payload),
   });
-
-  const text = await paymentResponse.text();
+  const text = await result.text();
   let body: CaktoResponse = {};
   try {
     body = text ? JSON.parse(text) : {};
   } catch {
     body = {};
   }
+  return { ok: result.ok, status: result.status, body };
+}
 
-  return { ok: paymentResponse.ok, status: paymentResponse.status, body };
+async function resolveOfferId(token: string, amount: number, name: string, reference: string): Promise<string> {
+  const configuredOfferId = Deno.env.get("CAKTO_OFFER_ID");
+  if (configuredOfferId) return configuredOfferId;
+
+  const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID") || DEFAULT_PRODUCT_ID;
+  const productId = /_[0-9]+$/.test(configuredProductId)
+    ? configuredProductId.split("_").pop() || DEFAULT_PRODUCT_ID
+    : configuredProductId;
+
+  const offer = await caktoFetch(token, "/offers/", {
+    method: "POST",
+    body: JSON.stringify({
+      name: `${name} #${reference.slice(0, 8)}`.slice(0, 255),
+      price: Number(amount.toFixed(2)),
+      product: productId,
+      type: "unique",
+      status: "active",
+      units: 1,
+    }),
+  });
+
+  if (!offer.ok || !offer.body?.id) {
+    console.error("Cakto offer create error", { status: offer.status, body: offer.body });
+    if (offer.status === 401 || offer.status === 403) {
+      throw new Error("A chave da Cakto precisa ter os escopos 'write offers' e 'write payments' habilitados.");
+    }
+    throw new Error(caktoError(offer.body, "Não foi possível preparar a oferta de pagamento na Cakto."));
+  }
+
+  return String(offer.body.id);
 }
 
 serve(async (req) => {
@@ -114,10 +143,7 @@ serve(async (req) => {
     const customerPhone = onlyDigits(String(body?.customer_phone || "11999999999")).slice(-11);
 
     if (!Number.isFinite(amount) || amount < MIN_AMOUNT) {
-      return response({
-        success: false,
-        error: `O valor mínimo para pagamento é R$${MIN_AMOUNT.toFixed(2).replace(".", ",")}.`,
-      }, 400);
+      return response({ success: false, error: `O valor mínimo para pagamento é R$${MIN_AMOUNT.toFixed(2).replace(".", ",")}.` }, 400);
     }
     if (!customerName || customerName.length < 3) {
       return response({ success: false, error: "Informe seu nome completo." }, 400);
@@ -130,29 +156,38 @@ serve(async (req) => {
     }
 
     const token = await getCaktoToken();
-    const offerId = Deno.env.get("CAKTO_OFFER_ID") || Deno.env.get("CAKTO_PRODUCT_ID") || DEFAULT_OFFER_ID;
-    const idempotencyKey = crypto.randomUUID();
-    const antifraudReference = `engajar_${idempotencyKey}`;
+    const reference = crypto.randomUUID();
+    const offerId = await resolveOfferId(
+      token,
+      amount,
+      String(body?.plan_name || body?.description || "Pedido Engajar Social"),
+      reference,
+    );
+    const antifraudReference = `engajar_${reference}`;
 
-    const payment = await createCaktoPix(token, {
-      paymentMethod: "pix",
-      customer: {
-        name: customerName.slice(0, 120),
-        email: customerEmail.slice(0, 255),
-        phone: `55${customerPhone || "11999999999"}`,
-        fingerprint: antifraudReference,
-        docType: "cpf",
-        docNumber: customerCpf,
-      },
-      items: [{ offerId: String(offerId), quantity: 1, offerType: "main" }],
-      metadata: {
-        plan_id: String(body?.plan_id || ""),
-        platform: String(body?.platform || "Instagram"),
-        username: String(body?.username || ""),
-      },
-      pixExpiresIn: 3600,
-      antifraudProfilingAttemptReference: antifraudReference,
-    }, idempotencyKey);
+    const payment = await caktoFetch(token, "/payments/", {
+      method: "POST",
+      headers: { "X-Idempotency-Key": reference },
+      body: JSON.stringify({
+        paymentMethod: "pix",
+        customer: {
+          name: customerName.slice(0, 120),
+          email: customerEmail.slice(0, 255),
+          phone: `55${customerPhone || "11999999999"}`,
+          fingerprint: antifraudReference,
+          docType: "cpf",
+          docNumber: customerCpf,
+        },
+        items: [{ offerId, quantity: 1, offerType: "main" }],
+        metadata: {
+          plan_id: String(body?.plan_id || ""),
+          platform: String(body?.platform || "Instagram"),
+          username: String(body?.username || ""),
+        },
+        pixExpiresIn: 3600,
+        antifraudProfilingAttemptReference: antifraudReference,
+      }),
+    });
 
     console.log("Cakto PIX response", { status: payment.status, paymentId: payment.body?.id || null });
 
@@ -176,7 +211,7 @@ serve(async (req) => {
       .from("transactions")
       .insert({
         horsepay_transaction_id: caktoPaymentId,
-        cakto_offer_id: String(offerId),
+        cakto_offer_id: offerId,
         plan_id: String(body?.plan_id || "unknown"),
         plan_name: String(body?.plan_name || "Plano"),
         platform: String(body?.platform || "Instagram"),
