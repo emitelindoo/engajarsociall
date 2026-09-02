@@ -3,7 +3,6 @@ import { Heart, Eye, Users, Globe, Minus, Plus, ShoppingCart, Check, ShieldCheck
 import { Slider } from "@/components/ui/slider";
 import {
   igSeguidores, igSeguidoresMundiais, igCurtidas, igCurtidasMundiais, igVisualizacoes,
-  ttSeguidores, ttSeguidoresMundiais, ttCurtidas, ttCurtidasMundiais, ttVisualizacoes,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
@@ -25,17 +24,8 @@ const igServices: ServiceConfig[] = [
   { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: igVisualizacoes },
 ];
 
-const ttServices: ServiceConfig[] = [
-  { id: "seg", label: "Seguidores BR", icon: <Users className="w-5 h-5" />, plans: ttSeguidores },
-  { id: "seg-ww", label: "Seguidores Mundiais", icon: <Globe className="w-5 h-5" />, plans: ttSeguidoresMundiais },
-  { id: "curt", label: "Curtidas BR", icon: <Heart className="w-5 h-5" />, plans: ttCurtidas },
-  { id: "curt-ww", label: "Curtidas Mundiais", icon: <Globe className="w-5 h-5" />, plans: ttCurtidasMundiais },
-  { id: "views", label: "Visualizações", icon: <Eye className="w-5 h-5" />, plans: ttVisualizacoes },
-];
-
 const platforms = [
   { id: "instagram", label: "Instagram", services: igServices, gradient: "from-[hsl(43,96%,56%)] via-[hsl(350,96%,55%)] to-[hsl(316,73%,52%)]" },
-  { id: "tiktok", label: "TikTok", services: ttServices, gradient: "from-[hsl(180,80%,50%)] via-[hsl(340,80%,55%)] to-[hsl(0,0%,15%)]" },
 ];
 
 const PlatformPlans = () => {
