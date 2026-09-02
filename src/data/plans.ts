@@ -32,6 +32,8 @@ const RATE_IG_SEG_WW = 0.49;
 const RATE_IG_CURT_BR = 0.49;
 // Instagram Curtidas Mundiais: R$3,90 a cada 100 curtidas
 const RATE_IG_CURT_WW = 0.39;
+// Instagram Visualizações: R$2,90 a cada 100 views
+const RATE_IG_VIEWS = 0.29;
 const calcPriceNum = (qty: number, rate: number): number => Math.round((qty / 10) * rate * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
@@ -81,13 +83,7 @@ export const igSeguidoresMundiais: PlanData[] = buildScalablePlans("ig-seg-ww", 
 export const igCurtidas: PlanData[] = buildScalablePlans("ig-curt", "Instagram", "Curtidas Brasileiras", "Curtidas", curtidaFeaturesBR, RATE_IG_CURT_BR, 100);
 export const igCurtidasMundiais: PlanData[] = buildScalablePlans("ig-curt-ww", "Instagram", "Curtidas Mundiais", "Curtidas", curtidaFeaturesWW, RATE_IG_CURT_WW, 100);
 
-export const igVisualizacoes: PlanData[] = [
-  { id: "ig-views-1k", name: "Starter", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
-  { id: "ig-views-5k", name: "Básico", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: viewFeatures },
-  { id: "ig-views-10k", name: "Profissional", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "10.000 Visualizações", features: viewFeatures, highlighted: true },
-  { id: "ig-views-50k", name: "Elite", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$149,90", price: "R$69,90", priceNum: 69.9, quantity: "50.000 Visualizações", features: viewFeatures },
-  { id: "ig-views-100k", name: "Premium", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$249,90", price: "R$119,90", priceNum: 119.9, quantity: "100.000 Visualizações", features: viewFeatures },
-];
+export const igVisualizacoes: PlanData[] = buildScalablePlans("ig-views", "Instagram", "Visualizações", "Visualizações", viewFeatures, RATE_IG_VIEWS, 100);
 
 // ─── HELPERS ──────────────────────────────────────────────
 const allPlans: PlanData[] = [
