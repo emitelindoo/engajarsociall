@@ -202,6 +202,7 @@ serve(async (req) => {
       success: true,
       transaction_id: txRow?.id || null,
       checkout_url: checkoutUrl,
+      dynamic_pricing: dynamicPricing,
     });
   } catch (err) {
     console.error("create-pix-payment error", err);
