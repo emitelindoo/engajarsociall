@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const CAKTO_API = "https://api.cakto.com.br/public_api";
 const MIN_AMOUNT = 5;
-const DEFAULT_PRODUCT_ID = "mauxop3_1079808";
+const DEFAULT_OFFER_ID = "mauxop3";
 
 type CaktoResponse = Record<string, any>;
 
@@ -94,15 +94,9 @@ async function caktoFetch(token: string, path: string, init: RequestInit = {}) {
   return { ok: result.ok, status: result.status, body };
 }
 
-async function resolveOfferId(_token: string, _amount: number, _name: string, _reference: string): Promise<string> {
-  const configuredOfferId = Deno.env.get("CAKTO_OFFER_ID");
-  if (configuredOfferId) return configuredOfferId;
-
-  const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID") || DEFAULT_PRODUCT_ID;
-  // A oferta enviada pelo cliente já é ativa na Cakto: usamos direto,
-  // evitando exigir o escopo "write offers" na chave.
-  if (configuredProductId.includes("_")) return configuredProductId;
-  return DEFAULT_PRODUCT_ID;
+function resolveOfferId(): string {
+  // ID real da oferta (extraído do link de checkout https://pay.cakto.com.br/mauxop3_1079808)
+  return DEFAULT_OFFER_ID;
 }
 
 
@@ -137,12 +131,7 @@ serve(async (req) => {
 
     const token = await getCaktoToken();
     const reference = crypto.randomUUID();
-    const offerId = await resolveOfferId(
-      token,
-      amount,
-      String(body?.plan_name || body?.description || "Pedido Engajar Social"),
-      reference,
-    );
+    const offerId = resolveOfferId();
     const antifraudReference = `engajar_${reference}`;
 
     const payment = await caktoFetch(token, "/payments/", {
