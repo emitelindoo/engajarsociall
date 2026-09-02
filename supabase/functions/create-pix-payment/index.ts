@@ -7,82 +7,42 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const CAKTO_API = "https://api.cakto.com.br/public_api";
-const MIN_AMOUNT = 5;
+const PAYFORGE_API = Deno.env.get("PAYFORGE_API") || "https://dashboard.payforge.group/api/v1";
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
+function formatCpf(cpf: string): string {
+  const digits = onlyDigits(cpf);
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9, 11)}`;
+}
+
 function isValidCpf(cpf: string): boolean {
   const digits = onlyDigits(cpf);
-  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
+
+  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) {
+    return false;
+  }
 
   let sum = 0;
-  for (let i = 0; i < 9; i += 1) sum += Number(digits[i]) * (10 - i);
-  let first = (sum * 10) % 11;
-  if (first === 10) first = 0;
-  if (first !== Number(digits[9])) return false;
+  for (let index = 0; index < 9; index += 1) {
+    sum += Number(digits[index]) * (10 - index);
+  }
+
+  let firstDigit = (sum * 10) % 11;
+  if (firstDigit === 10) firstDigit = 0;
+  if (firstDigit !== Number(digits[9])) {
+    return false;
+  }
 
   sum = 0;
-  for (let i = 0; i < 10; i += 1) sum += Number(digits[i]) * (11 - i);
-  let second = (sum * 10) % 11;
-  if (second === 10) second = 0;
-  return second === Number(digits[10]);
-}
-
-async function getToken(): Promise<string> {
-  const clientId = Deno.env.get("CAKTO_CLIENT_ID");
-  const clientSecret = Deno.env.get("CAKTO_CLIENT_SECRET");
-  if (!clientId || !clientSecret) throw new Error("Credenciais da Cakto não configuradas");
-
-  const res = await fetch(`${CAKTO_API}/token/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret }),
-  });
-
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data?.access_token) {
-    console.error("Cakto token error", { status: res.status, detail: data?.detail || data?.error || null });
-    throw new Error("Falha ao autenticar na Cakto");
+  for (let index = 0; index < 10; index += 1) {
+    sum += Number(digits[index]) * (11 - index);
   }
-  return data.access_token as string;
-}
 
-async function caktoFetch(token: string, path: string, init: RequestInit = {}) {
-  const res = await fetch(`${CAKTO_API}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      ...(init.headers || {}),
-    },
-  });
-  const text = await res.text();
-  let json: any = {};
-  try {
-    json = text ? JSON.parse(text) : {};
-  } catch {
-    json = {};
-  }
-  return { ok: res.ok, status: res.status, json };
-}
+  let secondDigit = (sum * 10) % 11;
+  if (secondDigit === 10) secondDigit = 0;
 
-function caktoError(json: any, fallback: string): string {
-  if (!json) return fallback;
-  if (typeof json.detail === "string") return json.detail;
-  const firstKey = Object.keys(json)[0];
-  const value = firstKey ? json[firstKey] : null;
-  if (typeof value === "string") return value;
-  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
-  return fallback;
-}
-
-async function getBaseOfferId(): Promise<string> {
-  const configured = Deno.env.get("CAKTO_PRODUCT_ID") || Deno.env.get("CAKTO_BASE_OFFER_ID");
-  // Checkout link informado pelo usuário: https://pay.cakto.com.br/mauxop3_1079808
-  const fallback = "mauxop3_1079808";
-  if (!configured || configured.includes("configure") || configured.includes("panel")) return fallback;
-  return configured;
+  return secondDigit === Number(digits[10]);
 }
 
 serve(async (req) => {
@@ -90,16 +50,14 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const json = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const publicKey = Deno.env.get("PAYFORGE_PUBLIC_KEY");
+    const secretKey = Deno.env.get("PAYFORGE_SECRET_KEY");
+    if (!publicKey || !secretKey) throw new Error("PayForge credentials not configured");
 
     const {
       amount,
@@ -115,98 +73,154 @@ serve(async (req) => {
       extras,
     } = await req.json();
 
-    const total = Number(amount);
-    if (!total || total <= 0) {
-      return json({ success: false, error: "Valor inválido" }, 400);
-    }
-    if (total < MIN_AMOUNT) {
-      return json(
-        { success: false, error: `O valor mínimo para pagamento é R$${MIN_AMOUNT.toFixed(2).replace(".", ",")}. Adicione mais itens ao carrinho.` },
-        400,
-      );
+    if (!amount || Number(amount) <= 0) {
+      return new Response(JSON.stringify({ success: false, error: "Valor inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const cpf = onlyDigits(customer_cpf || "");
-    if (!isValidCpf(cpf)) {
-      return json({ success: false, error: "CPF inválido. Digite um CPF válido." }, 400);
+    const normalizedCpf = onlyDigits(customer_cpf || "");
+    if (!isValidCpf(normalizedCpf)) {
+      return new Response(JSON.stringify({ success: false, error: "CPF inválido. Digite um CPF válido." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const baseOfferId = await getBaseOfferId();
-    const reference = crypto.randomUUID();
-    const offerName = String(plan_name || description || "Pedido Engajar Social").slice(0, 120);
+    const identifier = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    const callbackUrl = `${supabaseUrl}/functions/v1/payforge-webhook`;
 
-    let checkoutOfferId = baseOfferId;
-    let dynamicPricing = false;
+    const orderBody = {
+      identifier,
+      amount: Number(amount),
+      client: {
+        name: String(customer_name || "Cliente").trim().slice(0, 120),
+        email: String(customer_email || "cliente@email.com").trim().slice(0, 255),
+        phone: onlyDigits(customer_phone || "11999999999").slice(0, 11),
+        document: formatCpf(normalizedCpf),
+      },
+      products: [
+        {
+          id: String(plan_id || "plan").slice(0, 100),
+          name: String(description || plan_name || "Serviço Engajar Social").trim().slice(0, 255),
+          quantity: 1,
+          price: Number(amount),
+        },
+      ],
+      metadata: {
+        plan_id: String(plan_id || "").slice(0, 100),
+        platform: String(platform || "").slice(0, 100),
+        username: String(username || "").slice(0, 100),
+      },
+      callbackUrl,
+    };
 
-    // Tenta criar uma oferta dinâmica com o valor exato do carrinho.
-    // Se a chave de API não tiver escopo de ofertas, usamos o checkout base.
+    console.log("Creating PayForge PIX transaction", {
+      identifier,
+      amount: Number(amount),
+      plan_id: plan_id || null,
+      platform: platform || null,
+    });
+
+    const orderRes = await fetch(`${PAYFORGE_API}/gateway/pix/receive`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-public-key": publicKey,
+        "x-secret-key": secretKey,
+      },
+      body: JSON.stringify(orderBody),
+    });
+
+    const responseText = await orderRes.text();
+    let orderData: Record<string, unknown> = {};
+
     try {
-      const token = await getToken();
-      const baseOffer = await caktoFetch(token, `/offers/${encodeURIComponent(baseOfferId)}/`);
-      if (baseOffer.ok && baseOffer.json?.product) {
-        const offer = await caktoFetch(token, "/offers/", {
-          method: "POST",
-          body: JSON.stringify({
-            name: `${offerName} #${reference.slice(0, 8)}`.slice(0, 255),
-            price: Number(total.toFixed(2)),
-            product: String(baseOffer.json.product),
-            type: "unique",
-            status: "active",
-            units: 1,
-          }),
-        });
-        if (offer.ok && offer.json?.id) {
-          checkoutOfferId = String(offer.json.id);
-          dynamicPricing = true;
-        } else {
-          console.error("Cakto offer create error", { status: offer.status, body: offer.json });
-        }
-      } else {
-        console.error("Cakto base offer error", { status: baseOffer.status, body: baseOffer.json, baseOfferId });
-      }
-    } catch (e) {
-      console.error("Cakto dynamic offer skipped", (e as Error).message);
+      orderData = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      orderData = {};
     }
 
-    const params = new URLSearchParams();
-    if (customer_name) params.set("name", String(customer_name));
-    if (customer_email) params.set("email", String(customer_email));
-    if (customer_phone) params.set("phone", onlyDigits(String(customer_phone)));
-    if (cpf) params.set("document", cpf);
-    const query = params.toString();
-    const checkoutUrl = `https://pay.cakto.com.br/${checkoutOfferId}${query ? `?${query}` : ""}`;
+    console.log("PayForge create PIX response", {
+      status: orderRes.status,
+      contentType: orderRes.headers.get("content-type"),
+      gatewayStatus: orderData?.status || null,
+      errorCode: orderData?.errorCode || null,
+    });
 
+    if (!orderRes.ok) {
+      const isHtmlResponse = responseText.trim().startsWith("<!doctype") || responseText.trim().startsWith("<html");
+      const reason = isHtmlResponse
+        ? "A PayForge bloqueou esta requisição por localização/IP do servidor. Libere o acesso da API no painel deles ou peça ao suporte a liberação do ambiente."
+        : String(orderData.message || orderData.error || "Erro ao criar pedido no gateway");
 
-    // Registra a transação para acompanhamento via webhook
+      return new Response(JSON.stringify({ success: false, error: reason }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const pixCode = orderData.pix?.code || null;
+    const qrCodeBase64 = orderData.pix?.base64 || null;
+    const payforgeTransactionId = orderData.transactionId || null;
+
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        horsepay_transaction_id: null, // será preenchido pelo webhook
-        cakto_offer_id: checkoutOfferId,
+        horsepay_transaction_id: payforgeTransactionId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
         username: username || "",
         customer_name: customer_name || "Cliente",
         customer_email: customer_email || "",
-        amount: total,
+        amount: amount,
         status: "pending",
-        pix_code: checkoutUrl,
+        pix_code: pixCode || null,
         extras: extras || [],
       })
       .select("id")
       .single();
 
-    if (txError) console.error("Error saving transaction", txError);
+    if (txError) {
+      console.error("Error saving transaction", txError);
+    }
 
-    return json({
-      success: true,
-      transaction_id: txRow?.id || null,
-      checkout_url: checkoutUrl,
-      dynamic_pricing: dynamicPricing,
+    if (!pixCode) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          transaction_id: txRow?.id || null,
+          error: "PIX não gerado pelo gateway. Tente novamente.",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        transaction_id: txRow?.id || null,
+        pix_code: pixCode,
+        qr_code_image: qrCodeBase64,
+        amount,
+        status: "pending",
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  } catch (error: unknown) {
+    console.error("Error creating PIX payment", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("create-pix-payment error", err);
-    return json({ success: false, error: (err as Error).message || "Erro interno" }, 500);
   }
 });
