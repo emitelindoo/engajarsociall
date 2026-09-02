@@ -32,6 +32,8 @@ const RATE_IG_SEG_WW = 0.49;
 const RATE_IG_CURT_BR = 0.49;
 // Instagram Curtidas Mundiais: R$3,90 a cada 100 curtidas
 const RATE_IG_CURT_WW = 0.39;
+// Instagram Visualizações: R$2,90 a cada 100 views
+const RATE_IG_VIEWS = 0.29;
 const calcPriceNum = (qty: number, rate: number): number => Math.round((qty / 10) * rate * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
