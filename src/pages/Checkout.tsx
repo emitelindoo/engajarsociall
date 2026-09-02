@@ -151,7 +151,7 @@ const Checkout = () => {
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
           customer_cpf: cpfDigits,
-          customer_phone: "11999999999",
+          customer_phone: customerPhone,
           plan_id: items[0].plan.id,
           plan_name: items.map((i) => i.plan.name).join(" + "),
           platform: [...new Set(items.map((i) => i.plan.platform))].join(", "),
