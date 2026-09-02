@@ -8,6 +8,7 @@ const corsHeaders = {
 
 const PAID_EVENTS = ["purchase_approved", "payment_approved", "purchase_completed"];
 const FAILED_EVENTS = ["purchase_refused", "refund", "chargeback", "purchase_canceled"];
+const PENDING_PAYMENT_EVENTS = ["pix_gerado", "boleto_gerado", "picpay_gerado", "openfinance_nubank_gerado"];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -29,23 +30,41 @@ serve(async (req) => {
     const event = String(body?.event || "");
     const data = body?.data || {};
     const paymentId = data?.id ? String(data.id) : null;
+    const offerId = data?.offer?.id ? String(data.offer.id) : null;
 
-    console.log("Cakto webhook received", { event, paymentId, status: data?.status || null });
+    console.log("Cakto webhook received", { event, paymentId, offerId, status: data?.status || null });
 
     let status: string | null = null;
     if (PAID_EVENTS.includes(event) || data?.status === "paid" || data?.status === "approved") status = "paid";
     else if (FAILED_EVENTS.includes(event)) status = "failed";
+    else if (PENDING_PAYMENT_EVENTS.includes(event) || data?.status === "waiting_payment") status = "pending";
 
-    if (status && paymentId) {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      );
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
-      const { error } = await supabase
-        .from("transactions")
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq("horsepay_transaction_id", paymentId);
+    if (status && (paymentId || offerId)) {
+      // Primeiro tenta atualizar pelo offerId, depois pelo paymentId
+      let error: any = null;
+
+      if (offerId) {
+        const result = await supabase
+          .from("transactions")
+          .update({
+            status,
+            horsepay_transaction_id: paymentId || undefined,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("cakto_offer_id", offerId);
+        error = result.error;
+      } else if (paymentId) {
+        const result = await supabase
+          .from("transactions")
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq("horsepay_transaction_id", paymentId);
+        error = result.error;
+      }
 
       if (error) console.error("Cakto webhook: update error", error);
     }
