@@ -99,9 +99,11 @@ async function resolveOfferId(token: string, amount: number, name: string, refer
   if (configuredOfferId) return configuredOfferId;
 
   const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID") || DEFAULT_PRODUCT_ID;
-  const productId = /_[0-9]+$/.test(configuredProductId)
-    ? configuredProductId.split("_").pop() || DEFAULT_PRODUCT_ID
-    : configuredProductId;
+  // O link enviado pelo cliente (mauxop3_1079808) é uma oferta ativa da Cakto.
+  // Usá-lo diretamente evita exigir o escopo write offers para cada pedido.
+  if (configuredProductId.includes("_")) return configuredProductId;
+
+  const productId = configuredProductId;
 
   const offer = await caktoFetch(token, "/offers/", {
     method: "POST",
