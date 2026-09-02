@@ -181,7 +181,7 @@ serve(async (req) => {
       .from("transactions")
       .insert({
         horsepay_transaction_id: null, // será preenchido pelo webhook
-        cakto_offer_id: newOfferId,
+        cakto_offer_id: checkoutOfferId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
