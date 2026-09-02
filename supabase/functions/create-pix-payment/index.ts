@@ -165,7 +165,6 @@ serve(async (req) => {
           username: String(body?.username || ""),
         },
         pixExpiresIn: 3600,
-        antifraudProfilingAttemptReference: antifraudReference,
       }),
     });
 
