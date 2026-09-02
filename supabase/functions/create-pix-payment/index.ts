@@ -81,8 +81,8 @@ function caktoError(json: any, fallback: string): string {
 async function ensureProductId(_token: string): Promise<string> {
   const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID");
   if (configuredProductId) return configuredProductId;
-  // Fallback padrão baseado no produto informado pelo usuário
-  return "mauxop3_1079808";
+  // ID numérico do produto informado pelo usuário
+  return "1079808";
 }
 
 serve(async (req) => {
