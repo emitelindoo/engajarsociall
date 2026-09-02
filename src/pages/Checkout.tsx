@@ -118,10 +118,11 @@ const Checkout = () => {
     return () => clearInterval(interval);
   }, [transactionId]);
 
-  const cpfDigits = onlyDigits(customerCpf);
-  const isCpfValid = cpfDigits.length === 11 && isValidCpf(cpfDigits);
-  const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
-  const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && onlyDigits(customerPhone).length >= 10 && isCpfValid && items.length > 0 && allTargetsFilled);
+   const cpfDigits = onlyDigits(customerCpf);
+   const isCpfValid = cpfDigits.length === 11 && isValidCpf(cpfDigits);
+   const phoneDigits = onlyDigits(customerPhone);
+   const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
+   const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && phoneDigits.length >= 10 && isCpfValid && items.length > 0 && allTargetsFilled);
 
   const handlePayment = async () => {
     if (!isFormValid) return;
