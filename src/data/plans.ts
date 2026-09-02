@@ -26,6 +26,8 @@ const RATE_BR = 0.15;
 const RATE_WW = 0.08;
 // Instagram Seguidores Brasileiros: R$5,90 a cada 100 seguidores
 const RATE_IG_SEG_BR = 0.59;
+// Instagram Seguidores Mundiais: R$4,90 a cada 100 seguidores
+const RATE_IG_SEG_WW = 0.49;
 // Instagram Curtidas Brasileiras: R$4,90 a cada 100 curtidas
 const RATE_IG_CURT_BR = 0.49;
 // Instagram Curtidas Mundiais: R$3,90 a cada 100 curtidas
