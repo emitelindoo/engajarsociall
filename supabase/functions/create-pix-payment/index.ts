@@ -94,36 +94,17 @@ async function caktoFetch(token: string, path: string, init: RequestInit = {}) {
   return { ok: result.ok, status: result.status, body };
 }
 
-async function resolveOfferId(token: string, amount: number, name: string, reference: string): Promise<string> {
+async function resolveOfferId(_token: string, _amount: number, _name: string, _reference: string): Promise<string> {
   const configuredOfferId = Deno.env.get("CAKTO_OFFER_ID");
   if (configuredOfferId) return configuredOfferId;
 
   const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID") || DEFAULT_PRODUCT_ID;
-  // O link enviado pelo cliente (mauxop3_1079808) é uma oferta ativa da Cakto.
-  // Usá-lo diretamente evita exigir o escopo write offers para cada pedido.
+  // A oferta enviada pelo cliente já é ativa na Cakto: usamos direto,
+  // evitando exigir o escopo "write offers" na chave.
   if (configuredProductId.includes("_")) return configuredProductId;
-
-  const productId = configuredProductId;
-
-  const offer = await caktoFetch(token, "/offers/", {
-    method: "POST",
-    body: JSON.stringify({
-      name: `${name} #${reference.slice(0, 8)}`.slice(0, 255),
-      price: Number(amount.toFixed(2)),
-      product: productId,
-      type: "unique",
-      status: "active",
-      units: 1,
-    }),
-  });
-
-  if (!offer.ok || !offer.body?.id) {
-    console.error("Cakto offer create error, using fallback offer", { status: offer.status, body: offer.body });
-    return DEFAULT_PRODUCT_ID;
-  }
-
-  return String(offer.body.id);
+  return DEFAULT_PRODUCT_ID;
 }
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -188,7 +169,13 @@ serve(async (req) => {
       }),
     });
 
-    console.log("Cakto PIX response", { status: payment.status, paymentId: payment.body?.id || null });
+    console.log("Cakto PIX response", {
+      status: payment.status,
+      paymentId: payment.body?.id || null,
+      offerId,
+      body: payment.ok ? undefined : payment.body,
+    });
+
 
     if (!payment.ok) {
       const permissionError = payment.status === 401 || payment.status === 403;
