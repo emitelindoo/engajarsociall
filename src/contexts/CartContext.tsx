@@ -40,6 +40,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (existing) return prev;
       return [...prev, { plan, qty: 1, target: "" }];
     });
+    setTimeout(() => window.dispatchEvent(new CustomEvent("open-cart")), 150);
   }, []);
 
   const removeItem = useCallback((planId: string) => {

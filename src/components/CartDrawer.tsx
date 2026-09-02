@@ -2,12 +2,23 @@ import { ShoppingCart, X, Trash2, ArrowRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const CartDrawer = () => {
+const CartDrawer = ({ variant = "desktop" }: { variant?: "desktop" | "mobile" }) => {
   const { items, removeItem, total, count } = useCart();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const handler = () => {
+      const active = isMobile ? "mobile" : "desktop";
+      if (active === variant) setOpen(true);
+    };
+    window.addEventListener("open-cart", handler);
+    return () => window.removeEventListener("open-cart", handler);
+  }, [isMobile, variant]);
 
   const goToCheckout = () => {
     setOpen(false);
