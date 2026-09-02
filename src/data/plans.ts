@@ -21,11 +21,15 @@ const curtidaFeaturesWW = ["Curtidas mundiais", "Preço mais baixo", "Entrega r�
 const viewFeatures = ["Views brasileiras", "Entrega instantânea", "Sem queda", "Sem senha", "Segurança garantida"];
 
 // ─── PRICING ──────────────────────────────────────────────
-// Brasileiros: cada 10 unidades = R$0,15 · Mundiais: cada 10 unidades = R$0,08
+// Curtidas/Visualizações padrão: cada 10 unidades = R$0,15 · Mundiais: cada 10 unidades = R$0,08
 const RATE_BR = 0.15;
 const RATE_WW = 0.08;
 // Instagram Seguidores Brasileiros: R$5,90 a cada 100 seguidores
 const RATE_IG_SEG_BR = 0.59;
+// Instagram Curtidas Brasileiras: R$4,90 a cada 100 curtidas
+const RATE_IG_CURT_BR = 0.49;
+// Instagram Curtidas Mundiais: R$3,90 a cada 100 curtidas
+const RATE_IG_CURT_WW = 0.39;
 const calcPriceNum = (qty: number, rate: number): number => Math.round((qty / 10) * rate * 100) / 100;
 
 const fmtBRL = (n: number) => `R$${n.toFixed(2).replace(".", ",")}`;
