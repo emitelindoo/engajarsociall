@@ -3,7 +3,6 @@ import { Heart, Eye, Users, Globe, Minus, Plus, ShoppingCart, Check, ShieldCheck
 import { Slider } from "@/components/ui/slider";
 import {
   igSeguidores, igSeguidoresMundiais, igCurtidas, igCurtidasMundiais, igVisualizacoes,
-  ttSeguidores, ttSeguidoresMundiais, ttCurtidas, ttCurtidasMundiais, ttVisualizacoes,
   PlanData,
 } from "@/data/plans";
 import { useCart } from "@/contexts/CartContext";
