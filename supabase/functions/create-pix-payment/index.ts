@@ -7,7 +7,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PAYFORGE_API = Deno.env.get("PAYFORGE_API") || "https://dashboard.payforge.group/api/v1";
+const CAKTO_API = "https://api.cakto.com.br/public_api";
+const MIN_AMOUNT = 5;
+const DEFAULT_OFFER_ID = "mauxop3_1079808";
+
+type CaktoResponse = Record<string, any>;
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
 
@@ -18,209 +22,190 @@ function formatCpf(cpf: string): string {
 
 function isValidCpf(cpf: string): boolean {
   const digits = onlyDigits(cpf);
-
-  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) {
-    return false;
-  }
+  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
 
   let sum = 0;
-  for (let index = 0; index < 9; index += 1) {
-    sum += Number(digits[index]) * (10 - index);
-  }
-
+  for (let index = 0; index < 9; index += 1) sum += Number(digits[index]) * (10 - index);
   let firstDigit = (sum * 10) % 11;
   if (firstDigit === 10) firstDigit = 0;
-  if (firstDigit !== Number(digits[9])) {
-    return false;
-  }
+  if (firstDigit !== Number(digits[9])) return false;
 
   sum = 0;
-  for (let index = 0; index < 10; index += 1) {
-    sum += Number(digits[index]) * (11 - index);
-  }
-
+  for (let index = 0; index < 10; index += 1) sum += Number(digits[index]) * (11 - index);
   let secondDigit = (sum * 10) % 11;
   if (secondDigit === 10) secondDigit = 0;
-
   return secondDigit === Number(digits[10]);
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+function response(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function caktoError(body: CaktoResponse, fallback: string): string {
+  if (typeof body?.detail === "string") return body.detail;
+  if (typeof body?.message === "string") return body.message;
+
+  const firstKey = body && Object.keys(body)[0];
+  const value = firstKey ? body[firstKey] : null;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  return fallback;
+}
+
+async function getCaktoToken(): Promise<string> {
+  const clientId = Deno.env.get("CAKTO_CLIENT_ID");
+  const clientSecret = Deno.env.get("CAKTO_CLIENT_SECRET");
+  if (!clientId || !clientSecret) throw new Error("Credenciais da Cakto não configuradas.");
+
+  const tokenResponse = await fetch(`${CAKTO_API}/token/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret }),
+  });
+  const body = await tokenResponse.json().catch(() => ({}));
+
+  if (!tokenResponse.ok || typeof body?.access_token !== "string") {
+    console.error("Cakto token error", { status: tokenResponse.status });
+    throw new Error("Não foi possível autenticar o pagamento na Cakto.");
   }
 
+  return body.access_token;
+}
+
+async function createCaktoPix(token: string, payload: Record<string, unknown>, idempotencyKey: string) {
+  const paymentResponse = await fetch(`${CAKTO_API}/payments/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": idempotencyKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await paymentResponse.text();
+  let body: CaktoResponse = {};
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    body = text ? JSON.parse(text) : {};
+  } catch {
+    body = {};
+  }
 
-    const publicKey = Deno.env.get("PAYFORGE_PUBLIC_KEY");
-    const secretKey = Deno.env.get("PAYFORGE_SECRET_KEY");
-    if (!publicKey || !secretKey) throw new Error("PayForge credentials not configured");
+  return { ok: paymentResponse.ok, status: paymentResponse.status, body };
+}
 
-    const {
-      amount,
-      description,
-      customer_name,
-      customer_email,
-      customer_cpf,
-      customer_phone,
-      plan_id,
-      plan_name,
-      platform,
-      username,
-      extras,
-    } = await req.json();
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return response({ success: false, error: "Método não permitido" }, 405);
 
-    if (!amount || Number(amount) <= 0) {
-      return new Response(JSON.stringify({ success: false, error: "Valor inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) throw new Error("Backend não configurado.");
+
+    const body = await req.json();
+    const amount = Number(body?.amount);
+    const customerName = String(body?.customer_name || "").trim();
+    const customerEmail = String(body?.customer_email || "").trim().toLowerCase();
+    const customerCpf = onlyDigits(String(body?.customer_cpf || ""));
+    const customerPhone = onlyDigits(String(body?.customer_phone || "11999999999")).slice(-11);
+
+    if (!Number.isFinite(amount) || amount < MIN_AMOUNT) {
+      return response({
+        success: false,
+        error: `O valor mínimo para pagamento é R$${MIN_AMOUNT.toFixed(2).replace(".", ",")}.`,
+      }, 400);
+    }
+    if (!customerName || customerName.length < 3) {
+      return response({ success: false, error: "Informe seu nome completo." }, 400);
+    }
+    if (!customerEmail || !/^\S+@\S+\.\S+$/.test(customerEmail)) {
+      return response({ success: false, error: "Informe um e-mail válido." }, 400);
+    }
+    if (!isValidCpf(customerCpf)) {
+      return response({ success: false, error: "CPF inválido. Digite um CPF válido." }, 400);
     }
 
-    const normalizedCpf = onlyDigits(customer_cpf || "");
-    if (!isValidCpf(normalizedCpf)) {
-      return new Response(JSON.stringify({ success: false, error: "CPF inválido. Digite um CPF válido." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const token = await getCaktoToken();
+    const offerId = Deno.env.get("CAKTO_OFFER_ID") || Deno.env.get("CAKTO_PRODUCT_ID") || DEFAULT_OFFER_ID;
+    const idempotencyKey = crypto.randomUUID();
+    const antifraudReference = `engajar_${idempotencyKey}`;
 
-    const identifier = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
-    const callbackUrl = `${supabaseUrl}/functions/v1/payforge-webhook`;
-
-    const orderBody = {
-      identifier,
-      amount: Number(amount),
-      client: {
-        name: String(customer_name || "Cliente").trim().slice(0, 120),
-        email: String(customer_email || "cliente@email.com").trim().slice(0, 255),
-        phone: onlyDigits(customer_phone || "11999999999").slice(0, 11),
-        document: formatCpf(normalizedCpf),
+    const payment = await createCaktoPix(token, {
+      paymentMethod: "pix",
+      customer: {
+        name: customerName.slice(0, 120),
+        email: customerEmail.slice(0, 255),
+        phone: `55${customerPhone || "11999999999"}`,
+        fingerprint: antifraudReference,
+        docType: "cpf",
+        docNumber: customerCpf,
       },
-      products: [
-        {
-          id: String(plan_id || "plan").slice(0, 100),
-          name: String(description || plan_name || "Serviço Engajar Social").trim().slice(0, 255),
-          quantity: 1,
-          price: Number(amount),
-        },
-      ],
+      items: [{ offerId: String(offerId), quantity: 1, offerType: "main" }],
       metadata: {
-        plan_id: String(plan_id || "").slice(0, 100),
-        platform: String(platform || "").slice(0, 100),
-        username: String(username || "").slice(0, 100),
+        plan_id: String(body?.plan_id || ""),
+        platform: String(body?.platform || "Instagram"),
+        username: String(body?.username || ""),
       },
-      callbackUrl,
-    };
+      pixExpiresIn: 3600,
+      antifraudProfilingAttemptReference: antifraudReference,
+    }, idempotencyKey);
 
-    console.log("Creating PayForge PIX transaction", {
-      identifier,
-      amount: Number(amount),
-      plan_id: plan_id || null,
-      platform: platform || null,
-    });
+    console.log("Cakto PIX response", { status: payment.status, paymentId: payment.body?.id || null });
 
-    const orderRes = await fetch(`${PAYFORGE_API}/gateway/pix/receive`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-public-key": publicKey,
-        "x-secret-key": secretKey,
-      },
-      body: JSON.stringify(orderBody),
-    });
-
-    const responseText = await orderRes.text();
-    let orderData: Record<string, unknown> = {};
-
-    try {
-      orderData = responseText ? JSON.parse(responseText) : {};
-    } catch {
-      orderData = {};
+    if (!payment.ok) {
+      const permissionError = payment.status === 401 || payment.status === 403;
+      const error = permissionError
+        ? "A chave da Cakto precisa ter o escopo 'write payments' habilitado."
+        : caktoError(payment.body, "A Cakto não conseguiu gerar o PIX.");
+      return response({ success: false, error }, 400);
     }
 
-    console.log("PayForge create PIX response", {
-      status: orderRes.status,
-      contentType: orderRes.headers.get("content-type"),
-      gatewayStatus: orderData?.status || null,
-      errorCode: orderData?.errorCode || null,
-    });
-
-    if (!orderRes.ok) {
-      const isHtmlResponse = responseText.trim().startsWith("<!doctype") || responseText.trim().startsWith("<html");
-      const reason = isHtmlResponse
-        ? "A PayForge bloqueou esta requisição por localização/IP do servidor. Libere o acesso da API no painel deles ou peça ao suporte a liberação do ambiente."
-        : String(orderData.message || orderData.error || "Erro ao criar pedido no gateway");
-
-      return new Response(JSON.stringify({ success: false, error: reason }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const pixCode = payment.body?.pix?.qrCode;
+    const qrCodeImage = payment.body?.pix?.qrCodeBase64 || null;
+    const caktoPaymentId = payment.body?.id ? String(payment.body.id) : null;
+    if (typeof pixCode !== "string" || !pixCode.trim() || !caktoPaymentId) {
+      return response({ success: false, error: "A Cakto não retornou os dados do PIX. Tente novamente." }, 502);
     }
 
-    const pixCode = orderData.pix?.code || null;
-    const qrCodeBase64 = orderData.pix?.base64 || null;
-    const payforgeTransactionId = orderData.transactionId || null;
-
-    const { data: txRow, error: txError } = await supabase
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const { data: transaction, error: transactionError } = await supabase
       .from("transactions")
       .insert({
-        horsepay_transaction_id: payforgeTransactionId,
-        plan_id: plan_id || "unknown",
-        plan_name: plan_name || "Plano",
-        platform: platform || "Instagram",
-        username: username || "",
-        customer_name: customer_name || "Cliente",
-        customer_email: customer_email || "",
-        amount: amount,
+        horsepay_transaction_id: caktoPaymentId,
+        cakto_offer_id: String(offerId),
+        plan_id: String(body?.plan_id || "unknown"),
+        plan_name: String(body?.plan_name || "Plano"),
+        platform: String(body?.platform || "Instagram"),
+        username: String(body?.username || ""),
+        customer_name: customerName,
+        customer_email: customerEmail,
+        amount: Number(amount.toFixed(2)),
         status: "pending",
-        pix_code: pixCode || null,
-        extras: extras || [],
+        pix_code: pixCode,
+        extras: Array.isArray(body?.extras) ? body.extras : [],
       })
       .select("id")
       .single();
 
-    if (txError) {
-      console.error("Error saving transaction", txError);
-    }
+    if (transactionError) console.error("Error saving transaction", transactionError);
 
-    if (!pixCode) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          transaction_id: txRow?.id || null,
-          error: "PIX não gerado pelo gateway. Tente novamente.",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        transaction_id: txRow?.id || null,
-        pix_code: pixCode,
-        qr_code_image: qrCodeBase64,
-        amount,
-        status: "pending",
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
-  } catch (error: unknown) {
-    console.error("Error creating PIX payment", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return response({
+      success: true,
+      transaction_id: transaction?.id || null,
+      pix_code: pixCode,
+      qr_code_image: qrCodeImage,
+      cakto_payment_id: caktoPaymentId,
+      status: "pending",
     });
+  } catch (error) {
+    console.error("Error creating Cakto PIX payment", error);
+    return response({
+      success: false,
+      error: error instanceof Error ? error.message : "Erro interno ao gerar o PIX.",
+    }, 500);
   }
 });
