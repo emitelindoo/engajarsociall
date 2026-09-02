@@ -10,13 +10,22 @@ const PAID_EVENTS = ["purchase_approved", "payment_approved", "purchase_complete
 const FAILED_EVENTS = ["purchase_refused", "refund", "chargeback", "purchase_canceled"];
 const PENDING_PAYMENT_EVENTS = ["pix_gerado", "boleto_gerado", "picpay_gerado", "openfinance_nubank_gerado"];
 
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
     const body = await req.json();
     const expectedSecret = Deno.env.get("CAKTO_WEBHOOK_SECRET");
-    if (expectedSecret && body?.secret !== expectedSecret) {
+    if (expectedSecret && !timingSafeEqual(String(body?.secret || ""), expectedSecret)) {
       return new Response(JSON.stringify({ error: "unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
