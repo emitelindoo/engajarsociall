@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById } from "@/data/plans";
-import { ArrowLeft, ShieldCheck, Lock, Loader2, CheckCircle2, Copy, Trash2, ShoppingCart, Zap, Link, AtSign } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Lock, Loader2, CheckCircle2, Copy, Trash2, ShoppingCart, Zap, Link, AtSign, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
@@ -61,6 +61,7 @@ const Checkout = () => {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerCpf, setCustomerCpf] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
@@ -120,7 +121,7 @@ const Checkout = () => {
   const cpfDigits = onlyDigits(customerCpf);
   const isCpfValid = cpfDigits.length === 11 && isValidCpf(cpfDigits);
   const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
-  const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && isCpfValid && items.length > 0 && allTargetsFilled);
+  const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && onlyDigits(customerPhone).length >= 10 && isCpfValid && items.length > 0 && allTargetsFilled);
 
   const handlePayment = async () => {
     if (!isFormValid) return;
