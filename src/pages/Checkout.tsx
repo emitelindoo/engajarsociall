@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById } from "@/data/plans";
-import { ArrowLeft, ShieldCheck, Lock, Loader2, CheckCircle2, Copy, Trash2, ShoppingCart, Zap, Link, AtSign } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Lock, Loader2, CheckCircle2, Trash2, ShoppingCart, Zap, Link, AtSign, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
-import { QRCodeSVG } from "qrcode.react";
 import { fbEvent, fbSetUserData } from "@/lib/fbpixel";
 import { useCart, getTargetLabel } from "@/contexts/CartContext";
 
@@ -62,9 +61,7 @@ const Checkout = () => {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerCpf, setCustomerCpf] = useState("");
   const [loading, setLoading] = useState(false);
-  const [pixCode, setPixCode] = useState<string | null>(null);
-  const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -135,7 +132,7 @@ const Checkout = () => {
 
     try {
       if (!isCpfValid) {
-        throw new Error("Digite um CPF válido para gerar o PIX.");
+        throw new Error("Digite um CPF válido para continuar.");
       }
 
       const itemDescriptions = items.map(
@@ -172,17 +169,16 @@ const Checkout = () => {
           }
         }
 
-        throw new Error(backendMessage || errorWithContext.message || "Erro ao gerar PIX");
+        throw new Error(backendMessage || errorWithContext.message || "Erro ao gerar checkout");
       }
-      if (data?.success === false) throw new Error(data.error || "Erro ao gerar PIX");
+      if (data?.success === false) throw new Error(data.error || "Erro ao gerar checkout");
 
-      if (data?.pix_code) {
-        setPixCode(data.pix_code);
-        setQrCodeImage(data.qr_code_image || null);
+      if (data?.checkout_url) {
+        setCheckoutUrl(data.checkout_url);
         setTransactionId(data.transaction_id || null);
-        toast.success("PIX gerado com sucesso!");
+        toast.success("Checkout gerado! Escolha como pagar.");
       } else {
-        throw new Error(data?.error || "Erro ao gerar PIX");
+        throw new Error(data?.error || "Erro ao gerar checkout");
       }
     } catch (err: any) {
       console.error("Payment error:", err);
@@ -192,16 +188,13 @@ const Checkout = () => {
     }
   };
 
-  const copyPix = () => {
-    if (pixCode) {
-      navigator.clipboard.writeText(pixCode);
-      setCopied(true);
-      toast.success("Código PIX copiado!");
-      setTimeout(() => setCopied(false), 3000);
+  const openCheckout = () => {
+    if (checkoutUrl) {
+      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
     }
   };
 
-  if (items.length === 0 && !pixCode) {
+  if (items.length === 0 && !checkoutUrl) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -226,7 +219,7 @@ const Checkout = () => {
           </button>
 
           {/* Cart Items with per-item targets */}
-          {!pixCode && (
+          {!checkoutUrl && (
             <div className="bg-card rounded-2xl border border-border p-5 card-shadow mb-4">
               <h3 className="font-bold text-foreground text-sm mb-4 flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4 text-primary" /> Seus itens ({items.length})
@@ -274,7 +267,7 @@ const Checkout = () => {
           )}
 
           {/* Customer info */}
-          {!pixCode && (
+          {!checkoutUrl && (
             <div className="bg-card rounded-2xl border border-border p-5 card-shadow mb-4">
               <h3 className="font-bold text-foreground text-sm mb-4 flex items-center gap-2">
                 📋 Seus dados
@@ -305,14 +298,13 @@ const Checkout = () => {
             </div>
           )}
 
-          {/* PIX Result */}
-          {pixCode && (
+          {/* Checkout Result */}
+          {checkoutUrl && (
             <div className="bg-card rounded-2xl border border-primary/30 p-4 card-shadow mb-4">
               <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-accent" /> PIX gerado — falta só pagar! 🚀
+                <CheckCircle2 className="w-4 h-4 text-accent" /> Checkout pronto! 🚀
               </h3>
 
-              {/* Compact summary */}
               <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl px-3 py-2.5 mb-3">
                 <p className="text-[10px] uppercase tracking-wider font-bold text-primary mb-1.5">
                   ✨ Você está adquirindo
@@ -332,21 +324,13 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center mb-3">
-                <div className="bg-white p-2.5 rounded-xl">
-                  <QRCodeSVG value={pixCode} size={160} level="M" />
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Você será redirecionado para o checkout seguro da Cakto, onde pode pagar com PIX, cartão, PicPay, Apple Pay, Google Pay e mais.
+              </p>
 
-              <div className="bg-muted rounded-xl p-2.5 mb-2 break-all max-h-20 overflow-y-auto">
-                <p className="text-[10px] text-foreground font-mono leading-relaxed">{pixCode}</p>
-              </div>
-
-              <button onClick={copyPix}
-                className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                  copied ? "bg-accent text-accent-foreground" : "brand-gradient-bg text-primary-foreground hover:opacity-90"
-                }`}>
-                {copied ? <><CheckCircle2 className="w-4 h-4" /> Copiado! Finalize no banco</> : <><Copy className="w-4 h-4" /> Copiar código e pagar</>}
+              <button onClick={openCheckout}
+                className="w-full brand-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2">
+                <ExternalLink className="w-4 h-4" /> Pagar agora
               </button>
 
               <div className="flex items-center justify-center gap-2 mt-3 text-[10px] text-muted-foreground">
@@ -356,11 +340,19 @@ const Checkout = () => {
                 <span>•</span>
                 <span>Sem senha</span>
               </div>
+
+              <div className="mt-4 pt-4 border-t border-border/50 text-center">
+                <p className="text-[11px] text-muted-foreground mb-2">Já pagou? Aguardamos a confirmação automaticamente.</p>
+                <div className="flex items-center justify-center gap-2 text-[11px] text-accent">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Aguardando confirmação...
+                </div>
+              </div>
             </div>
           )}
 
           {/* Total & CTA */}
-          {!pixCode && (
+          {!checkoutUrl && (
             <div className="bg-card rounded-2xl border border-border p-5 card-shadow">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-muted-foreground text-sm font-medium">Total</span>
@@ -376,7 +368,7 @@ const Checkout = () => {
               )}
               <button onClick={handlePayment} disabled={!isFormValid || loading}
                 className="w-full brand-gradient-bg text-primary-foreground py-4 rounded-xl font-bold text-base transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando PIX...</> : <><Lock className="w-4 h-4" /> Finalizar Compra via PIX</>}
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando checkout...</> : <><Lock className="w-4 h-4" /> Finalizar Compra</>}
               </button>
               <div className="flex items-center justify-center gap-4 mt-4 text-[11px] text-muted-foreground">
                 <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Pagamento Seguro</span>

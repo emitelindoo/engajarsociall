@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 const CAKTO_API = "https://api.cakto.com.br/public_api";
-const PRODUCT_NAME = "Engajar Social";
 const MIN_AMOUNT = 5;
 
 const onlyDigits = (value: string) => value.replace(/\D/g, "");
@@ -43,7 +42,7 @@ async function getToken(): Promise<string> {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data?.access_token) {
-    console.error("Cakto token error", { status: res.status, detail: data?.detail || null });
+    console.error("Cakto token error", { status: res.status, detail: data?.detail || data?.error || null });
     throw new Error("Falha ao autenticar na Cakto");
   }
   return data.access_token as string;
@@ -78,12 +77,11 @@ function caktoError(json: any, fallback: string): string {
   return fallback;
 }
 
-async function ensureProductId(token: string): Promise<string> {
-  const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID");
-  if (!configuredProductId) {
-    throw new Error("Configure o CAKTO_PRODUCT_ID com o ID do produto criado no painel Cakto");
-  }
-  return configuredProductId;
+async function getBaseOfferId(): Promise<string> {
+  const configured = Deno.env.get("CAKTO_PRODUCT_ID") || Deno.env.get("CAKTO_BASE_OFFER_ID");
+  if (configured) return configured;
+  // Checkout link informado pelo usuário: https://pay.cakto.com.br/mauxop3_1079808
+  return "mauxop3_1079808";
 }
 
 serve(async (req) => {
@@ -133,11 +131,23 @@ serve(async (req) => {
     }
 
     const token = await getToken();
-    const productId = await ensureProductId(token);
+    const baseOfferId = await getBaseOfferId();
 
+    // Busca a oferta base para descobrir o product_id ao qual pertence
+    const baseOffer = await caktoFetch(token, `/offers/${encodeURIComponent(baseOfferId)}/`);
+    if (!baseOffer.ok || !baseOffer.json?.product) {
+      console.error("Cakto base offer error", { status: baseOffer.status, body: baseOffer.json, baseOfferId });
+      return json(
+        { success: false, error: caktoError(baseOffer.json, "Não foi possível carregar o produto base da Cakto. Verifique o ID do produto e os escopos da chave de API.") },
+        400,
+      );
+    }
+
+    const productId = String(baseOffer.json.product);
     const reference = crypto.randomUUID();
     const offerName = String(plan_name || description || "Pedido Engajar Social").slice(0, 120);
 
+    // Cria uma oferta dinâmica com o valor do carrinho
     const offer = await caktoFetch(token, "/offers/", {
       method: "POST",
       body: JSON.stringify({
@@ -152,50 +162,21 @@ serve(async (req) => {
 
     if (!offer.ok || !offer.json?.id) {
       console.error("Cakto offer create error", { status: offer.status, body: offer.json });
-      return json({ success: false, error: caktoError(offer.json, "Não foi possível criar a cobrança") }, 400);
+      return json(
+        { success: false, error: caktoError(offer.json, "Não foi possível criar a oferta de pagamento. Verifique se a chave de API tem escopo 'write offers'.") },
+        400,
+      );
     }
 
-    const offerId = String(offer.json.id);
-    const phone = onlyDigits(customer_phone || "11999999999").slice(-11);
+    const newOfferId = String(offer.json.id);
+    const checkoutUrl = `https://pay.cakto.com.br/${newOfferId}`;
 
-    const payment = await caktoFetch(token, "/payments/", {
-      method: "POST",
-      headers: { "X-Idempotency-Key": reference },
-      body: JSON.stringify({
-        paymentMethod: "pix",
-        customer: {
-          name: String(customer_name || "Cliente").trim().slice(0, 120),
-          email: String(customer_email || "cliente@email.com").trim().slice(0, 255),
-          phone: `55${phone}`,
-          fingerprint: `fp_${reference}`,
-          docType: "cpf",
-          docNumber: cpf,
-        },
-        items: [{ offerId, quantity: 1, offerType: "main" }],
-        metadata: {
-          plan_id: String(plan_id || ""),
-          platform: String(platform || ""),
-          username: String(username || ""),
-        },
-        pixExpiresIn: 3600,
-        antifraudProfilingAttemptReference: reference,
-      }),
-    });
-
-    console.log("Cakto PIX response", { status: payment.status, id: payment.json?.id || null });
-
-    if (!payment.ok) {
-      return json({ success: false, error: caktoError(payment.json, "Erro ao gerar PIX na Cakto") }, 400);
-    }
-
-    const pixCode = payment.json?.pix?.qrCode || null;
-    const qrCodeBase64 = payment.json?.pix?.qrCodeBase64 || null;
-    const caktoPaymentId = payment.json?.id ? String(payment.json.id) : null;
-
+    // Registra a transação para acompanhamento via webhook
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
-        horsepay_transaction_id: caktoPaymentId,
+        horsepay_transaction_id: null, // será preenchido pelo webhook
+        cakto_offer_id: newOfferId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
@@ -204,7 +185,7 @@ serve(async (req) => {
         customer_email: customer_email || "",
         amount: total,
         status: "pending",
-        pix_code: pixCode,
+        pix_code: checkoutUrl,
         extras: extras || [],
       })
       .select("id")
@@ -212,16 +193,10 @@ serve(async (req) => {
 
     if (txError) console.error("Error saving transaction", txError);
 
-    if (!pixCode) {
-      return json({ success: false, transaction_id: txRow?.id || null, error: "PIX não gerado. Tente novamente." }, 400);
-    }
-
     return json({
       success: true,
       transaction_id: txRow?.id || null,
-      pix_code: pixCode,
-      qr_code_image: qrCodeBase64,
-      cakto_payment_id: caktoPaymentId,
+      checkout_url: checkoutUrl,
     });
   } catch (err) {
     console.error("create-pix-payment error", err);
