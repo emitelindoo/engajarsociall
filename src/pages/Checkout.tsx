@@ -62,9 +62,7 @@ const Checkout = () => {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerCpf, setCustomerCpf] = useState("");
   const [loading, setLoading] = useState(false);
-  const [pixCode, setPixCode] = useState<string | null>(null);
-  const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState<string | null>(null);
 
   useEffect(() => {
