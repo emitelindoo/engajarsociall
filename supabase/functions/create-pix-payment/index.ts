@@ -79,27 +79,11 @@ function caktoError(json: any, fallback: string): string {
 }
 
 async function ensureProductId(token: string): Promise<string> {
-  const list = await caktoFetch(token, `/products/?search=${encodeURIComponent(PRODUCT_NAME)}&limit=50`);
-  if (list.ok) {
-    const found = (list.json?.results || []).find((p: any) => p?.name === PRODUCT_NAME);
-    if (found?.id) return String(found.id);
+  const configuredProductId = Deno.env.get("CAKTO_PRODUCT_ID");
+  if (!configuredProductId) {
+    throw new Error("Configure o CAKTO_PRODUCT_ID com o ID do produto criado no painel Cakto");
   }
-
-  const created = await caktoFetch(token, "/products/", {
-    method: "POST",
-    body: JSON.stringify({
-      name: PRODUCT_NAME,
-      description: "Serviços de engajamento para Instagram (seguidores, curtidas e visualizações).",
-      price: "5.00",
-      type: "unique",
-    }),
-  });
-
-  if (!created.ok || !created.json?.id) {
-    console.error("Cakto product create error", { status: created.status, body: created.json });
-    throw new Error(caktoError(created.json, "Não foi possível preparar o produto na Cakto"));
-  }
-  return String(created.json.id);
+  return configuredProductId;
 }
 
 serve(async (req) => {
