@@ -195,7 +195,13 @@ serve(async (req) => {
       const error = permissionError
         ? "A chave da Cakto precisa ter o escopo 'write payments' habilitado."
         : caktoError(payment.body, "A Cakto não conseguiu gerar o PIX.");
-      return response({ success: false, error }, 400);
+      // Provider/configuration failures are returned as an application result so
+      // the checkout can show a useful message instead of a FunctionsHttpError.
+      return response({
+        success: false,
+        error,
+        code: permissionError ? "CAKTO_SCOPE_MISSING" : "CAKTO_PAYMENT_FAILED",
+      });
     }
 
     const pixCode = payment.body?.pix?.qrCode;
