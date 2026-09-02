@@ -28,7 +28,7 @@ const Hero = () => {
         </h1>
         <p className="text-base text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
           Seguidores e curtidas brasileiros, entrega rápida e sem precisar da sua senha.
-          Funciona no Instagram e TikTok.
+          Funciona no Instagram.
         </p>
 
         <div className="flex gap-3 justify-center flex-wrap mb-10">
