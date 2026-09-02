@@ -83,28 +83,13 @@ export const igVisualizacoes: PlanData[] = [
   { id: "ig-views-100k", name: "Premium", platform: "Instagram", serviceType: "Visualizações", originalPrice: "R$249,90", price: "R$119,90", priceNum: 119.9, quantity: "100.000 Visualizações", features: viewFeatures },
 ];
 
-// ─── TIKTOK ───────────────────────────────────────────────
-export const ttSeguidores: PlanData[] = buildScalablePlans("tt-seg", "TikTok", "Seguidores Brasileiros", "Seguidores", segFeaturesBR, RATE_BR);
-export const ttSeguidoresMundiais: PlanData[] = buildScalablePlans("tt-seg-ww", "TikTok", "Seguidores Mundiais", "Seguidores", segFeaturesWW, RATE_WW);
-export const ttCurtidas: PlanData[] = buildScalablePlans("tt-curt", "TikTok", "Curtidas Brasileiras", "Curtidas", curtidaFeaturesBR, RATE_BR);
-export const ttCurtidasMundiais: PlanData[] = buildScalablePlans("tt-curt-ww", "TikTok", "Curtidas Mundiais", "Curtidas", curtidaFeaturesWW, RATE_WW);
-
-export const ttVisualizacoes: PlanData[] = [
-  { id: "tt-views-1k", name: "Starter", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$19,90", price: "R$9,90", priceNum: 9.9, quantity: "1.000 Visualizações", features: viewFeatures },
-  { id: "tt-views-5k", name: "Básico", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$39,90", price: "R$19,90", priceNum: 19.9, quantity: "5.000 Visualizações", features: viewFeatures },
-  { id: "tt-views-10k", name: "Profissional", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$69,90", price: "R$34,90", priceNum: 34.9, quantity: "10.000 Visualizações", features: viewFeatures, highlighted: true },
-  { id: "tt-views-50k", name: "Elite", platform: "TikTok", serviceType: "Visualizações", originalPrice: "R$149,90", price: "R$69,90", priceNum: 69.9, quantity: "50.000 Visualizações", features: viewFeatures },
-];
-
 // ─── HELPERS ──────────────────────────────────────────────
 const allPlans: PlanData[] = [
   ...igSeguidores, ...igSeguidoresMundiais, ...igCurtidas, ...igCurtidasMundiais, ...igVisualizacoes,
-  ...ttSeguidores, ...ttSeguidoresMundiais, ...ttCurtidas, ...ttCurtidasMundiais, ...ttVisualizacoes,
 ];
 
 // backward compat exports
 export const instagramPlans = igSeguidores;
-export const tiktokPlans = ttSeguidores;
 
 export function getPlanById(id: string): PlanData | undefined {
   return allPlans.find((p) => p.id === id);
