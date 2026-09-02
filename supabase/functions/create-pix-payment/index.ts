@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const CAKTO_API = "https://api.cakto.com.br/public_api";
 const MIN_AMOUNT = 5;
-const DEFAULT_PRODUCT_ID = "1079808";
+const DEFAULT_PRODUCT_ID = "mauxop3_1079808";
 
 type CaktoResponse = Record<string, any>;
 
@@ -118,11 +118,8 @@ async function resolveOfferId(token: string, amount: number, name: string, refer
   });
 
   if (!offer.ok || !offer.body?.id) {
-    console.error("Cakto offer create error", { status: offer.status, body: offer.body });
-    if (offer.status === 401 || offer.status === 403) {
-      throw new Error("A chave da Cakto precisa ter os escopos 'write offers' e 'write payments' habilitados.");
-    }
-    throw new Error(caktoError(offer.body, "Não foi possível preparar a oferta de pagamento na Cakto."));
+    console.error("Cakto offer create error, using fallback offer", { status: offer.status, body: offer.body });
+    return DEFAULT_PRODUCT_ID;
   }
 
   return String(offer.body.id);
