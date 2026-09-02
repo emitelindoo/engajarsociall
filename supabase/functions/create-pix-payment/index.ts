@@ -79,9 +79,10 @@ function caktoError(json: any, fallback: string): string {
 
 async function getBaseOfferId(): Promise<string> {
   const configured = Deno.env.get("CAKTO_PRODUCT_ID") || Deno.env.get("CAKTO_BASE_OFFER_ID");
-  if (configured) return configured;
   // Checkout link informado pelo usuário: https://pay.cakto.com.br/mauxop3_1079808
-  return "mauxop3_1079808";
+  const fallback = "mauxop3_1079808";
+  if (!configured || configured.includes("configure") || configured.includes("panel")) return fallback;
+  return configured;
 }
 
 serve(async (req) => {
