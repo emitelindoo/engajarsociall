@@ -11,16 +11,12 @@ const FAILED_EVENTS = ["purchase_refused", "refund", "chargeback", "purchase_can
 const PENDING_PAYMENT_EVENTS = ["pix_gerado", "boleto_gerado", "picpay_gerado", "openfinance_nubank_gerado"];
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
     const body = await req.json();
     const expectedSecret = Deno.env.get("CAKTO_WEBHOOK_SECRET");
-
     if (expectedSecret && body?.secret !== expectedSecret) {
-      console.warn("Cakto webhook: invalid secret");
       return new Response(JSON.stringify({ error: "unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -31,49 +27,44 @@ serve(async (req) => {
     const data = body?.data || {};
     const paymentId = data?.id ? String(data.id) : null;
     const offerId = data?.offer?.id ? String(data.offer.id) : null;
-
-    console.log("Cakto webhook received", { event, paymentId, offerId, status: data?.status || null });
-
-    let status: string | null = null;
-    if (PAID_EVENTS.includes(event) || data?.status === "paid" || data?.status === "approved") status = "paid";
-    else if (FAILED_EVENTS.includes(event)) status = "failed";
-    else if (PENDING_PAYMENT_EVENTS.includes(event) || data?.status === "waiting_payment") status = "pending";
+    const status = PAID_EVENTS.includes(event) || data?.status === "paid" || data?.status === "approved"
+      ? "paid"
+      : FAILED_EVENTS.includes(event)
+        ? "failed"
+        : PENDING_PAYMENT_EVENTS.includes(event) || data?.status === "waiting_payment"
+          ? "pending"
+          : null;
 
     const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "",
     );
 
     if (status && (paymentId || offerId)) {
-      // Primeiro tenta atualizar pelo offerId, depois pelo paymentId
-      let error: any = null;
-
-      if (offerId) {
-        const result = await supabase
-          .from("transactions")
-          .update({
-            status,
-            horsepay_transaction_id: paymentId || undefined,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("cakto_offer_id", offerId);
-        error = result.error;
-      } else if (paymentId) {
-        const result = await supabase
+      let update = null;
+      if (paymentId) {
+        update = await supabase
           .from("transactions")
           .update({ status, updated_at: new Date().toISOString() })
           .eq("horsepay_transaction_id", paymentId);
-        error = result.error;
       }
 
-      if (error) console.error("Cakto webhook: update error", error);
+      if ((!update || update.count === 0) && offerId) {
+        update = await supabase
+          .from("transactions")
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq("cakto_offer_id", offerId)
+          .eq("status", "pending");
+      }
+
+      if (update?.error) console.error("Cakto webhook update error", update.error);
     }
 
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("Cakto webhook error", err);
+  } catch (error) {
+    console.error("Cakto webhook error", error);
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

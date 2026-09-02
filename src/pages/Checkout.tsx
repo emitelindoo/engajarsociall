@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getPlanById } from "@/data/plans";
-import { ArrowLeft, ShieldCheck, Lock, Loader2, CheckCircle2, Trash2, ShoppingCart, Zap, Link, AtSign, ExternalLink } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Lock, Loader2, CheckCircle2, Copy, Trash2, ShoppingCart, Zap, Link, AtSign, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
+import { QRCodeSVG } from "qrcode.react";
 import { fbEvent, fbSetUserData } from "@/lib/fbpixel";
 import { useCart, getTargetLabel } from "@/contexts/CartContext";
 
@@ -60,8 +61,11 @@ const Checkout = () => {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerCpf, setCustomerCpf] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
+  const [pixCode, setPixCode] = useState<string | null>(null);
+  const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [transactionId, setTransactionId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -114,10 +118,11 @@ const Checkout = () => {
     return () => clearInterval(interval);
   }, [transactionId]);
 
-  const cpfDigits = onlyDigits(customerCpf);
-  const isCpfValid = cpfDigits.length === 11 && isValidCpf(cpfDigits);
-  const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
-  const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && isCpfValid && items.length > 0 && allTargetsFilled);
+   const cpfDigits = onlyDigits(customerCpf);
+   const isCpfValid = cpfDigits.length === 11 && isValidCpf(cpfDigits);
+   const phoneDigits = onlyDigits(customerPhone);
+   const allTargetsFilled = items.every((i) => i.target.trim().length > 0);
+   const isFormValid = Boolean(customerName.trim() && customerEmail.trim() && phoneDigits.length >= 10 && isCpfValid && items.length > 0 && allTargetsFilled);
 
   const handlePayment = async () => {
     if (!isFormValid) return;
@@ -132,7 +137,7 @@ const Checkout = () => {
 
     try {
       if (!isCpfValid) {
-        throw new Error("Digite um CPF válido para continuar.");
+        throw new Error("Digite um CPF válido para gerar o PIX.");
       }
 
       const itemDescriptions = items.map(
@@ -147,7 +152,7 @@ const Checkout = () => {
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
           customer_cpf: cpfDigits,
-          customer_phone: "11999999999",
+          customer_phone: customerPhone,
           plan_id: items[0].plan.id,
           plan_name: items.map((i) => i.plan.name).join(" + "),
           platform: [...new Set(items.map((i) => i.plan.platform))].join(", "),
@@ -169,16 +174,17 @@ const Checkout = () => {
           }
         }
 
-        throw new Error(backendMessage || errorWithContext.message || "Erro ao gerar checkout");
+        throw new Error(backendMessage || errorWithContext.message || "Erro ao gerar PIX");
       }
-      if (data?.success === false) throw new Error(data.error || "Erro ao gerar checkout");
+      if (data?.success === false) throw new Error(data.error || "Erro ao gerar PIX");
 
-      if (data?.checkout_url) {
-        setCheckoutUrl(data.checkout_url);
+      if (data?.pix_code) {
+        setPixCode(data.pix_code);
+        setQrCodeImage(data.qr_code_image || null);
         setTransactionId(data.transaction_id || null);
-        toast.success("Checkout gerado! Escolha como pagar.");
+        toast.success("PIX gerado com sucesso!");
       } else {
-        throw new Error(data?.error || "Erro ao gerar checkout");
+        throw new Error(data?.error || "Erro ao gerar PIX");
       }
     } catch (err: any) {
       console.error("Payment error:", err);
@@ -188,13 +194,16 @@ const Checkout = () => {
     }
   };
 
-  const openCheckout = () => {
-    if (checkoutUrl) {
-      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+  const copyPix = () => {
+    if (pixCode) {
+      navigator.clipboard.writeText(pixCode);
+      setCopied(true);
+      toast.success("Código PIX copiado!");
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
-  if (items.length === 0 && !checkoutUrl) {
+  if (items.length === 0 && !pixCode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -219,7 +228,7 @@ const Checkout = () => {
           </button>
 
           {/* Cart Items with per-item targets */}
-          {!checkoutUrl && (
+          {!pixCode && (
             <div className="bg-card rounded-2xl border border-border p-5 card-shadow mb-4">
               <h3 className="font-bold text-foreground text-sm mb-4 flex items-center gap-2">
                 <ShoppingCart className="w-4 h-4 text-primary" /> Seus itens ({items.length})
@@ -267,7 +276,7 @@ const Checkout = () => {
           )}
 
           {/* Customer info */}
-          {!checkoutUrl && (
+          {!pixCode && (
             <div className="bg-card rounded-2xl border border-border p-5 card-shadow mb-4">
               <h3 className="font-bold text-foreground text-sm mb-4 flex items-center gap-2">
                 📋 Seus dados
@@ -283,14 +292,22 @@ const Checkout = () => {
                   <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="seu@email.com"
                     className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1">CPF</label>
-                  <input type="text" value={customerCpf} onChange={(e) => setCustomerCpf(formatCpf(e.target.value))} placeholder="000.000.000-00" maxLength={14}
-                    className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
-                  {cpfDigits.length === 11 && !isCpfValid && (
-                    <p className="text-xs text-destructive mt-1">Digite um CPF válido.</p>
-                  )}
-                </div>
+                 <div>
+                   <label className="block text-xs font-medium text-muted-foreground mb-1">Telefone</label>
+                   <div className="relative">
+                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                     <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value.replace(/[^0-9()+\- ]/g, "").slice(0, 15))} placeholder="(11) 99999-9999"
+                       className="w-full rounded-xl bg-muted border border-border pl-10 pr-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+                   </div>
+                 </div>
+                 <div>
+                   <label className="block text-xs font-medium text-muted-foreground mb-1">CPF</label>
+                   <input type="text" value={customerCpf} onChange={(e) => setCustomerCpf(formatCpf(e.target.value))} placeholder="000.000.000-00" maxLength={14}
+                     className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+                   {cpfDigits.length === 11 && !isCpfValid && (
+                     <p className="text-xs text-destructive mt-1">Digite um CPF válido.</p>
+                   )}
+                 </div>
               </div>
               <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
                 <Lock className="w-3 h-3" /> Nunca pedimos sua senha. Dados protegidos e criptografados.
@@ -298,13 +315,14 @@ const Checkout = () => {
             </div>
           )}
 
-          {/* Checkout Result */}
-          {checkoutUrl && (
+          {/* PIX Result */}
+          {pixCode && (
             <div className="bg-card rounded-2xl border border-primary/30 p-4 card-shadow mb-4">
               <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-accent" /> Checkout pronto! 🚀
+                <CheckCircle2 className="w-4 h-4 text-accent" /> PIX gerado — falta só pagar! 🚀
               </h3>
 
+              {/* Compact summary */}
               <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl px-3 py-2.5 mb-3">
                 <p className="text-[10px] uppercase tracking-wider font-bold text-primary mb-1.5">
                   ✨ Você está adquirindo
@@ -324,13 +342,29 @@ const Checkout = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-muted-foreground mb-3">
-                Você será redirecionado para o checkout seguro da Cakto, onde pode pagar com PIX, cartão, PicPay, Apple Pay, Google Pay e mais.
-              </p>
+               <div className="flex justify-center mb-3">
+                 <div className="bg-white p-2.5 rounded-xl">
+                   {qrCodeImage ? (
+                     <img
+                       src={qrCodeImage.startsWith("data:") ? qrCodeImage : `data:image/png;base64,${qrCodeImage}`}
+                       alt="QR Code para pagamento PIX"
+                       className="w-[160px] h-[160px] object-contain"
+                     />
+                   ) : (
+                     <QRCodeSVG value={pixCode} size={160} level="M" />
+                   )}
+                 </div>
+               </div>
 
-              <button onClick={openCheckout}
-                className="w-full brand-gradient-bg text-primary-foreground py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2">
-                <ExternalLink className="w-4 h-4" /> Pagar agora
+              <div className="bg-muted rounded-xl p-2.5 mb-2 break-all max-h-20 overflow-y-auto">
+                <p className="text-[10px] text-foreground font-mono leading-relaxed">{pixCode}</p>
+              </div>
+
+              <button onClick={copyPix}
+                className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                  copied ? "bg-accent text-accent-foreground" : "brand-gradient-bg text-primary-foreground hover:opacity-90"
+                }`}>
+                {copied ? <><CheckCircle2 className="w-4 h-4" /> Copiado! Finalize no banco</> : <><Copy className="w-4 h-4" /> Copiar código e pagar</>}
               </button>
 
               <div className="flex items-center justify-center gap-2 mt-3 text-[10px] text-muted-foreground">
@@ -340,19 +374,11 @@ const Checkout = () => {
                 <span>•</span>
                 <span>Sem senha</span>
               </div>
-
-              <div className="mt-4 pt-4 border-t border-border/50 text-center">
-                <p className="text-[11px] text-muted-foreground mb-2">Já pagou? Aguardamos a confirmação automaticamente.</p>
-                <div className="flex items-center justify-center gap-2 text-[11px] text-accent">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Aguardando confirmação...
-                </div>
-              </div>
             </div>
           )}
 
           {/* Total & CTA */}
-          {!checkoutUrl && (
+          {!pixCode && (
             <div className="bg-card rounded-2xl border border-border p-5 card-shadow">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-muted-foreground text-sm font-medium">Total</span>
@@ -368,7 +394,7 @@ const Checkout = () => {
               )}
               <button onClick={handlePayment} disabled={!isFormValid || loading}
                 className="w-full brand-gradient-bg text-primary-foreground py-4 rounded-xl font-bold text-base transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando checkout...</> : <><Lock className="w-4 h-4" /> Finalizar Compra</>}
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Gerando PIX...</> : <><Lock className="w-4 h-4" /> Finalizar Compra via PIX</>}
               </button>
               <div className="flex items-center justify-center gap-4 mt-4 text-[11px] text-muted-foreground">
                 <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Pagamento Seguro</span>
