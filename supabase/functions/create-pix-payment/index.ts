@@ -169,7 +169,13 @@ serve(async (req) => {
       }),
     });
 
-    console.log("Cakto PIX response", { status: payment.status, paymentId: payment.body?.id || null });
+    console.log("Cakto PIX response", {
+      status: payment.status,
+      paymentId: payment.body?.id || null,
+      offerId,
+      body: payment.ok ? undefined : payment.body,
+    });
+
 
     if (!payment.ok) {
       const permissionError = payment.status === 401 || payment.status === 403;
