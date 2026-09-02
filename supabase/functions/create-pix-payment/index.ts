@@ -79,9 +79,10 @@ function caktoError(json: any, fallback: string): string {
 
 async function getBaseOfferId(): Promise<string> {
   const configured = Deno.env.get("CAKTO_PRODUCT_ID") || Deno.env.get("CAKTO_BASE_OFFER_ID");
-  if (configured) return configured;
   // Checkout link informado pelo usuário: https://pay.cakto.com.br/mauxop3_1079808
-  return "mauxop3_1079808";
+  const fallback = "mauxop3_1079808";
+  if (!configured || configured.includes("configure") || configured.includes("panel")) return fallback;
+  return configured;
 }
 
 serve(async (req) => {
@@ -130,53 +131,58 @@ serve(async (req) => {
       return json({ success: false, error: "CPF inválido. Digite um CPF válido." }, 400);
     }
 
-    const token = await getToken();
     const baseOfferId = await getBaseOfferId();
-
-    // Busca a oferta base para descobrir o product_id ao qual pertence
-    const baseOffer = await caktoFetch(token, `/offers/${encodeURIComponent(baseOfferId)}/`);
-    if (!baseOffer.ok || !baseOffer.json?.product) {
-      console.error("Cakto base offer error", { status: baseOffer.status, body: baseOffer.json, baseOfferId });
-      return json(
-        { success: false, error: caktoError(baseOffer.json, "Não foi possível carregar o produto base da Cakto. Verifique o ID do produto e os escopos da chave de API.") },
-        400,
-      );
-    }
-
-    const productId = String(baseOffer.json.product);
     const reference = crypto.randomUUID();
     const offerName = String(plan_name || description || "Pedido Engajar Social").slice(0, 120);
 
-    // Cria uma oferta dinâmica com o valor do carrinho
-    const offer = await caktoFetch(token, "/offers/", {
-      method: "POST",
-      body: JSON.stringify({
-        name: `${offerName} #${reference.slice(0, 8)}`.slice(0, 255),
-        price: Number(total.toFixed(2)),
-        product: productId,
-        type: "unique",
-        status: "active",
-        units: 1,
-      }),
-    });
+    let checkoutOfferId = baseOfferId;
+    let dynamicPricing = false;
 
-    if (!offer.ok || !offer.json?.id) {
-      console.error("Cakto offer create error", { status: offer.status, body: offer.json });
-      return json(
-        { success: false, error: caktoError(offer.json, "Não foi possível criar a oferta de pagamento. Verifique se a chave de API tem escopo 'write offers'.") },
-        400,
-      );
+    // Tenta criar uma oferta dinâmica com o valor exato do carrinho.
+    // Se a chave de API não tiver escopo de ofertas, usamos o checkout base.
+    try {
+      const token = await getToken();
+      const baseOffer = await caktoFetch(token, `/offers/${encodeURIComponent(baseOfferId)}/`);
+      if (baseOffer.ok && baseOffer.json?.product) {
+        const offer = await caktoFetch(token, "/offers/", {
+          method: "POST",
+          body: JSON.stringify({
+            name: `${offerName} #${reference.slice(0, 8)}`.slice(0, 255),
+            price: Number(total.toFixed(2)),
+            product: String(baseOffer.json.product),
+            type: "unique",
+            status: "active",
+            units: 1,
+          }),
+        });
+        if (offer.ok && offer.json?.id) {
+          checkoutOfferId = String(offer.json.id);
+          dynamicPricing = true;
+        } else {
+          console.error("Cakto offer create error", { status: offer.status, body: offer.json });
+        }
+      } else {
+        console.error("Cakto base offer error", { status: baseOffer.status, body: baseOffer.json, baseOfferId });
+      }
+    } catch (e) {
+      console.error("Cakto dynamic offer skipped", (e as Error).message);
     }
 
-    const newOfferId = String(offer.json.id);
-    const checkoutUrl = `https://pay.cakto.com.br/${newOfferId}`;
+    const params = new URLSearchParams();
+    if (customer_name) params.set("name", String(customer_name));
+    if (customer_email) params.set("email", String(customer_email));
+    if (customer_phone) params.set("phone", onlyDigits(String(customer_phone)));
+    if (cpf) params.set("document", cpf);
+    const query = params.toString();
+    const checkoutUrl = `https://pay.cakto.com.br/${checkoutOfferId}${query ? `?${query}` : ""}`;
+
 
     // Registra a transação para acompanhamento via webhook
     const { data: txRow, error: txError } = await supabase
       .from("transactions")
       .insert({
         horsepay_transaction_id: null, // será preenchido pelo webhook
-        cakto_offer_id: newOfferId,
+        cakto_offer_id: checkoutOfferId,
         plan_id: plan_id || "unknown",
         plan_name: plan_name || "Plano",
         platform: platform || "Instagram",
@@ -197,6 +203,7 @@ serve(async (req) => {
       success: true,
       transaction_id: txRow?.id || null,
       checkout_url: checkoutUrl,
+      dynamic_pricing: dynamicPricing,
     });
   } catch (err) {
     console.error("create-pix-payment error", err);

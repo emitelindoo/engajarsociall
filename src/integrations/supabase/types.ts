@@ -17,6 +17,7 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          cakto_offer_id: string | null
           created_at: string
           customer_email: string
           customer_name: string
@@ -33,6 +34,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          cakto_offer_id?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
@@ -49,6 +51,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          cakto_offer_id?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
