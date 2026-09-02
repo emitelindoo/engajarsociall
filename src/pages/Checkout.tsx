@@ -291,14 +291,22 @@ const Checkout = () => {
                   <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="seu@email.com"
                     className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-muted-foreground mb-1">CPF</label>
-                  <input type="text" value={customerCpf} onChange={(e) => setCustomerCpf(formatCpf(e.target.value))} placeholder="000.000.000-00" maxLength={14}
-                    className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
-                  {cpfDigits.length === 11 && !isCpfValid && (
-                    <p className="text-xs text-destructive mt-1">Digite um CPF válido.</p>
-                  )}
-                </div>
+                 <div>
+                   <label className="block text-xs font-medium text-muted-foreground mb-1">Telefone</label>
+                   <div className="relative">
+                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                     <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value.replace(/[^0-9()+\- ]/g, "").slice(0, 15))} placeholder="(11) 99999-9999"
+                       className="w-full rounded-xl bg-muted border border-border pl-10 pr-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+                   </div>
+                 </div>
+                 <div>
+                   <label className="block text-xs font-medium text-muted-foreground mb-1">CPF</label>
+                   <input type="text" value={customerCpf} onChange={(e) => setCustomerCpf(formatCpf(e.target.value))} placeholder="000.000.000-00" maxLength={14}
+                     className="w-full rounded-xl bg-muted border border-border px-4 py-3 text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all" />
+                   {cpfDigits.length === 11 && !isCpfValid && (
+                     <p className="text-xs text-destructive mt-1">Digite um CPF válido.</p>
+                   )}
+                 </div>
               </div>
               <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1">
                 <Lock className="w-3 h-3" /> Nunca pedimos sua senha. Dados protegidos e criptografados.
