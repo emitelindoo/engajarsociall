@@ -1,6 +1,7 @@
-import { ShoppingCart, X, Trash2, ArrowRight } from "lucide-react";
+import { ShoppingCart, X, Trash2, MessageCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
+import { openWhatsAppOrder } from "@/lib/whatsapp";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
