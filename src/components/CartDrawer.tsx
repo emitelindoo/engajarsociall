@@ -1,6 +1,7 @@
-import { ShoppingCart, X, Trash2, ArrowRight } from "lucide-react";
+import { ShoppingCart, X, Trash2, MessageCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useNavigate } from "react-router-dom";
+import { openWhatsAppOrder } from "@/lib/whatsapp";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,8 +22,8 @@ const CartDrawer = ({ variant = "desktop" }: { variant?: "desktop" | "mobile" })
   }, [isMobile, variant]);
 
   const goToCheckout = () => {
+    openWhatsAppOrder(items, total);
     setOpen(false);
-    navigate("/checkout");
   };
 
   return (
@@ -97,7 +98,7 @@ const CartDrawer = ({ variant = "desktop" }: { variant?: "desktop" | "mobile" })
                 onClick={goToCheckout}
                 className="w-full ig-gradient-bg text-primary-foreground py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all"
               >
-                Finalizar Pedido <ArrowRight className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4" /> Finalizar no WhatsApp
               </button>
             </div>
           </>
