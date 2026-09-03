@@ -21,8 +21,8 @@ const CartDrawer = ({ variant = "desktop" }: { variant?: "desktop" | "mobile" })
   }, [isMobile, variant]);
 
   const goToCheckout = () => {
+    openWhatsAppOrder(items, total);
     setOpen(false);
-    navigate("/checkout");
   };
 
   return (
